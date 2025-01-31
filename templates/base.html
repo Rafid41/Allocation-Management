@@ -61,7 +61,7 @@
                 <li class="nav-item-active">
                     {% comment %} a class="nav-link" href="{% url 'index' %}">
                     {% endcomment %}
-                    <a class="nav-link" href="{% url 'tasks:task_list' %}">
+                    <a class="nav-link" href="{% url 'App_Home:home_page' %}">
                         Home
                     </a>
                 </li>
@@ -81,6 +81,7 @@
 
                     <!-- menu items in drop down -->
                     <div class="dropdown-menu">
+                        {% comment %}
                         <a
                             class="dropdown-item"
                             href="{% url 'App_Login:pass_change' %}"
@@ -93,6 +94,7 @@
                             href="{% url 'App_Login:logout' %}"
                             >Logout</a
                         >
+                        {% endcomment %}
                     </div>
                 </div>
 

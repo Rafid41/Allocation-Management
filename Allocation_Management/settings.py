@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap4",
     "django_cleanup.apps.CleanupConfig",
     "App_Login",
+    "App_Home",
 ]
 
 # bootstrap, bootstrap3, bootstrap4, uni-form
