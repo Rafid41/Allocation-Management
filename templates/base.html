@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <!-- Latest compiled and minified CSS -->
+        <link
+            rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        />
+
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+        <!-- popper JS -->
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"
+            integrity="sha512-TPh2Oxlg1zp+kz3nFA0C5vVC6leG/6mm1z9+mA81MI5eaUVqasPLO8Cuk4gMF4gUfP5etR73rgU/8PNMsSesoQ=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
+
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+        <!-- fontawesome -->
+        <link
+            href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+            rel="stylesheet"
+        />
+
+        <!-- Bootstrap DateTimePicker CSS -->
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css"
+            rel="stylesheet"
+        />
+
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+        {% comment %} {% endcomment %}
+        <link
+            rel="stylesheet"
+            href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+        />
+        {% comment %} {% endcomment %}
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+        />
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        {% comment %} {% endcomment %} {% comment %} main part {% endcomment %}
+        <title>{% block title_block %} Task Manager {% endblock %}</title>
+
+        {% block css_block %} {% endblock %}
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                <li class="nav-item-active">
+                    {% comment %} a class="nav-link" href="{% url 'index' %}">
+                    {% endcomment %}
+                    <a class="nav-link" href="{% url 'tasks:task_list' %}">
+                        Home
+                    </a>
+                </li>
+                {%endif%}
+
+                <!-- dropdown navigation bar on username-->
+                {% if user.is_authenticated %}
+                <div clas="nav-item dropdown">
+                    <a
+                        class="nav-link dropdown-toggle"
+                        href="#"
+                        id="navbardrop"
+                        data-toggle="dropdown"
+                    >
+                        @{{user.username}}
+                    </a>
+
+                    <!-- menu items in drop down -->
+                    <div class="dropdown-menu">
+                        <a
+                            class="dropdown-item"
+                            href="{% url 'App_Login:pass_change' %}"
+                            >Change Password</a
+                        >
+
+                        <hr />
+                        <a
+                            class="dropdown-item"
+                            href="{% url 'App_Login:logout' %}"
+                            >Logout</a
+                        >
+                    </div>
+                </div>
+
+                {% else %}
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'App_Login:signup' %}"
+                        >Sign Up</a
+                    >
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'App_Login:login' %}"
+                        >Login</a
+                    >
+                </li>
+
+                {% endif %}
+            </ul>
+        </nav>
+
+        <div class="container" style="padding-top: 20px">
+            {% block body_block %} {% endblock %}
+        </div>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    </body>
+</html>
