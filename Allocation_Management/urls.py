@@ -14,6 +14,7 @@ urlpatterns = [
         "", lambda request: redirect("App_Login:login")
     ),  # Redirect root to /accounts/
     path("home/", include("App_Home.urls")),
+    path("entry/", include("App_Entry.urls")),
 ]
 
 

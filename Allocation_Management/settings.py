@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "django_cleanup.apps.CleanupConfig",
     "App_Login",
     "App_Home",
+    "App_Entry",
+    "django_extensions",
 ]
 
 # bootstrap, bootstrap3, bootstrap4, uni-form

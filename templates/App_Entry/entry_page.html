@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Entry {% endblock %}
+
+{% block body_block %}
+{% comment %} <div class="container mt-4">
+    <h2>Create or Update Package</h2>
+
+    <form id="packageForm">
+        {% csrf_token %}
+
+        <!-- Package ID Searchbox -->
+        <div class="mb-3 position-relative">
+            <label for="package" class="form-label">Package Name:</label>
+            <input type="text" id="package" name="package" class="form-control" placeholder="Search or create package..." autocomplete="off">
+            <div id="package_suggestions" class="list-group position-absolute d-none"></div>
+        </div>
+
+        <!-- Warehouse Dropdown -->
+        <div class="mb-3">
+            <label for="warehouse" class="form-label">Warehouse:</label>
+            <select id="warehouse" name="warehouse" class="form-select">
+                <option value="">Select Warehouse</option>
+                <option value="Dhaka">Dhaka</option>
+                <option value="Khulna">Khulna</option>
+                <option value="Chittagong">Chittagong</option>
+            </select>
+        </div>
+
+        <!-- Package Description -->
+        <div class="mb-3">
+            <label for="description" class="form-label">Description (Optional):</label>
+            <textarea id="description" name="description" class="form-control"></textarea>
+        </div>
+
+        <!-- Unit Field -->
+        <div class="mb-3">
+            <label for="unit" class="form-label">Unit:</label>
+            <input type="number" id="unit" name="unit" class="form-control" step="1">
+        </div>
+
+        <button type="button" id="submitPackageBtn" class="btn btn-primary">Save Package</button>
+    </form>
+
+    <hr>
+
+    <h2>Add Item to Package</h2>
+    <form id="itemForm">
+        {% csrf_token %}
+
+        <!-- Item Name Searchbox -->
+        <div class="mb-3 position-relative">
+            <label for="item" class="form-label">Item Name:</label>
+            <input type="text" id="item" name="item" class="form-control" placeholder="Search or create item..." autocomplete="off">
+            <div id="item_suggestions" class="list-group position-absolute d-none"></div>
+        </div>
+
+        <!-- Unit Price Field -->
+        <div class="mb-3">
+            <label for="unit_price" class="form-label">Unit Price:</label>
+            <input type="number" id="unit_price" name="unit_price" class="form-control" step="0.01">
+        </div>
+
+        <!-- Quantity Field -->
+        <div class="mb-3">
+            <label for="quantity_of_item" class="form-label">Quantity of Item:</label>
+            <input type="number" id="quantity_of_item" name="quantity_of_item" class="form-control">
+        </div>
+
+        <button type="button" id="submitItemBtn" class="btn btn-success">Save Item</button>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function () {
+        let selectedPackageId = null;
+
+        // Package search suggestions
+        $("#package").on("keyup", function () {
+            let query = $(this).val();
+            if (query.length > 1) {
+                $.ajax({
+                    url: "{% url 'App_Entry:search_packages' %}",
+                    data: { query: query },
+                    success: function (data) {
+                        let suggestions = $("#package_suggestions");
+                        suggestions.empty().removeClass("d-none");
+                        data.forEach(pkg => {
+                            suggestions.append(`<div class='list-group-item package-suggestion' data-id="${pkg.id}">${pkg.name}</div>`);
+                        });
+                    }
+                });
+            } else {
+                $("#package_suggestions").addClass("d-none");
+            }
+        });
+
+        $(document).on("click", ".package-suggestion", function () {
+            $("#package").val($(this).text());
+            selectedPackageId = $(this).data("id");
+            $("#package_suggestions").addClass("d-none");
+        });
+
+        // Create or Update Package
+        $("#submitPackageBtn").click(function () {
+            let packageName = $("#package").val();
+            let warehouse = $("#warehouse").val();
+            let description = $("#description").val();
+            let unit = $("#unit").val();
+
+            $.ajax({
+                url: "{% url 'App_Entry:create_package' %}",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    package_name: packageName,
+                    warehouse: warehouse,
+                    description: description,
+                    unit: unit
+                }),
+                success: function (response) {
+                    alert(response.created ? "Package Created!" : "Package Updated!");
+                    selectedPackageId = response.id;
+                }
+            });
+        });
+
+        // Item search suggestions
+        $("#item").on("keyup", function () {
+            let query = $(this).val();
+            if (query.length > 1) {
+                $.ajax({
+                    url: "{% url 'App_Entry:search_items' %}",
+                    data: { query: query },
+                    success: function (data) {
+                        let suggestions = $("#item_suggestions");
+                        suggestions.empty().removeClass("d-none");
+                        data.forEach(item => {
+                            suggestions.append(`<div class='list-group-item item-suggestion' data-id="${item.id}">${item.name}</div>`);
+                        });
+                    }
+                });
+            } else {
+                $("#item_suggestions").addClass("d-none");
+            }
+        });
+
+        $(document).on("click", ".item-suggestion", function () {
+            $("#item").val($(this).text());
+            $("#item_suggestions").addClass("d-none");
+        });
+
+        // Create or Update Item in Package
+        $("#submitItemBtn").click(function () {
+            let itemName = $("#item").val();
+            let unitPrice = $("#unit_price").val();
+            let quantity = $("#quantity_of_item").val();
+
+            if (!selectedPackageId) {
+                alert("Please select or create a package first.");
+                return;
+            }
+
+            $.ajax({
+                url: "{% url 'App_Entry:create_package_item' %}",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    package_id: selectedPackageId,
+                    item_name: itemName,
+                    quantity_of_item: quantity,
+                    unit_price_of_item: unitPrice
+                }),
+                success: function (response) {
+                    if (response.error) {
+                        alert(response.error);
+                    } else {
+                        alert(response.updated ? "Item Updated!" : "Item Created!");
+                    }
+                }
+            });
+        });
+    });
+</script> {% endcomment %}
+
+{% endblock %}

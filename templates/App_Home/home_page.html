@@ -1,4 +1,6 @@
-{% extends 'base.html' %} {% load crispy_forms_tags %} {% load static %} 
+{% extends 'base.html' %} 
+{% load crispy_forms_tags %} 
+{% load static %} 
 {%block title_block %} Home {% endblock %} 
 {% block css_block %}
 
@@ -60,7 +62,9 @@
         <div class="section" >
           
             <div class="btn_column">
-                <a class="btn btn-outline-success" style="font-size: 40px;" href=""><b>Entry</b></a>
+                <a class="btn btn-outline-success" style="font-size: 40px;" href="{% url 'App_Entry:entry_page' %}">
+                    <b>Entry</b>
+                </a>
             </div>
             
         </div>
