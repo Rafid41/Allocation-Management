@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from App_Entry.models import Package, Item
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.views.generic import (
     CreateView,
     UpdateView,
@@ -27,6 +28,8 @@ def entry_page(request):
 from django.urls import reverse_lazy
 
 
+##################################  view package and add new Package #################################
+@login_required
 def view_package_and_addNew(request):
     """Handles both displaying the package list and adding a new package."""
 
@@ -56,3 +59,9 @@ def view_package_and_addNew(request):
         "App_Entry/view_package_and_addNew.html",
         {"current_package_list": packages},
     )
+
+
+############################## Add New Item to a Package ##########################################
+def add_item_to_pkg(request):
+    """Renders the package and item entry page"""
+    return render(request, "App_Entry/Add_item_to_package.html")

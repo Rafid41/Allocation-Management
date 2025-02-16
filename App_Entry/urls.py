@@ -11,13 +11,9 @@ urlpatterns = [
         views.view_package_and_addNew,
         name="view_package_and_addNew",
     ),
-    # path("package/", views.package_view, name="package"),
-    # API endpoints
-    # # Search APIs (for AJAX autocomplete)
-    # path("search_packages/", views.search_packages, name="search_packages"),
-    # path("search_items/", views.search_items, name="search_items"),
-    # # Create or update package
-    # path("create_package/", views.create_package, name="create_package"),
-    # # Create or update package item
-    # path("create_package_item/", views.create_package_item, name="create_package_item"),
+    path(
+        "add_item_to_package/",
+        views.add_item_to_pkg,
+        name="add_item_to_package",
+    ),
 ]
