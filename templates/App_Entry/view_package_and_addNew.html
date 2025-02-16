@@ -24,12 +24,28 @@
         text-align: center;
         font-size: 16px;
     }
+
+    /* Hide number input arrows in Chrome, Safari, Edge */
+    .no-spinner::-webkit-outer-spin-button,
+    .no-spinner::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Hide number input arrows in Firefox */
+    .no-spinner {
+        -moz-appearance: textfield;
+    }
 </style>
 
-<div class="container mt-5">
+<a href="{% url 'App_Entry:entry_page' %}" ><i color='#B2BEB5' class="fa fa-arrow-left fa-2x" aria-hidden="true"></i>
+</a>
+
+<div class="container mt-5 card p-7 shadow">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <h1 class="text-center"><b>Package List</b></h1>
+            <br>
+            <h2 class="text-center"><b>Existing Package List</b></h2>
             
             <!-- Display Success & Error Messages -->
             {% if messages %}
@@ -57,14 +73,17 @@
                 {% csrf_token %}
                 
                 <div class="form-group">
-                    <label for="packageId"><b>Package ID</b></label>
-                    <input type="number" name="packageId" class="form-control" required placeholder="Enter Package ID">
+                    <label for="packageId"><b>Add New Package</b></label>
+                    <input type="number" name="packageId" class="form-control no-spinner" required placeholder="Enter Package ID">
                 </div>
                 
                 <button type="submit" class="btn btn-primary mt-3 w-100">Create Package</button>
             </form>
+            <br>
+            <br>
         </div>
     </div>
+    
 </div>
 <br>
 <br>
