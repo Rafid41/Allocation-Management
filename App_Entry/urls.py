@@ -8,7 +8,7 @@ urlpatterns = [
     path("", views.entry_page, name="entry_page"),
     path(
         "view_package_and_addNew/",
-        views.PackageListAndCreate.as_view(),
+        views.view_package_and_addNew,
         name="view_package_and_addNew",
     ),
     # path("package/", views.package_view, name="package"),

@@ -26,43 +26,47 @@
     }
 </style>
 
-<center>
-    <h1><b>Package List</b></h1>
-    <br>
-
-    <div class="data-grid">
-        {% for package in current_package_list %}
-            <div class="grid-item">
-                <b>{{ package.packageId }}</b>  <!-- Display the packageId or any other field -->
-            </div>
-        {% empty %}
-            <p>No packages available.</p>
-        {% endfor %}
-    </div>
-
-    <br>
-    <br>
-
-    <!-- Form to create new Package -->
-    <form method="post">
-        {% csrf_token %}
-        
-        <!-- Render each form field individually to check for issues -->
-        <div class="form-group">
-            <label for="{{ form.packageId.id_for_label }}">Package ID</label>
-            {{ form.packageId }}
-            {% if form.packageId.errors %}
-                <div class="errors">
-                    {% for error in form.packageId.errors %}
-                        <p class="error">{{ error }}</p>
-                    {% endfor %}
-                </div>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h1 class="text-center"><b>Package List</b></h1>
+            
+            <!-- Display Success & Error Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
             {% endif %}
-        </div>
-        
-        <button type="submit">Create Package</button>
-    </form>
+            
+            <div class="data-grid mt-3">
+                {% for package in current_package_list %}
+                    <div class="grid-item">
+                        <b>{{ package.packageId }}</b>
+                    </div>
+                {% empty %}
+                    <p class="text-center">No packages available.</p>
+                {% endfor %}
+            </div>
 
-</center>
+            <br>
+
+            <!-- Form to create new Package -->
+            <form method="post" class="card p-3 shadow">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="packageId"><b>Package ID</b></label>
+                    <input type="number" name="packageId" class="form-control" required placeholder="Enter Package ID">
+                </div>
+                
+                <button type="submit" class="btn btn-primary mt-3 w-100">Create Package</button>
+            </form>
+        </div>
+    </div>
+</div>
+<br>
+<br>
 
 {% endblock %}

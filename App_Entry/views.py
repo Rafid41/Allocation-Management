@@ -1,5 +1,5 @@
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
@@ -15,8 +15,8 @@ from django.views.generic import (
     DeleteView,
 )
 from django import forms
-from django.http import HttpResponse
 from django.contrib import messages
+from django.urls import reverse
 
 
 def entry_page(request):
@@ -27,34 +27,32 @@ def entry_page(request):
 from django.urls import reverse_lazy
 
 
-class PackageListAndCreate(LoginRequiredMixin, CreateView, ListView):
-    model = Package
-    template_name = "App_Entry/view_package_and_addNew.html"
-    fields = ["packageId"]
-    success_url = reverse_lazy(
-        "App_Entry:view_package_and_addNew"
-    )  # Redirect to the package list after form submission
+def view_package_and_addNew(request):
+    """Handles both displaying the package list and adding a new package."""
 
-    def get_queryset(self):
-        return Package.objects.all().order_by("packageId")
+    if request.method == "POST":
+        package_id = request.POST.get("packageId")
 
-    def form_valid(self, form):
-        # Check if packageId already exists
-        if Package.objects.filter(packageId=form.cleaned_data["packageId"]).exists():
-            form.add_error("packageId", "This packageId already exists.")
-            return self.form_invalid(form)
-        return super().form_valid(form)
+        if package_id:
+            # Ensure packageId is a valid integer
+            try:
+                package_id = int(package_id)
+                if Package.objects.filter(packageId=package_id).exists():
+                    messages.error(request, "This package ID already exists!")
+                else:
+                    Package.objects.create(packageId=package_id)
+                    messages.success(request, "Package added successfully!")
+                    return HttpResponseRedirect(
+                        reverse("App_Entry:view_package_and_addNew")
+                    )
+            except ValueError:
+                messages.error(request, "Invalid package ID. Please enter a number.")
 
-    def form_invalid(self, form):
-        messages.error(
-            self.request, "Package creation failed. Please check the errors."
-        )
-        return super().form_invalid(form)
+    # Fetch all packages to display
+    packages = Package.objects.all().order_by("packageId")
 
-    def get_context_data(self, **kwargs):
-        # Add the list of packages to the context for the template
-        context = super().get_context_data(**kwargs)
-        context["current_package_list"] = Package.objects.all().order_by(
-            "packageId"
-        )  # Explicitly set the list
-        return context
+    return render(
+        request,
+        "App_Entry/view_package_and_addNew.html",
+        {"current_package_list": packages},
+    )
