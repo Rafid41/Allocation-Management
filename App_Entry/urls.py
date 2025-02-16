@@ -6,6 +6,13 @@ app_name = "App_Entry"
 urlpatterns = [
     # Page rendering
     path("", views.entry_page, name="entry_page"),
+    path(
+        "view_package_and_addNew/",
+        views.PackageListAndCreate.as_view(),
+        name="view_package_and_addNew",
+    ),
+    # path("package/", views.package_view, name="package"),
+    # API endpoints
     # # Search APIs (for AJAX autocomplete)
     # path("search_packages/", views.search_packages, name="search_packages"),
     # path("search_items/", views.search_items, name="search_items"),

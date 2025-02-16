@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Entry {% endblock %}
+
+{% block body_block %}
+
+<style>
+    .data-grid {
+        display: grid;
+        grid-template-columns: 1fr; /* 1 column */
+        gap: 10px;
+        max-width: 500px; /* Limit the width */
+        max-height: 300px; /* Limit the height */
+        margin: 0 auto;
+        overflow-y: auto; /* Enable vertical scrolling */
+        border: 1px solid #ddd; /* Optional: border for the grid area */
+    }
+
+    .data-grid .grid-item {
+        background-color: #f4f4f4;
+        padding: 10px;
+        text-align: center;
+        font-size: 16px;
+    }
+</style>
+
+<center>
+    <h1><b>Package List</b></h1>
+    <br>
+
+    <div class="data-grid">
+        {% for package in current_package_list %}
+            <div class="grid-item">
+                <b>{{ package.packageId }}</b>  <!-- Display the packageId or any other field -->
+            </div>
+        {% empty %}
+            <p>No packages available.</p>
+        {% endfor %}
+    </div>
+
+    <br>
+    <br>
+
+    <!-- Form to create new Package -->
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Render each form field individually to check for issues -->
+        <div class="form-group">
+            <label for="{{ form.packageId.id_for_label }}">Package ID</label>
+            {{ form.packageId }}
+            {% if form.packageId.errors %}
+                <div class="errors">
+                    {% for error in form.packageId.errors %}
+                        <p class="error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <button type="submit">Create Package</button>
+    </form>
+
+</center>
+
+{% endblock %}

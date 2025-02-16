@@ -2,10 +2,10 @@ from django.db import models
 
 
 class Package(models.Model):
-    packageId = models.CharField(max_length=100, unique=True)
+    packageId = models.BigIntegerField(unique=True)
 
     def __str__(self):
-        return self.packageId
+        return str(self.packageId)  # Convert packageId to a string
 
 
 class Item(models.Model):
