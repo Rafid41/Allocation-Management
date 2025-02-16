@@ -2,10 +2,133 @@
 {% load crispy_forms_tags %}
 {% load static %}
 
-{% block title_block %} Entry {% endblock %}
+{% block title_block %}Add Item to Package{% endblock %}
 
 {% block body_block %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3><i class="fas fa-box"></i> Add Item to Package</h3>
+                </div>
+                <div class="card-body">
 
+                    <!-- Display Messages -->
+                    {% if messages %}
+                    <div class="alert alert-dismissible">
+                        {% for message in messages %}
+                        <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
 
+                    <!-- Item Form -->
+                    <form method="POST">
+                        {% csrf_token %}
 
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="package"><i class="fas fa-boxes"></i> Select Package:</label>
+                                    <select name="package" id="package-select" class="form-control" required>
+                                        <option value="">-- Search & Select Package --</option>
+                                        {% for package in packages %}
+                                        <option value="{{ package.id }}">{{ package.packageId }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="item_name"><i class="fas fa-tag"></i> Item Name:</label>
+                                    <input type="text" name="item_name" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="warehouse"><i class="fas fa-warehouse"></i> Select Warehouse:</label>
+                                    <select name="warehouse" class="form-control" required>
+                                        <option value="Dhaka">Dhaka</option>
+                                        <option value="Khulna">Khulna</option>
+                                        <option value="Chittagong">Chittagong</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="unit_of_item"><i class="fas fa-sort-numeric-up"></i> Unit:</label>
+                                    <input type="number" name="unit_of_item" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="unit_price"><i class="fas fa-dollar-sign"></i> Unit Price:</label>
+                                    <input type="number" name="unit_price" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="quantity_of_item"><i class="fas fa-cubes"></i> Quantity:</label>
+                                    <input type="number" name="quantity_of_item" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label for="description"><i class="fas fa-align-left"></i> Description (Optional):</label>
+                            <textarea name="description" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block mt-4">
+                            <i class="fas fa-plus-circle"></i> Add Item
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Display Items -->
+    <h3 class="mt-5 text-center"><i class="fas fa-list"></i> Package Item List</h3>
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered mt-3">
+            <thead class="table-dark">
+                <tr class="text-center">
+                    <th>Package ID</th>
+                    <th>Item Name</th>
+                    <th>Description</th>
+                    <th>Warehouse</th>
+                    <th>Unit</th>
+                    <th>Unit Price</th>
+                    <th>Quantity</th>
+                    <th>Entry Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr class="text-center">
+                    <td>{{ item.package.packageId }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.warehouse }}</td>
+                    <td>{{ item.unit_of_item }}</td>
+                    <td>৳ {{ item.unit_price }}</td>
+                    <td>{{ item.quantity_of_item }}</td>
+                    <td>{{ item.created_at|date:"Y-m-d H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

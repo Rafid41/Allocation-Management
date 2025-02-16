@@ -22,12 +22,14 @@ class Item(models.Model):
     )
     unit_of_item = models.IntegerField(default=0)
     unit_price = models.BigIntegerField(default=0)
+    quantity_of_item = models.BigIntegerField(default=0)
     package = models.ForeignKey(
         Package,
         on_delete=models.SET_NULL,  # This will set the package field to null when the item is deleted
         related_name="package_of_item",
         null=True,  # Allow null values in the package field
     )
+    created_at = models.DateTimeField(auto_now_add=True)  # Auto capture entry datess
 
     def __str__(self):
         return self.name

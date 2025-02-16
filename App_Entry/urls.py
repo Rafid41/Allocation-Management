@@ -13,7 +13,7 @@ urlpatterns = [
     ),
     path(
         "add_item_to_package/",
-        views.add_item_to_pkg,
+        views.add_item_to_package,
         name="add_item_to_package",
     ),
 ]
