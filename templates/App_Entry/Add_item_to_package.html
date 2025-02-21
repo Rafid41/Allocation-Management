@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% comment %} templates\App_Entry\Add_item_to_package.html {% endcomment %}
 {% load crispy_forms_tags %}
 {% load static %}
 
@@ -65,7 +66,11 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label for="unit_of_item"><i class="fas fa-sort-numeric-up"></i> Unit:</label>
-                                    <input type="number" name="unit_of_item" class="form-control" required>
+                                    <select name="unit_of_item" class="form-control" required>
+                                        {% for unit in unit_choices %}
+                                        <option value="{{ unit }}">{{ unit }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
                             </div>
 

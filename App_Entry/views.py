@@ -67,12 +67,10 @@ from django.utils.timezone import now
 
 
 def add_item_to_package(request):
-    packages = Package.objects.all().order_by(
-        "packageId"
-    )  # Ensuring packages are sorted
-    items = Item.objects.all().order_by(
-        "package__packageId"
-    )  # Sorting items by package ID
+    packages = Package.objects.all().order_by("packageId")
+    items = Item.objects.all().order_by("package__packageId")
+
+    UNIT_CHOICES = ["Nos.", "Mtr.", "Km.", "Set.", "Pair."]
 
     if request.method == "POST":
         package_id = request.POST.get("package")
@@ -83,10 +81,11 @@ def add_item_to_package(request):
         quantity_of_item = request.POST.get("quantity_of_item")
         description = request.POST.get("description")
 
-        # Ensure package exists
-        package = get_object_or_404(Package, id=package_id)
+        if unit_of_item not in UNIT_CHOICES:
+            messages.error(request, "Invalid unit selected.")
+            return redirect("App_Entry:add_item_to_package")
 
-        # Check if item already exists within the package
+        package = get_object_or_404(Package, id=package_id)
         existing_item = Item.objects.filter(name=item_name, package=package).first()
 
         if existing_item:
@@ -97,26 +96,24 @@ def add_item_to_package(request):
                 )
                 return redirect("App_Entry:add_item_to_package")
 
-            # Update existing item
             existing_item.unit_of_item = unit_of_item
             existing_item.unit_price = unit_price
             existing_item.warehouse = warehouse
             existing_item.description = description
-            existing_item.quantity_of_item = quantity_of_item  # Update quantity
+            existing_item.quantity_of_item = quantity_of_item
             existing_item.save()
             messages.success(
                 request, f"Updated {item_name} in package {package.packageId}."
             )
 
         else:
-            # Create new item
-            new_item = Item.objects.create(
+            Item.objects.create(
                 name=item_name,
                 package=package,
                 warehouse=warehouse,
                 unit_of_item=unit_of_item,
                 unit_price=unit_price,
-                quantity_of_item=quantity_of_item,  # Added field
+                quantity_of_item=quantity_of_item,
                 description=description,
             )
             messages.success(
@@ -128,5 +125,5 @@ def add_item_to_package(request):
     return render(
         request,
         "App_Entry/Add_item_to_package.html",
-        {"packages": packages, "items": items},
+        {"packages": packages, "items": items, "unit_choices": UNIT_CHOICES},
     )
