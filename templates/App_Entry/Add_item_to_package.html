@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% comment %} templates\App_Entry\Add_item_to_package.html {% endcomment %}
 {% load crispy_forms_tags %}
 {% load static %}
 
@@ -14,8 +13,6 @@
                     <h3><i class="fas fa-box"></i> Add Item to Package</h3>
                 </div>
                 <div class="card-body">
-
-                    <!-- Display Messages -->
                     {% if messages %}
                     <div class="alert alert-dismissible">
                         {% for message in messages %}
@@ -26,76 +23,59 @@
                     </div>
                     {% endif %}
 
-                    <!-- Item Form -->
                     <form method="POST">
                         {% csrf_token %}
 
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="package"><i class="fas fa-boxes"></i> Select Package:</label>
-                                    <select name="package" id="package-select" class="form-control" required>
-                                        <option value="">-- Search & Select Package --</option>
-                                        {% for package in packages %}
-                                        <option value="{{ package.id }}">{{ package.packageId }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
+                                <label>Select Package:</label>
+                                <select name="package" class="form-control" required>
+                                    <option value="">-- Select Package --</option>
+                                    {% for package in packages %}
+                                    <option value="{{ package.id }}">{{ package.packageId }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
-
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="item_name"><i class="fas fa-tag"></i> Item Name:</label>
-                                    <input type="text" name="item_name" class="form-control" required>
-                                </div>
+                                <label>Item Name:</label>
+                                <input type="text" name="item_name" class="form-control" required>
                             </div>
                         </div>
 
                         <div class="row mt-3">
                             <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="warehouse"><i class="fas fa-warehouse"></i> Select Warehouse:</label>
-                                    <select name="warehouse" class="form-control" required>
-                                        <option value="Dhaka">Dhaka</option>
-                                        <option value="Khulna">Khulna</option>
-                                        <option value="Chittagong">Chittagong</option>
-                                    </select>
-                                </div>
+                                <label>Select Warehouse:</label>
+                                <select name="warehouse" class="form-control" required>
+                                    <option value="Dhaka">Dhaka</option>
+                                    <option value="Khulna">Khulna</option>
+                                    <option value="Chittagong">Chittagong</option>
+                                </select>
                             </div>
-
                             <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="unit_of_item"><i class="fas fa-sort-numeric-up"></i> Unit:</label>
-                                    <select name="unit_of_item" class="form-control" required>
-                                        {% for unit in unit_choices %}
-                                        <option value="{{ unit }}">{{ unit }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
+                                <label>Unit:</label>
+                                <select name="unit_of_item" class="form-control" required>
+                                    {% for unit in unit_choices %}
+                                    <option value="{{ unit }}">{{ unit }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
-
                             <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="unit_price"><i class="fas fa-dollar-sign"></i> Unit Price:</label>
-                                    <input type="number" name="unit_price" class="form-control" required>
-                                </div>
+                                <label>Unit Price:</label>
+                                <input type="number" name="unit_price" class="form-control" required>
                             </div>
-
                             <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="quantity_of_item"><i class="fas fa-cubes"></i> Quantity:</label>
-                                    <input type="number" name="quantity_of_item" class="form-control" required>
-                                </div>
+                                <label>Quantity:</label>
+                                <input type="number" name="quantity_of_item" class="form-control" required>
                             </div>
                         </div>
 
                         <div class="form-group mt-3">
-                            <label for="description"><i class="fas fa-align-left"></i> Description (Optional):</label>
+                            <label>Description (Optional):</label>
                             <textarea name="description" class="form-control" rows="2"></textarea>
                         </div>
 
                         <button type="submit" class="btn btn-primary btn-block mt-4">
-                            <i class="fas fa-plus-circle"></i> Add Item
+                            Add Item
                         </button>
                     </form>
                 </div>
@@ -103,37 +83,79 @@
         </div>
     </div>
 
-    <!-- Display Items -->
-    <h3 class="mt-5 text-center"><i class="fas fa-list"></i> Package Item List</h3>
-    <div class="table-responsive">
-        <table class="table table-hover table-bordered mt-3">
-            <thead class="table-dark">
-                <tr class="text-center">
-                    <th>Package ID</th>
-                    <th>Item Name</th>
-                    <th>Description</th>
-                    <th>Warehouse</th>
-                    <th>Unit</th>
-                    <th>Unit Price</th>
-                    <th>Quantity</th>
-                    <th>Entry Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in items %}
-                <tr class="text-center">
-                    <td>{{ item.package.packageId }}</td>
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.description }}</td>
-                    <td>{{ item.warehouse }}</td>
-                    <td>{{ item.unit_of_item }}</td>
-                    <td>৳ {{ item.unit_price }}</td>
-                    <td>{{ item.quantity_of_item }}</td>
-                    <td>{{ item.created_at|date:"Y-m-d H:i" }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <!-- Table for Displaying Items -->
+    <h3 class="mt-5 text-center">Package Item List</h3>
+    <table class="table table-hover table-bordered mt-3">
+        <thead class="table-dark">
+            <tr class="text-center">
+                <th>Package ID</th>
+                <th>Item Name</th>
+                <th>Description</th>
+                <th>Warehouse</th>
+                <th>Unit</th>
+                <th>Unit Price</th>
+                <th>Quantity</th>
+                <th>Entry Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr class="text-center">
+                <td>{{ item.package.packageId }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.description }}</td>
+                <td>{{ item.warehouse }}</td>
+                <td>{{ item.unit_of_item }}</td>
+                <td>৳ {{ item.unit_price }}</td>
+                <td>{{ item.quantity_of_item }}</td>
+                <td>{{ item.created_at|date:"Y-m-d H:i" }}</td>
+                <td class="action-cell">
+                    <div class="action-buttons">
+                        <a href="{% url 'App_Entry:edit_item' item.id %}" class="btn btn-warning btn-sm">Edit</a>
+                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ item.id }}">Delete</button>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- Delete Confirmation Modal -->
+            <div class="modal fade" id="deleteModal{{ item.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to delete <strong>{{ item.name }}</strong> from package <strong>{{ item.package.packageId }}</strong>?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                            <a href="{% url 'App_Entry:delete_item' item.id %}" class="btn btn-danger">Yes, Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
+
+<style>
+    .action-cell {
+        position: relative;
+    }
+
+    .action-buttons {
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .action-cell:hover .action-buttons {
+        opacity: 1;
+    }
+</style>
+
 {% endblock %}

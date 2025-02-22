@@ -16,4 +16,6 @@ urlpatterns = [
         views.add_item_to_package,
         name="add_item_to_package",
     ),
+    path("edit-item/<int:item_id>/", views.edit_item, name="edit_item"),
+    path("delete-item/<int:item_id>/", views.delete_item, name="delete_item"),
 ]

@@ -127,3 +127,32 @@ def add_item_to_package(request):
         "App_Entry/Add_item_to_package.html",
         {"packages": packages, "items": items, "unit_choices": UNIT_CHOICES},
     )
+
+
+@login_required
+def edit_item(request, item_id):
+    """Edit an existing item"""
+    item = get_object_or_404(Item, id=item_id)
+    if request.method == "POST":
+        item.name = request.POST.get("item_name")
+        item.warehouse = request.POST.get("warehouse")
+        item.unit_of_item = request.POST.get("unit_of_item")
+        item.unit_price = request.POST.get("unit_price")
+        item.quantity_of_item = request.POST.get("quantity_of_item")
+        item.description = request.POST.get("description")
+        item.save()
+        messages.success(request, "Item updated successfully!")
+        return redirect("App_Entry:add_item_to_package")
+
+    return render(
+        request, "App_Entry/edit_item.html", {"item": item}
+    )
+
+
+@login_required
+def delete_item(request, item_id):
+    """Delete an existing item"""
+    item = get_object_or_404(Item, id=item_id)
+    item.delete()
+    messages.success(request, "Item deleted successfully!")
+    return redirect("App_Entry:add_item_to_package")
