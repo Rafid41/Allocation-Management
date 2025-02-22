@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "App_Login",
     "App_Home",
     "App_Entry",
+    "App_Status",
     "django_extensions",
 ]
 

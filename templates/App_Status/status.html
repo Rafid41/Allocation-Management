@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Status {% endblock %}
+
+{% block body_block %}
+<center><h1><b> Status </b></h1></center>
+<div class="container mt-4">
+    <h2>Search Items</h2>
+
+    <form method="GET" action="{% url 'App_Status:status_page' %}" class="row g-3">
+        <div class="col-md-4">
+            <!-- This input field will turn into a date picker if "Entry/Update date" is selected -->
+            <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
+        </div>
+
+        <div class="col-md-3">
+            <select name="filter_by" id="filterDropdown" class="form-select" onchange="toggleInputFields()">
+                <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
+                <option value="Package ID" {% if filter_by == "Package ID" %}selected{% endif %}>Package ID</option>
+                <option value="Item Name" {% if filter_by == "Item Name" %}selected{% endif %}>Item Name</option>
+                <option value="Warehouse" {% if filter_by == "Warehouse" %}selected{% endif %}>Warehouse</option>
+                <option value="Unit" {% if filter_by == "Unit" %}selected{% endif %}>Unit</option>
+                <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Entry/Update Date</option>
+            </select>
+        </div>
+
+        <div class="col-md-3" id="datePickerContainer" style="display: none;">
+            <input type="date" name="date" id="dateInput" class="form-control" value="{{ date_filter }}">
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary me-3">Search</button>
+            <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <h4>Search Results</h4>
+
+    <div id="printableArea" class="table-responsive">
+        <h3 class="text-center">Status</h3>
+        <br>
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark sticky-top">
+                <tr>
+                    <th>Package ID</th>
+                    <th>Item Name</th>
+                    <th>Warehouse</th>
+                    <th>Unit</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Entry/Update date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if items %}
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.package.packageId }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.warehouse }}</td>
+                        <td>{{ item.unit_of_item }}</td>
+                        <td>{{ item.quantity_of_item }}</td>
+                        <td>{{ item.unit_price }}</td>
+                        <td>{{ item.created_at }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-danger">No matching data found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    /* Improve table readability */
+    .table {
+        font-size: 14px;
+        text-align: center;
+    }
+
+    /* Fixed table header */
+    .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+    }
+
+    /* Make table header stand out */
+    .table-dark th {
+        background-color: #343a40 !important;
+        color: white !important;
+    }
+
+    /* Improve spacing and border visibility */
+    .table-bordered th, .table-bordered td {
+        border: 1px solid #ddd !important;
+        padding: 10px;
+    }
+
+    /* Hover effect for better interaction */
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Hide unnecessary elements when printing */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #printableArea, #printableArea * {
+            visibility: visible;
+        }
+        #printableArea {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+
+        /* Add margins to the printed page */
+        @page {
+            size: A4;
+            margin: 0.5in;
+        }
+
+        /* Hide the page title and URL */
+        @media print {
+            @page {
+                margin: 0.5in;
+            }
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            h1, h2 {
+                display: none;
+            }
+        }
+    }
+</style>
+
+<script>
+    function toggleInputFields() {
+        var filterDropdown = document.getElementById("filterDropdown");
+        var searchQuery = document.getElementById("searchQuery");
+        var datePickerContainer = document.getElementById("datePickerContainer");
+
+        // If "Entry/Update date" is selected, show the date picker and hide the search input
+        if (filterDropdown.value === "Entry/Update date") {
+            searchQuery.style.display = "none";
+            datePickerContainer.style.display = "block";
+        } else {
+            searchQuery.style.display = "block";
+            datePickerContainer.style.display = "none";
+        }
+    }
+
+    // Ensure the correct visibility on page load
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleInputFields();
+    });
+
+    function printResults() {
+        window.print();
+    }
+</script>
+{% endblock %}

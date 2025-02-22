@@ -15,6 +15,7 @@ urlpatterns = [
     ),  # Redirect root to /accounts/
     path("home/", include("App_Home.urls")),
     path("entry/", include("App_Entry.urls")),
+    path("status/", include("App_Status.urls")),
 ]
 
 
