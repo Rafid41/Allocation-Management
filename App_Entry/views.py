@@ -130,29 +130,71 @@ def add_item_to_package(request):
 
 
 @login_required
-def edit_item(request, item_id):
-    """Edit an existing item"""
-    item = get_object_or_404(Item, id=item_id)
-    if request.method == "POST":
-        item.name = request.POST.get("item_name")
-        item.warehouse = request.POST.get("warehouse")
-        item.unit_of_item = request.POST.get("unit_of_item")
-        item.unit_price = request.POST.get("unit_price")
-        item.quantity_of_item = request.POST.get("quantity_of_item")
-        item.description = request.POST.get("description")
-        item.save()
-        messages.success(request, "Item updated successfully!")
-        return redirect("App_Entry:add_item_to_package")
-
-    return render(
-        request, "App_Entry/edit_item.html", {"item": item}
-    )
-
-
-@login_required
 def delete_item(request, item_id):
     """Delete an existing item"""
     item = get_object_or_404(Item, id=item_id)
     item.delete()
     messages.success(request, "Item deleted successfully!")
     return redirect("App_Entry:add_item_to_package")
+
+
+@login_required
+def edit_item(request, item_id):
+    item = get_object_or_404(Item, pk=item_id)  # Get the item by ID
+    packages = Package.objects.all()
+
+    if request.method == "POST":
+        # Retrieve form data
+        package_id = request.POST.get("package")
+        item_name = request.POST.get("item_name")
+        warehouse = request.POST.get("warehouse")
+        unit_of_item = request.POST.get("unit_of_item")
+        unit_price = request.POST.get("unit_price")
+        quantity_of_item = request.POST.get("quantity_of_item")
+        description = request.POST.get("description")
+
+        # Validation
+        if not all(
+            [
+                package_id,
+                item_name,
+                warehouse,
+                unit_of_item,
+                unit_price,
+                quantity_of_item,
+            ]
+        ):
+            messages.error(request, "All fields except description are required!")
+            return redirect("App_Entry:edit_item", item_id=item.id)
+
+        # Ensure unit_of_item is a valid choice key
+        valid_units = dict(Item.UNIT_CHOICES).keys()
+        if unit_of_item not in valid_units:
+            messages.error(request, "Invalid unit selected!")
+            return redirect("App_Entry:edit_item", item_id=item.id)
+
+        # Update item values
+        item.package = get_object_or_404(Package, id=package_id)
+        item.name = item_name
+        item.warehouse = warehouse
+        item.unit_of_item = unit_of_item  # Store only key (e.g., "Nos.", "Km.", etc.)
+        item.unit_price = int(unit_price)
+        item.quantity_of_item = int(quantity_of_item)
+        item.description = description
+
+        item.save()  # Save changes
+
+        messages.success(request, "Item updated successfully!")
+        return redirect("App_Entry:add_item_to_package")
+
+    # Pass data to template
+    return render(
+        request,
+        "App_Entry/edit_item.html",
+        {
+            "item": item,
+            "packages": packages,
+            "warehouse_choices": Item.WAREHOUSE_CHOICES,
+            "unit_choices": Item.UNIT_CHOICES,
+        },
+    )
