@@ -29,7 +29,6 @@ from django.urls import reverse_lazy
 
 
 ##################################  view package and add new Package #################################
-@login_required
 def view_package_and_addNew(request):
     """Handles both displaying the package list and adding a new package."""
 
@@ -51,14 +50,16 @@ def view_package_and_addNew(request):
             except ValueError:
                 messages.error(request, "Invalid package ID. Please enter a number.")
 
-    # Fetch all packages to display
+    # Fetch all packages with their items and sort by packageId, item name, and warehouse
     packages = Package.objects.all().order_by("packageId")
+    items = Item.objects.select_related("package").order_by("package__packageId", "name", "warehouse")
 
     return render(
         request,
         "App_Entry/view_package_and_addNew.html",
-        {"current_package_list": packages},
+        {"current_package_list": packages, "items": items},
     )
+
 
 
 ############################## Add New Item to a Package ##########################################
@@ -78,8 +79,8 @@ def add_item_to_package(request):
         item_name = request.POST.get("item_name")
         warehouse = request.POST.get("warehouse")
         unit_of_item = request.POST.get("unit_of_item")
-        unit_price = request.POST.get("unit_price")
-        quantity_of_item = request.POST.get("quantity_of_item")
+        unit_price = int(request.POST.get("unit_price"))
+        quantity_of_item = int(request.POST.get("quantity_of_item"))
         description = request.POST.get("description")
 
         if unit_of_item not in UNIT_CHOICES:
@@ -88,7 +89,7 @@ def add_item_to_package(request):
 
         package = get_object_or_404(Package, id=package_id)
 
-        # Check if the same item already exists in the same warehouse
+        # Check if the same item exists in the same package
         existing_item = Item.objects.filter(name=item_name, package=package, warehouse=warehouse).first()
 
         if existing_item:
@@ -98,6 +99,17 @@ def add_item_to_package(request):
                     f"Cannot update {item_name} in {warehouse} as it already exists with quantity {existing_item.quantity_of_item}.",
                 )
                 return redirect("App_Entry:add_item_to_package")
+
+        # Check if the same package and item exist with a different price
+        same_package_items = Item.objects.filter(name=item_name, package=package)
+        price_updated = False
+
+        if same_package_items.exists():
+            for item in same_package_items:
+                if item.unit_price != unit_price:
+                    item.unit_price = unit_price
+                    item.save()
+                    price_updated = True
 
         # Add a new entry instead of updating if the warehouse is different
         Item.objects.create(
@@ -109,9 +121,12 @@ def add_item_to_package(request):
             quantity_of_item=quantity_of_item,
             description=description,
         )
-        messages.success(
-            request, f"Added {item_name} to package {package.packageId} in {warehouse} warehouse."
-        )
+
+        success_message = f"Added {item_name} to package {package.packageId} in {warehouse} warehouse."
+        if price_updated:
+            success_message += " Price updated for all matching entries."
+
+        messages.success(request, success_message)
 
         return redirect("App_Entry:add_item_to_package")
 
@@ -121,7 +136,6 @@ def add_item_to_package(request):
         {"packages": packages, "items": items, "unit_choices": UNIT_CHOICES},
     )
 
-
 @login_required
 def delete_item(request, item_id):
     """Delete an existing item"""
@@ -129,6 +143,7 @@ def delete_item(request, item_id):
     item.delete()
     messages.success(request, "Item deleted successfully!")
     return redirect("App_Entry:add_item_to_package")
+
 
 @login_required
 def edit_item(request, item_id):
@@ -156,24 +171,30 @@ def edit_item(request, item_id):
             messages.error(request, "Invalid unit selected!")
             return redirect("App_Entry:edit_item", item_id=item.id)
 
-        # Check if the same item with the same warehouse exists with quantity > 0
-        existing_item = Item.objects.filter(
-            name=item_name, warehouse=warehouse
-        ).exclude(id=item.id).first()
+        # Check if warehouse has changed
+        if warehouse != item.warehouse:
+            # If warehouse is changed, ensure no other item with same name and warehouse exists with quantity > 0
+            existing_item = Item.objects.filter(name=item_name, warehouse=warehouse).exclude(id=item.id).first()
 
-        if existing_item and existing_item.quantity_of_item > 0:
-            messages.error(
-                request,
-                f"Cannot update '{item_name}' in '{warehouse}' as another entry exists with quantity {existing_item.quantity_of_item}.",
-            )
-            return redirect("App_Entry:edit_item", item_id=item.id)
+            if existing_item and existing_item.quantity_of_item > 0:
+                messages.error(
+                    request,
+                    f"Cannot update '{item_name}' to warehouse '{warehouse}' as another entry exists with quantity {existing_item.quantity_of_item}.",
+                )
+                return redirect("App_Entry:edit_item", item_id=item.id)
+
+        # Check if the price has changed and update all entries with the same package and item
+        new_price = int(unit_price)
+        if item.unit_price != new_price:
+            Item.objects.filter(package_id=package_id, name=item_name).update(unit_price=new_price)
+            messages.success(request, f"Price updated for all '{item_name}' in package '{package_id}'.")
 
         # Update item values
         item.package = get_object_or_404(Package, id=package_id)
         item.name = item_name
         item.warehouse = warehouse
         item.unit_of_item = unit_of_item  # Store only key (e.g., "Nos.", "Km.", etc.)
-        item.unit_price = int(unit_price)
+        item.unit_price = new_price
         item.quantity_of_item = int(quantity_of_item)
         item.description = description
 
