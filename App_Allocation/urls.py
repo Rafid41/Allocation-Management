@@ -6,4 +6,9 @@ app_name = "App_Allocation"
 
 urlpatterns = [
     path("", views.allocation_page, name="allocation_page"),
+    path(
+        "view_PBS_and_addNew/",
+        views.view_PBS_and_addNew,
+        name="view_PBS_and_addNew",
+    ),
 ]

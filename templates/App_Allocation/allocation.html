@@ -1,7 +1,27 @@
-{% extends 'base.html' %} 
-{% comment %} templates\App_Allocation\allocation.html {% endcomment %}
-{% load crispy_forms_tags %} 
-{% load static %} 
-{%block title_block %} Allocation {% endblock %} 
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Allocation {% endblock %}
+
 {% block body_block %}
+<center>
+    <h1 class="mb-4"><b>Allocation Page</b></h1>
+</center>
+<br/>
+<br/>
+<br/>
+<div class="container d-flex justify-content-center  vh-100">
+    <div class="text-center">
+        
+        <a href="{% url 'App_Allocation:view_PBS_and_addNew' %}" class="btn btn-primary btn-lg mb-3">
+            <i class="fas fa-plus-circle"></i> Add New PBS
+        </a>
+        <br>
+        <a href="" class="btn btn-secondary btn-lg">
+            <i class="fas fa-tasks"></i> Allocate Items to PBS
+        </a>
+    </div>
+</div>
+
 {% endblock %}

@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} PBS Entry {% endblock %}
+
+{% block body_block %}
+
+<style>
+    /* Container styling */
+    .card-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* PBS List styling */
+    .pbs-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        padding: 10px;
+        background: #f9f9f9;
+    }
+
+    .pbs-item {
+        background: #fff;
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    /* Hide number input arrows */
+    .no-spinner::-webkit-outer-spin-button,
+    .no-spinner::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .no-spinner {
+        -moz-appearance: textfield;
+    }
+
+
+    {% comment %} message close button  {% endcomment %}
+    .custom-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        border: none;
+        background: none;
+        color: red;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .custom-close:hover {
+        color: darkred;
+    }
+</style>
+
+<!-- Back Button -->
+<div class="container mt-.5">
+    <a href="{% url 'App_Allocation:allocation_page' %}" class="btn btn-outline-secondary">
+        <i class="fa fa-arrow-left"></i> Back
+    </a>
+</div>
+
+<!-- Main Card -->
+<div class="container card-container card p-4 shadow bg-light">
+    <h2 class="text-center text-primary"><i class="fas fa-list"></i> <b>Existing PBS List</b></h2>
+
+    <!-- Display Success & Error Messages -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+                <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+                {{ message }}
+                <button type="button" class="custom-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- PBS List -->
+    <div class="pbs-list mt-3 mb-4">
+        {% for PBS in current_PBS_list %}
+            <div class="pbs-item">
+                <i class="fa fa-building text-primary"></i> {{ PBS.name }}
+            </div>
+        {% empty %}
+            <p class="text-center text-muted">No PBS available.</p>
+        {% endfor %}
+    </div>
+
+    <br>
+    
+
+    <!-- Form to Add New PBS -->
+    <form method="post" class="card p-3 shadow-sm mt-4">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="PBS_Name" class="fw-bold"><i class="fa fa-plus-circle"></i> <b>Add New PBS</b></label>
+            <input type="text" name="PBS_Name" class="form-control no-spinner" required placeholder="Enter PBS Name">
+        </div>
+        
+        <button type="submit" class="btn btn-success mt-3 w-100">
+            <i class="fa fa-check"></i> Create PBS
+        </button>
+    </form>
+</div>
+
+{% endblock %}
