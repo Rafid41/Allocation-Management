@@ -130,7 +130,6 @@ def delete_item(request, item_id):
     messages.success(request, "Item deleted successfully!")
     return redirect("App_Entry:add_item_to_package")
 
-
 @login_required
 def edit_item(request, item_id):
     item = get_object_or_404(Item, pk=item_id)  # Get the item by ID
@@ -147,16 +146,7 @@ def edit_item(request, item_id):
         description = request.POST.get("description")
 
         # Validation
-        if not all(
-            [
-                package_id,
-                item_name,
-                warehouse,
-                unit_of_item,
-                unit_price,
-                quantity_of_item,
-            ]
-        ):
+        if not all([package_id, item_name, warehouse, unit_of_item, unit_price, quantity_of_item]):
             messages.error(request, "All fields except description are required!")
             return redirect("App_Entry:edit_item", item_id=item.id)
 
@@ -164,6 +154,18 @@ def edit_item(request, item_id):
         valid_units = dict(Item.UNIT_CHOICES).keys()
         if unit_of_item not in valid_units:
             messages.error(request, "Invalid unit selected!")
+            return redirect("App_Entry:edit_item", item_id=item.id)
+
+        # Check if the same item with the same warehouse exists with quantity > 0
+        existing_item = Item.objects.filter(
+            name=item_name, warehouse=warehouse
+        ).exclude(id=item.id).first()
+
+        if existing_item and existing_item.quantity_of_item > 0:
+            messages.error(
+                request,
+                f"Cannot update '{item_name}' in '{warehouse}' as another entry exists with quantity {existing_item.quantity_of_item}.",
+            )
             return redirect("App_Entry:edit_item", item_id=item.id)
 
         # Update item values
