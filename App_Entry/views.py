@@ -66,6 +66,7 @@ def view_package_and_addNew(request):
 from django.utils.timezone import now
 
 
+@login_required
 def add_item_to_package(request):
     packages = Package.objects.all().order_by("packageId")
     items = Item.objects.all().order_by("package__packageId")
@@ -86,39 +87,31 @@ def add_item_to_package(request):
             return redirect("App_Entry:add_item_to_package")
 
         package = get_object_or_404(Package, id=package_id)
-        existing_item = Item.objects.filter(name=item_name, package=package).first()
+
+        # Check if the same item already exists in the same warehouse
+        existing_item = Item.objects.filter(name=item_name, package=package, warehouse=warehouse).first()
 
         if existing_item:
             if existing_item.quantity_of_item > 0:
                 messages.error(
                     request,
-                    f"Cannot update {item_name} as it already exists with quantity {existing_item.quantity_of_item}.",
+                    f"Cannot update {item_name} in {warehouse} as it already exists with quantity {existing_item.quantity_of_item}.",
                 )
                 return redirect("App_Entry:add_item_to_package")
 
-            existing_item.unit_of_item = unit_of_item
-            existing_item.unit_price = unit_price
-            existing_item.warehouse = warehouse
-            existing_item.description = description
-            existing_item.quantity_of_item = quantity_of_item
-            existing_item.save()
-            messages.success(
-                request, f"Updated {item_name} in package {package.packageId}."
-            )
-
-        else:
-            Item.objects.create(
-                name=item_name,
-                package=package,
-                warehouse=warehouse,
-                unit_of_item=unit_of_item,
-                unit_price=unit_price,
-                quantity_of_item=quantity_of_item,
-                description=description,
-            )
-            messages.success(
-                request, f"Added {item_name} to package {package.packageId}."
-            )
+        # Add a new entry instead of updating if the warehouse is different
+        Item.objects.create(
+            name=item_name,
+            package=package,
+            warehouse=warehouse,
+            unit_of_item=unit_of_item,
+            unit_price=unit_price,
+            quantity_of_item=quantity_of_item,
+            description=description,
+        )
+        messages.success(
+            request, f"Added {item_name} to package {package.packageId} in {warehouse} warehouse."
+        )
 
         return redirect("App_Entry:add_item_to_package")
 
