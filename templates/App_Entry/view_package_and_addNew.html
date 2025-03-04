@@ -10,7 +10,7 @@
     .data-grid {
         display: grid;
         grid-template-columns: 1fr; /* Single column layout */
-        gap: 10px;
+        gap: 5px;
         max-width: 600px; /* Increased width */
         max-height: 400px; /* Increased height */
         margin: 0 auto;
@@ -61,11 +61,14 @@
     <i color='#B2BEB5' class="fa fa-arrow-left fa-2x" aria-hidden="true"></i>
 </a>
 
-<div class="container mt-5 card p-7 shadow">
+<!-- Container for Existing Package List -->
+<div class="container mt-5 card p-4 shadow">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <br>
-            <h2 class="text-center"><b>Existing Package List</b></h2>
+            <h2 class="text-center">
+                <b><i class="fa fa-box"></i> Existing Package List</b>
+            </h2>
 
             <!-- Display Success & Error Messages -->
             {% if messages %}
@@ -76,58 +79,45 @@
                 {% endfor %}
             {% endif %}
 
+            <!-- Data Grid for Existing Packages -->
             <div class="data-grid mt-3">
                 {% for package in current_package_list %}
                     <div class="package-header">
-                        Package ID: <b>{{ package.packageId }}</b>
+                        <b><i class="fa fa-box"></i> {{ package.packageId }}</b>
                     </div>
                     <table class="item-table">
-                        <thead>
-                            <tr>
-                                <th>Item Name</th>
-                                <th>Warehouse</th>
-                                <th>Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in items %}
-                                {% if item.package.packageId == package.packageId %}
-                                    <tr>
-                                        <td>{{ item.name }}</td>
-                                        <td>{{ item.warehouse }}</td>
-                                        <td>{{ item.quantity_of_item }}</td>
-                                    </tr>
-                                {% endif %}
-                            {% empty %}
-                                <tr>
-                                    <td colspan="3" class="text-center">No items available</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
+                        <!-- Table content here -->
                     </table>
                 {% empty %}
                     <p class="text-center">No packages available.</p>
                 {% endfor %}
             </div>
+        </div>
+    </div>
+</div>
 
-            <br>
-
-            <!-- Form to create new Package -->
+<!-- Container for Add New Package Form -->
+<div class="container card p-4 shadow mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
             <form method="post" class="card p-3 shadow">
                 {% csrf_token %}
                 
                 <div class="form-group">
-                    <label for="packageId"><b>Add New Package</b></label>
+                    <label for="packageId">
+                        <b><i class="fa fa-plus-circle"></i> Add New Package</b>
+                    </label>
                     <input type="number" name="packageId" class="form-control no-spinner" required placeholder="Enter Package ID">
                 </div>
                 
-                <button type="submit" class="btn btn-primary mt-3 w-100">Create Package</button>
+                <button type="submit" class="btn btn-primary mt-3 w-100">
+                    <i class="fa fa-plus"></i> Create Package
+                </button>
             </form>
-            <br>
-            <br>
         </div>
     </div>
 </div>
+
 <br>
 <br>
 
