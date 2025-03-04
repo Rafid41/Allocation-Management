@@ -5,9 +5,23 @@
 {% block title_block %} Search and Select Item for Allocation {% endblock %}
 
 {% block body_block %}
+ <!-- Display Success & Error Messages -->
+    {% if messages %}
+            {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+                <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+                {{ message }}
+                <button type="button" class="custom-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+            </div>
+            {% endfor %}
+    {% endif %}
 <center><h1 class="fw-bold text-primary"><b> Search and Select Item for Allocation </b></h1></center>
 <div class="container mt-4">
     <br>
+       
+        
+
+
     <form method="GET" action="{% url 'App_Allocation:Search_and_Select'%}" class="row g-3">
         <div class="col-md-4">
             <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
@@ -65,7 +79,9 @@
                         <td>৳ {{ item.unit_price }}</td>
                         <td>{{ item.created_at }}</td>
                         <td>
-                            <a href="" class="btn btn-success btn-sm select-btn"><i class="fas fa-check"></i> Select</a>
+                            <a 
+                            href="{% url 'App_Allocation:allocate_item' item.id %}" 
+                            class="btn btn-success btn-sm select-btn"><i class="fas fa-check"></i> Select</a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -80,6 +96,18 @@
 </div>
 
 <style>
+    {% comment %} <!-- Custom Close Button Styling --> {% endcomment %}
+
+    .custom-close {
+        background: none;
+        border: none;
+        font-size: 1rem;
+        font-weight: bold;
+        color: inherit;
+        float: right;
+        cursor: pointer;
+    }
+
     .table {
         font-size: 14px;
         text-align: center;

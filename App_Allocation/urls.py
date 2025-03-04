@@ -12,4 +12,5 @@ urlpatterns = [
         name="view_PBS_and_addNew",
     ),
     path('Search_and_Select/', views.Search_and_Select, name='Search_and_Select'),
+    path('allocate_item/<int:item_id>/', views.allocate_item, name="allocate_item"),
 ]

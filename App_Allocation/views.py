@@ -100,17 +100,82 @@ def Search_and_Select(request):
 
 
 # ########################  Allocate to PBS ##########################
-from django.shortcuts import render
 from django.http import JsonResponse
 from .models import Temporary_Allocation, PBS, Package, Item
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import Temporary_Allocation, Item, Final_Allocation
+from .forms import TemporaryAllocationForm
 
 
 
+# def validate_allocation_no(request):
+#     """Check if the allocation number already exists."""
+#     allocation_no = request.GET.get("allocation_no")
+#     exists = Temporary_Allocation.objects.filter(allocation_no=allocation_no).exists()
+#     return JsonResponse({"exists": exists})
 
-def validate_allocation_no(request):
-    """Check if the allocation number already exists."""
-    allocation_no = request.GET.get("allocation_no")
-    exists = Temporary_Allocation.objects.filter(allocation_no=allocation_no).exists()
-    return JsonResponse({"exists": exists})
 
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import Item, PBS, Temporary_Allocation
+from .forms import TemporaryAllocationForm
+
+def allocate_item(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
+    pbss = PBS.objects.all()  # Fetch all PBS options
+
+    if request.method == "POST":
+        form = TemporaryAllocationForm(request.POST)
+        pbs_id = request.POST.get("pbs")  # Get selected PBS ID from form
+        allocation_no = request.POST.get("allocation_no")  # Get allocation number
+        quantity = request.POST.get("quantity")  # Get quantity
+        
+        # Convert quantity to integer safely
+        try:
+            quantity = int(quantity)
+        except (TypeError, ValueError):
+            messages.error(request, "Invalid quantity entered.")
+            return redirect("App_Allocation:allocate_item", item_id=item.id)
+
+        # Validate Allocation Number
+        allocation_exists = (
+            Temporary_Allocation.objects.filter(allocation_no=allocation_no).exists()
+            or Final_Allocation.objects.filter(allocation_no=allocation_no).exists()
+        )
+
+        if allocation_exists:
+            messages.error(request, "Allocation Number Already Exists in Temporary or Final Allocation.")
+        elif quantity > item.quantity_of_item:
+            messages.error(request, "Entered quantity exceeds available stock!")
+        elif not pbs_id:
+            messages.error(request, "Please select a valid PBS before submitting.")
+        else:
+            allocation = form.save(commit=False)
+            allocation.item = item
+            allocation.package = item.package
+            allocation.warehouse = item.warehouse
+            allocation.price = item.unit_price
+            allocation.pbs = get_object_or_404(PBS, id=pbs_id)  # Assign PBS
+            allocation.save()
+            messages.success(request, "Item allocated successfully!")
+            return redirect("App_Allocation:Search_and_Select")
+
+    else:
+        form = TemporaryAllocationForm(initial={
+            "package": item.package,
+            "warehouse": item.warehouse,
+            "unit": item.unit_of_item,
+            "unit_price": item.unit_price,
+        })
+
+    # Fetch Temporary Allocations sorted by Allocation number
+    allocations = Temporary_Allocation.objects.all().order_by('allocation_no')
+
+    return render(request, "App_Allocation/allocate_item.html", {
+        "form": form,
+        "item": item,
+        "pbss": pbss,
+        "allocations": allocations,
+    })

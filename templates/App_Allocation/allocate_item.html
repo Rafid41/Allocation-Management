@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Allocate Item {% endblock %}
+
+{% block body_block %}
+<div class="container mt-4">
+    <h2 class="text-primary text-center"><b>Allocate Item</b></h2>
+
+    <!-- Display Success & Error Messages -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+            <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+            {{ message }}
+            <button type="button" class="custom-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                <label>Allocation Number:</label>
+                <input type="number" name="allocation_no" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label>Item Name:</label>
+                <input type="text" class="form-control" value="{{ item.name }}" readonly>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label>PBS:</label>
+                <select name="pbs" class="form-select" required>
+                    <option value="">Select PBS</option>
+                    {% for pbs in pbss %}
+                        <option value="{{ pbs.id }}">{{ pbs.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label>Package:</label>
+                <input type="text" class="form-control" value="{{ item.package.packageId }}" readonly>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label>Warehouse:</label>
+                <input type="text" class="form-control" value="{{ item.warehouse }}" readonly>
+            </div>
+            <div class="col-md-6">
+                <label>Quantity:</label>
+                <input type="number" name="quantity" class="form-control" placeholder="Max Item: {{ item.quantity_of_item }}" required>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label>Unit:</label>
+                <input type="text" class="form-control" value="{{ item.unit_of_item }}" readonly>
+            </div>
+            <div class="col-md-6">
+                <label>Unit Price:</label>
+                <input type="text" class="form-control" value="{{ item.unit_price }}" readonly>
+            </div>
+        </div>
+
+        <!-- Buttons (Cancel on the left and Allocate on the right) -->
+        <div class="row mt-4 d-flex justify-content-between">
+            <div class="col-md-6 text-start">
+                <a href="{% url 'App_Allocation:Search_and_Select' %}" class="btn btn-danger">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+            <div class="col-md-6 text-end">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Allocate
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <hr>
+
+    <h3 class="text-center text-secondary"><b>Temporary Allocated Items</b></h3>
+    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;"> 
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Allocation No</th>
+                    <th>PBS</th>
+                    <th>Item Name</th>
+                    <th>Package</th>
+                    <th>Warehouse</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for allocation in allocations %}
+                <tr>
+                    <td>{{ allocation.allocation_no }}</td>
+                    <td>{{ allocation.pbs.name }}</td>
+                    <td>{{ allocation.item.name }}</td>
+                    <td>{{ allocation.package.packageId }}</td>
+                    <td>{{ allocation.warehouse }}</td>
+                    <td>{{ allocation.quantity }}</td>
+                    <td>{{ allocation.price }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-danger">No Allocations Found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Custom Close Button Styling -->
+<style>
+    .custom-close {
+        background: none;
+        border: none;
+        font-size: 1rem;
+        font-weight: bold;
+        color: inherit;
+        float: right;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
