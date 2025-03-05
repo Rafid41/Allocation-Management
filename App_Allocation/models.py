@@ -19,6 +19,7 @@ class Temporary_Allocation(models.Model):
     warehouse = models.CharField(max_length=50)  # Locked until Item is selected
     quantity = models.IntegerField()  # Placeholder: max available quantity from Item model
     price = models.BigIntegerField()  # Auto-fetched from Item model (not editable)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Allocation {self.allocation_no}"
@@ -32,6 +33,7 @@ class Final_Allocation(models.Model):
     warehouse = models.CharField(max_length=50)  # Locked until Item is selected
     quantity = models.IntegerField()  # Placeholder: max available quantity from Item model
     price = models.BigIntegerField()  # Auto-fetched from Item model (not editable)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Allocation {self.allocation_no}"

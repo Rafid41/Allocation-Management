@@ -99,6 +99,7 @@
                     <th>Warehouse</th>
                     <th>Quantity</th>
                     <th>Unit Price</th>
+                    <th>Allocation Date</th>
                 </tr>
             </thead>
             <tbody>
@@ -111,6 +112,7 @@
                     <td>{{ allocation.warehouse }}</td>
                     <td>{{ allocation.quantity }}</td>
                     <td>{{ allocation.price }}</td>
+                    <td>{{ allocation.created_at }}</td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -133,5 +135,11 @@
         float: right;
         cursor: pointer;
     }
+   
+    .table td, .table th {
+        text-align: center;
+        vertical-align: middle;
+}
+
 </style>
 {% endblock %}
