@@ -198,19 +198,20 @@ def delete_allocation(request, allocation_id):
     allocation = get_object_or_404(Temporary_Allocation, id=allocation_id)
     allocation.delete()
     messages.success(request, "Allocation deleted successfully.")
-    return redirect("App_Allocation:confirm_allocation")
+    return redirect("App_Allocation:confirm_allocation_view")
 
 
 from datetime import datetime
 
 @login_required
-def confirm_allocation(request):
+def confirm_allocation_view(request):
     query = request.GET.get("query", "").strip()
     filter_by = request.GET.get("filter_by", "All")
     date_filter = request.GET.get("date_filter", "")
 
     allocations = Temporary_Allocation.objects.all()
 
+    # Apply query filters based on the filter_by field
     if query:
         if filter_by == "allocation_no":
             allocations = allocations.filter(allocation_no__icontains=query)
@@ -223,6 +224,7 @@ def confirm_allocation(request):
         elif filter_by == "warehouse":
             allocations = allocations.filter(warehouse__icontains=query)
         elif filter_by == "All":
+            # For the "All" filter, search across multiple fields
             allocations = allocations.filter(
                 Q(allocation_no__icontains=query) |
                 Q(pbs__name__icontains=query) |
@@ -234,13 +236,18 @@ def confirm_allocation(request):
                 Q(created_at__icontains=query)
             )
     
+    # Handle filtering by "Entry/Update date"
     if filter_by == "Entry/Update date" and date_filter:
         try:
-            # Convert to date and filter using the correct date format
+            # Convert the date string to a datetime object and filter by the created_at field
             date_obj = datetime.strptime(date_filter, "%Y-%m-%d")
             allocations = allocations.filter(created_at__date=date_obj.date())
         except ValueError:
+            # If the date string is not valid, ignore the filter
             pass
+
+    # Sort the allocations by allocation_no
+    allocations = allocations.order_by('allocation_no')
 
     context = {
         "allocations": allocations,
@@ -250,3 +257,46 @@ def confirm_allocation(request):
     }
 
     return render(request, "App_Allocation/confirm_allocation.html", context)
+
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import Temporary_Allocation, Item, Final_Allocation
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def confirm_allocation(request, allocation_id):
+    # Get the selected allocation
+    allocation = get_object_or_404(Temporary_Allocation, id=allocation_id)
+    item = allocation.item
+
+    # Check if the item quantity is sufficient
+    if item.quantity_of_item >= allocation.quantity:
+        # If sufficient, create an entry in Final_Allocation
+        final_allocation = Final_Allocation.objects.create(
+            allocation_no=allocation.allocation_no,
+            pbs=allocation.pbs,
+            package=allocation.package,
+            item=allocation.item,
+            warehouse=allocation.warehouse,
+            quantity=allocation.quantity,
+            price=allocation.price
+        )
+
+        # Update item quantity in Item table
+        item.quantity_of_item -= allocation.quantity
+        item.save()
+
+        # Delete the temporary allocation
+        allocation.delete()
+
+        # Display success message
+        messages.success(request, f"Allocation {allocation.allocation_no} confirmed and transferred to Final Allocation and Entry for Temporary Allocation is Deleted.")
+    else:
+        # If quantity exceeds, show error message
+        messages.error(request, f"Quantity exceeds available stock for item {item.name}.")
+
+    # Redirect to the confirmation page
+    return redirect('App_Allocation:confirm_allocation_view')
