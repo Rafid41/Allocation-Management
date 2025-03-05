@@ -49,6 +49,7 @@ from App_Entry.models import Item
 from django.db.models import Q
 from datetime import datetime
 
+@login_required
 def Search_and_Select(request):
     """Renders the package and item entry page with search functionality"""
     query = request.GET.get("query", "").strip()  # Strip leading/trailing whitespaces from query input
@@ -122,6 +123,7 @@ from django.contrib import messages
 from .models import Item, PBS, Temporary_Allocation
 from .forms import TemporaryAllocationForm
 
+@login_required
 def allocate_item(request, item_id):
     item = get_object_or_404(Item, id=item_id)
     pbss = PBS.objects.all()  # Fetch all PBS options
@@ -180,3 +182,71 @@ def allocate_item(request, item_id):
         "pbss": pbss,
         "allocations": allocations,
     })
+
+
+
+# ########################  Confirm Allocation ##########################
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.db.models import Q  # Import Q for complex queries
+from .models import Temporary_Allocation, PBS, Package, Item
+from django.contrib.auth.decorators import login_required
+
+
+@login_required
+def delete_allocation(request, allocation_id):
+    allocation = get_object_or_404(Temporary_Allocation, id=allocation_id)
+    allocation.delete()
+    messages.success(request, "Allocation deleted successfully.")
+    return redirect("App_Allocation:confirm_allocation")
+
+
+from datetime import datetime
+
+@login_required
+def confirm_allocation(request):
+    query = request.GET.get("query", "").strip()
+    filter_by = request.GET.get("filter_by", "All")
+    date_filter = request.GET.get("date_filter", "")
+
+    allocations = Temporary_Allocation.objects.all()
+
+    if query:
+        if filter_by == "allocation_no":
+            allocations = allocations.filter(allocation_no__icontains=query)
+        elif filter_by == "pbs":
+            allocations = allocations.filter(pbs__name__icontains=query)
+        elif filter_by == "package":
+            allocations = allocations.filter(package__packageId__icontains=query)
+        elif filter_by == "item":
+            allocations = allocations.filter(item__name__icontains=query)
+        elif filter_by == "warehouse":
+            allocations = allocations.filter(warehouse__icontains=query)
+        elif filter_by == "All":
+            allocations = allocations.filter(
+                Q(allocation_no__icontains=query) |
+                Q(pbs__name__icontains=query) |
+                Q(package__packageId__icontains=query) |
+                Q(item__name__icontains=query) |
+                Q(warehouse__icontains=query) |
+                Q(price__icontains=query) |
+                Q(quantity__icontains=query) |
+                Q(created_at__icontains=query)
+            )
+    
+    if filter_by == "Entry/Update date" and date_filter:
+        try:
+            # Convert to date and filter using the correct date format
+            date_obj = datetime.strptime(date_filter, "%Y-%m-%d")
+            allocations = allocations.filter(created_at__date=date_obj.date())
+        except ValueError:
+            pass
+
+    context = {
+        "allocations": allocations,
+        "query": query,
+        "filter_by": filter_by,
+        "date_filter": date_filter,
+    }
+
+    return render(request, "App_Allocation/confirm_allocation.html", context)

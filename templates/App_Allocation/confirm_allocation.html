@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Confirm Allocation {% endblock %}
+
+{% block body_block %}
+<div class="container mt-4">
+    <h2 class="text-primary text-center"><b>Confirm Allocations</b></h2>
+    <br>
+
+    <!-- Display Success & Error Messages -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+            <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+            {{ message }}
+            <button type="button" class="custom-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Search Form -->
+    <form method="GET" action="{% url 'App_Allocation:confirm_allocation' %}" class="row g-3">
+        <div class="col-md-3">
+            <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
+        </div>
+
+        <div class="col-md-3">
+            <select name="filter_by" id="filterDropdown" class="form-select" onchange="toggleInputFields()">
+                <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
+                <option value="allocation_no" {% if filter_by == "allocation_no" %}selected{% endif %}>Allocation No</option>
+                <option value="pbs" {% if filter_by == "pbs" %}selected{% endif %}>PBS</option>
+                <option value="package" {% if filter_by == "package" %}selected{% endif %}>Package</option>
+                <option value="item" {% if filter_by == "item" %}selected{% endif %}>Item</option>
+                <option value="warehouse" {% if filter_by == "warehouse" %}selected{% endif %}>Warehouse</option>
+                <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Entry/Update Date</option>
+            </select>
+        </div>
+
+        <div class="col-md-3" id="datePickerContainer" style="display: none;">
+            <input type="date" name="date_filter" id="dateFilter" class="form-control" value="{{ date_filter|date:'Y-m-d' }}">
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <div class="table-responsive">
+        <h3 class="text-center text-secondary"><b>Temporary Allocations</b></h3>
+        <br>
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark sticky-top">
+                <tr>
+                    <th>Allocation No</th>
+                    <th>PBS</th>
+                    <th>Package</th>
+                    <th>Item</th>
+                    <th>Warehouse</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Created At</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if allocations %}
+                    {% for allocation in allocations %}
+                    <tr class="selectable-row">
+                        <td>{{ allocation.allocation_no }}</td>
+                        <td>{{ allocation.pbs.name }}</td>
+                        <td>{{ allocation.package.packageId }}</td>
+                        <td>{{ allocation.item.name }}</td>
+                        <td>{{ allocation.warehouse }}</td>
+                        <td>{{ allocation.quantity }}</td>
+                        <td>৳ {{ allocation.price }}</td>
+                        <td>{{ allocation.created_at }}</td>
+                        <td>
+                            <button class="btn btn-success btn-sm action-btn confirm-btn"><i class="fas fa-check"></i> Confirm</button>
+                            <button class="btn btn-danger btn-sm action-btn delete-btn" data-toggle="modal" data-target="#deleteModal{{ allocation.id }}">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Delete Confirmation Modal -->
+                    <div class="modal fade" id="deleteModal{{ allocation.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete allocation <strong>{{ allocation.allocation_no }}</strong>
+                                    for item <strong>{{ allocation.item.name }}</strong> in package 
+                                    <strong>{{ allocation.package.packageId }}</strong>?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                                    <a href="{% url 'App_Allocation:delete_allocation' allocation.id %}" class="btn btn-danger">Yes, Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center text-danger">No allocations found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- CSS Styling -->
+<style>
+    .custom-close {
+        background: none;
+        border: none;
+        font-size: 1rem;
+        font-weight: bold;
+        color: inherit;
+        float: right;
+        cursor: pointer;
+    }
+
+    .table {
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+    }
+
+    .table-dark th {
+        background-color: #343a40 !important;
+        color: white !important;
+    }
+
+    .table-bordered th, .table-bordered td {
+        border: 1px solid #ddd !important;
+        padding: 10px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .action-btn {
+        display: none;
+        margin-right: 5px;
+    }
+
+    .selectable-row:hover .action-btn {
+        display: inline-block;
+    }
+</style>
+
+<script>
+    function toggleInputFields() {
+        var filterDropdown = document.getElementById("filterDropdown");
+        var searchQuery = document.getElementById("searchQuery");
+        var datePickerContainer = document.getElementById("datePickerContainer");
+
+        // If "Entry/Update date" is selected, show the date picker and hide the search input
+        if (filterDropdown.value === "Entry/Update date") {
+            searchQuery.style.display = "none";
+            datePickerContainer.style.display = "block";
+        } else {
+            searchQuery.style.display = "block";
+            datePickerContainer.style.display = "none";
+        }
+    }
+
+    // Ensure the correct visibility on page load
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleInputFields();
+    });
+</script>
+
+{% endblock %}
