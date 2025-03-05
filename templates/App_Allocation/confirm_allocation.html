@@ -11,14 +11,14 @@
 
     <!-- Display Success & Error Messages -->
     {% if messages %}
-        {% for message in messages %}
-        <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
-            <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
-            {{ message }}
-            <button type="button" class="custom-close" data-bs-dismiss="alert" aria-label="Close">X</button>
-        </div>
-        {% endfor %}
-    {% endif %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+        <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+        {{ message }}
+        <button type="button" class="custom-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+    </div>
+    {% endfor %}
+{% endif %}
 
     <!-- Search Form -->
     <form method="GET" action="{% url 'App_Allocation:confirm_allocation_view' %}" class="row g-3">
@@ -45,12 +45,14 @@
     </form>
 
     <hr>
+    <h3 class="text-center text-secondary"><b>Temporary Allocations</b></h3>
+    <br>
 
+    <!-- Table Section -->
     <div class="table-responsive">
-        <h3 class="text-center text-secondary"><b>Temporary Allocations</b></h3>
-        <br>
+        
         <table class="table table-bordered table-striped table-hover">
-            <thead class="table-dark sticky-top">
+            <thead class="table-dark">
                 <tr>
                     <th>Allocation No</th>
                     <th>PBS</th>
@@ -59,7 +61,7 @@
                     <th>Warehouse</th>
                     <th>Quantity</th>
                     <th>Unit Price</th>
-                    <th>Created At</th>
+                    <th>Allocation Date</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -74,14 +76,14 @@
                         <td>{{ allocation.warehouse }}</td>
                         <td>{{ allocation.quantity }}</td>
                         <td>৳ {{ allocation.price }}</td>
-                        <td>{{ allocation.created_at }}</td>
+                        <td>{{ allocation.created_at|date:"d-m-Y h:i A" }}</td>
                         <td>
                             <div class="action-btn">
                                 <!-- Confirm Allocation Button -->
-                                <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#confirmModal{{ allocation.id }}"><i class="fas fa-check"></i> Confirm</button>
+                                <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#confirmModal{{ allocation.id }}">Confirm</button>
                     
                                 <!-- Delete Button (Visible on Hover) -->
-                                <button class="btn btn-danger btn-sm delete-btn" data-toggle="modal" data-target="#deleteModal{{ allocation.id }}"><i class="fas fa-trash-alt"></i> Delete</button>
+                                <button class="btn btn-danger btn-sm delete-btn" data-toggle="modal" data-target="#deleteModal{{ allocation.id }}">Delete</button>
                             </div>
                     
                             <!-- Modal for Confirming Allocation -->
@@ -153,50 +155,72 @@
     .custom-close {
         background: none;
         border: none;
-        font-size: 1rem;
+        font-size: 1.2rem;
         font-weight: bold;
-        color: inherit;
-        float: right;
+        color: inherit; /* Inherits the text color */
+        float: right; /* Positions the button to the right */
         cursor: pointer;
+        padding: 0;
+        margin: 0;
+        position: absolute;
+        top: 10px; /* Adjust position as needed */
+        right: 10px; /* Adjust position as needed */
     }
-
+    
+    .alert {
+        position: relative; /* Ensure the alert container is positioned relative for absolute positioning of the close button */
+        padding-right: 40px; /* Ensure there's space for the close button */
+    }
+    
+    /* Table Layout Fix */
     .table {
-        font-size: 14px;
+        table-layout: auto; /* Allow the table to adjust column widths automatically */
+        width: 100%;
+    }
+
+    .table th, .table td {
         text-align: center;
-    }
-
-    .sticky-top {
-        position: sticky;
-        top: 0;
-        z-index: 1020;
-    }
-
-    .table-dark th {
-        background-color: #343a40 !important;
-        color: white !important;
+        padding: 8px 15px;
+        vertical-align: middle;
     }
 
     .table-bordered th, .table-bordered td {
-        border: 1px solid #ddd !important;
-        padding: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .table-dark th {
+        background-color: #343a40;
+        color: white;
     }
 
     .table-hover tbody tr:hover {
         background-color: rgba(0, 0, 0, 0.05);
     }
 
-    /* Hide buttons by default */
     .action-btn {
-        display: none; /* The buttons are hidden by default */
-        gap: 5px; /* Small gap between buttons */
-        justify-content: center;
+        display: none; /* Hide buttons by default */
     }
-    
-    /* Show buttons when hovering over the row */
+
     .selectable-row:hover .action-btn {
-        display: flex; /* Show buttons when hovering over the row */
+        display: inline-flex; /* Show buttons when hovering over the row */
+        gap: 5px;
     }
-    
+
+    .table-responsive {
+        overflow-x: auto;
+        max-width: 100%;
+        margin-bottom: 20px;
+
+        overflow-y: auto; /* Enables vertical scrolling */
+        max-height: 400px; /* Adjust the height to display a maximum of 20 rows (assuming each row has a height of ~20px) */
+  
+    }
+
+    .btn-sm {
+        font-size: 12px;
+        padding: 5px 10px;
+        margin: 0 5px;
+    }
 </style>
 
 <script>
@@ -215,7 +239,7 @@
         }
     }
 
-    // Ensure the correct visibility on page load
+    // Ensure correct visibility on page load
     document.addEventListener("DOMContentLoaded", function() {
         toggleInputFields();
     });

@@ -232,8 +232,8 @@ def confirm_allocation_view(request):
                 Q(item__name__icontains=query) |
                 Q(warehouse__icontains=query) |
                 Q(price__icontains=query) |
-                Q(quantity__icontains=query) |
-                Q(created_at__icontains=query)
+                Q(quantity__icontains=query) 
+                
             )
     
     # Handle filtering by "Entry/Update date"
@@ -277,6 +277,7 @@ def confirm_allocation(request, allocation_id):
         # If sufficient, create an entry in Final_Allocation
         final_allocation = Final_Allocation.objects.create(
             allocation_no=allocation.allocation_no,
+            item_primary_key=allocation.item_primary_key,
             pbs=allocation.pbs,
             package=allocation.package,
             item=allocation.item,
