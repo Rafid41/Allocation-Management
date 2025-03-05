@@ -154,6 +154,7 @@ def allocate_item(request, item_id):
         else:
             allocation = form.save(commit=False)
             allocation.item = item
+            allocation.item_primary_key = item.id
             allocation.package = item.package
             allocation.warehouse = item.warehouse
             allocation.price = item.unit_price

@@ -12,6 +12,7 @@ class PBS(models.Model):
 
 class Temporary_Allocation(models.Model):
     allocation_no = models.IntegerField(unique=True)  # Unique allocation number
+    item_primary_key = models.IntegerField(null=True)  # Placeholder: primary key of the selected item
     pbs = models.ForeignKey(PBS, on_delete=models.CASCADE)  # Dropdown from PBS model
     package = models.ForeignKey(Package, on_delete=models.CASCADE)  # Locked until PBS is selected
     item = models.ForeignKey(Item, on_delete=models.CASCADE)  # Locked until Package is selected
