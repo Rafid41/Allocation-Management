@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} View Final Allocation {% endblock %}
+
+{% block body_block %}
+<a href="{% url 'App_Allocation:allocation_page' %}" class="btn btn-outline-secondary">
+    <i class="fa fa-arrow-left"></i> Back
+</a>
+<center><h1><b>View Final Allocation</b></h1></center>
+
+<div class="container mt-4">
+    <h2>Search Final Allocations</h2>
+
+    <form method="GET" action="{% url 'App_Allocation:view_final_allocation' %}" class="row g-3">
+        <div class="col-md-4">
+            <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
+        </div>
+
+        <div class="col-md-3">
+            <select name="filter_by" id="filterDropdown" class="form-select" onchange="toggleInputFields()">
+                <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
+                <option value="Allocation No" {% if filter_by == "Allocation No" %}selected{% endif %}>Allocation No</option>
+                <option value="PBS" {% if filter_by == "PBS" %}selected{% endif %}>PBS</option>
+                <option value="Package" {% if filter_by == "Package" %}selected{% endif %}>Package</option>
+                <option value="Item" {% if filter_by == "Item" %}selected{% endif %}>Item</option>
+                <option value="Warehouse" {% if filter_by == "Warehouse" %}selected{% endif %}>Warehouse</option>
+                <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Allocation Date</option>
+            </select>
+        </div>
+
+        <div class="col-md-3" id="datePickerContainer" style="display: none;">
+            <input type="date" name="date" id="dateInput" class="form-control" value="{{ date_filter }}">
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary me-3">Search</button>
+            <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <h4>Search Results</h4>
+
+    <div id="printableArea">
+        <h3 class="text-center"><b>Final Allocations</b></h3>
+        <br>
+        <div class="table-container">  <!-- Scrollable Table -->
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="table-dark sticky-top">
+                    <tr>
+                        <th>Allocation No</th>
+                        <th>PBS</th>
+                        <th>Package ID</th>
+                        <th>Item</th>
+                        <th>Warehouse</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Allocation Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if allocations %}
+                        {% for allocation in allocations %}
+                        <tr>
+                            <td>{{ allocation.allocation_no }}</td>
+                            <td>{{ allocation.pbs.name }}</td>
+                            <td>{{ allocation.package.packageId }}</td>
+                            <td>{{ allocation.item.name }}</td>
+                            <td>{{ allocation.warehouse }}</td>
+                            <td>{{ allocation.quantity }}</td>
+                            <td>{{ allocation.price }}</td>
+                            <td>{{ allocation.created_at }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center text-danger">No matching data found</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <br>
+</div>
+
+<style>
+    /* Scrollable table with max 30 rows */
+    .table-container {
+        max-height: 500px; /* Adjust height for 30 rows */
+        overflow-y: auto;
+    }
+
+    /* Sticky header */
+    .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        background-color: #343a40 !important;
+        color: white !important;
+    }
+
+    /* Table styling */
+    .table {
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .table-bordered th, .table-bordered td {
+        border: 1px solid #ddd !important;
+        padding: 10px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Printing settings */
+    @media print {
+        .table-container {
+            max-height: none !important; /* Show all rows */
+            overflow: visible !important;
+        }
+
+        body * {
+            visibility: hidden;
+        }
+
+        #printableArea, #printableArea * {
+            visibility: visible;
+        }
+
+        #printableArea {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+
+        @page {
+            size: A4;
+            margin: 0.5in;
+        }
+    }
+</style>
+
+<script>
+    function toggleInputFields() {
+        var filterDropdown = document.getElementById("filterDropdown");
+        var searchQuery = document.getElementById("searchQuery");
+        var datePickerContainer = document.getElementById("datePickerContainer");
+
+        if (filterDropdown.value === "Entry/Update date") {
+            searchQuery.style.display = "none";
+            datePickerContainer.style.display = "block";
+        } else {
+            searchQuery.style.display = "block";
+            datePickerContainer.style.display = "none";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleInputFields();
+    });
+
+    function printResults() {
+        window.print();
+    }
+</script>
+
+{% endblock %}

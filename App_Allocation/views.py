@@ -301,3 +301,62 @@ def confirm_allocation(request, allocation_id):
 
     # Redirect to the confirmation page
     return redirect('App_Allocation:confirm_allocation_view')
+
+
+# ########################  Search & Print for Final Allocation ##########################
+from django.shortcuts import render
+from App_Allocation.models import Final_Allocation
+from django.db.models import Q
+from datetime import datetime
+
+def view_final_allocation(request):
+    """Renders the Final Allocation search and print page"""
+    
+    query = request.GET.get("query", "").strip()
+    filter_by = request.GET.get("filter_by", "All")
+    date_filter = request.GET.get("date", "")
+
+    allocations = Final_Allocation.objects.all()
+
+    # Apply query filter based on the selected 'filter_by' option
+    if query:
+        if filter_by == "All":
+            allocations = allocations.filter(
+                Q(allocation_no__icontains=query)
+                | Q(pbs__name__icontains=query)  # Assuming PBS has a 'name' field
+                | Q(package__packageId__icontains=query)
+                | Q(item__name__icontains=query)
+                | Q(warehouse__icontains=query)
+            )
+        elif filter_by == "Allocation No":
+            allocations = allocations.filter(allocation_no__icontains=query)
+        elif filter_by == "PBS":
+            allocations = allocations.filter(pbs__name__icontains=query)
+        elif filter_by == "Package":
+            allocations = allocations.filter(package__packageId__icontains=query)
+        elif filter_by == "Item":
+            allocations = allocations.filter(item__name__icontains=query)
+        elif filter_by == "Warehouse":
+            allocations = allocations.filter(warehouse__icontains=query)
+
+    # Apply date filter
+    if filter_by == "Entry/Update date" and date_filter:
+        try:
+            date_obj = datetime.strptime(date_filter, "%Y-%m-%d")
+            allocations = allocations.filter(created_at__date=date_obj.date())
+        except ValueError:
+            pass  # Ignore invalid date formats
+
+    # Order by allocation_no
+    allocations = allocations.order_by("allocation_no")
+
+    return render(
+        request,
+        "App_Allocation/view_print_Final_allocation.html",
+        {
+            "allocations": allocations,
+            "query": query,
+            "filter_by": filter_by,
+            "date_filter": date_filter,
+        },
+    )
