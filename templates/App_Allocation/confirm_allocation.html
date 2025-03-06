@@ -5,7 +5,12 @@
 {% block title_block %} Confirm Allocation {% endblock %}
 
 {% block body_block %}
-<div class="container mt-4">
+
+
+<div class="container mt-1">
+    <a href="{% url 'App_Allocation:allocation_page' %}" class="btn btn-outline-secondary">
+        <i class="fa fa-arrow-left"></i> Back
+    </a>
     <h2 class="text-primary text-center"><b>Confirm Allocations</b></h2>
     <br>
 
