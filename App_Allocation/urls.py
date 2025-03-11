@@ -11,6 +11,7 @@ urlpatterns = [
         views.view_PBS_and_addNew,
         name="view_PBS_and_addNew",
     ),
+     path("view_allocation_numbers/", views.view_allocation_numbers_and_Add_New, name="view_allocation_numbers_and_Add_New"),
     path('Search_and_Select/', views.Search_and_Select, name='Search_and_Select'),
     path('allocate_item/<int:item_id>/', views.allocate_item, name="allocate_item"),
     path('delete_allocation/<int:allocation_id>/', views.delete_allocation, name="delete_allocation"),

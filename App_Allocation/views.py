@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-from .models import PBS
+from .models import PBS, Allocation_Number
 from django.urls import reverse
 from django.contrib import messages
 
@@ -43,16 +43,53 @@ def view_PBS_and_addNew(request):
         "App_Allocation/view_PBS_and_addNew.html",
         {"current_PBS_list": PBSs},
     )
+
+
+@login_required
+def view_allocation_numbers_and_Add_New(request):
+    """Handles both displaying the Allocation_Number list and adding a new one."""
+
+    if request.method == "POST":
+        allocation_no = request.POST.get("allocation_no")  # Get input from form
+
+        if allocation_no:
+            allocation_no = allocation_no.strip()  # Remove extra spaces
+            if Allocation_Number.objects.filter(allocation_no=allocation_no).exists():
+                messages.error(
+                    request, "This Allocation Number already exists!"
+                )  # Error message
+            else:
+                Allocation_Number.objects.create(allocation_no=allocation_no)
+                messages.success(
+                    request, "Allocation Number added successfully!"
+                )  # Success message
+                return redirect(
+                    reverse("App_Allocation:view_allocation_numbers_and_Add_New")
+                )
+
+    # Fetch all allocation numbers to display
+    allocation_numbers = Allocation_Number.objects.all().order_by("allocation_no")
+
+    return render(
+        request,
+        "App_Allocation/view_allocation_numbers_and_Add_New.html",
+        {"allocation_numbers": allocation_numbers},
+    )
+
+
 # ########################  Search & Select for Allocation ##########################
 from django.shortcuts import render
 from App_Entry.models import Item
 from django.db.models import Q
 from datetime import datetime
 
+
 @login_required
 def Search_and_Select(request):
     """Renders the package and item entry page with search functionality"""
-    query = request.GET.get("query", "").strip()  # Strip leading/trailing whitespaces from query input
+    query = request.GET.get(
+        "query", ""
+    ).strip()  # Strip leading/trailing whitespaces from query input
     filter_by = request.GET.get("filter_by", "All")
     date_filter = request.GET.get("date", "")
 
@@ -109,7 +146,6 @@ from .models import Temporary_Allocation, Item, Final_Allocation
 from .forms import TemporaryAllocationForm
 
 
-
 # def validate_allocation_no(request):
 #     """Check if the allocation number already exists."""
 #     allocation_no = request.GET.get("allocation_no")
@@ -117,11 +153,11 @@ from .forms import TemporaryAllocationForm
 #     return JsonResponse({"exists": exists})
 
 
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from .models import Item, PBS, Temporary_Allocation
 from .forms import TemporaryAllocationForm
+
 
 @login_required
 def allocate_item(request, item_id):
@@ -133,7 +169,7 @@ def allocate_item(request, item_id):
         pbs_id = request.POST.get("pbs")  # Get selected PBS ID from form
         allocation_no = request.POST.get("allocation_no")  # Get allocation number
         quantity = request.POST.get("quantity")  # Get quantity
-        
+
         # Convert quantity to integer safely
         try:
             quantity = int(quantity)
@@ -148,7 +184,10 @@ def allocate_item(request, item_id):
         )
 
         if allocation_exists:
-            messages.error(request, "Allocation Number Already Exists in Temporary or Final Allocation.")
+            messages.error(
+                request,
+                "Allocation Number Already Exists in Temporary or Final Allocation.",
+            )
         elif quantity > item.quantity_of_item:
             messages.error(request, "Entered quantity exceeds available stock!")
         elif not pbs_id:
@@ -166,23 +205,28 @@ def allocate_item(request, item_id):
             return redirect("App_Allocation:Search_and_Select")
 
     else:
-        form = TemporaryAllocationForm(initial={
-            "package": item.package,
-            "warehouse": item.warehouse,
-            "unit": item.unit_of_item,
-            "unit_price": item.unit_price,
-        })
+        form = TemporaryAllocationForm(
+            initial={
+                "package": item.package,
+                "warehouse": item.warehouse,
+                "unit": item.unit_of_item,
+                "unit_price": item.unit_price,
+            }
+        )
 
     # Fetch Temporary Allocations sorted by Allocation number
-    allocations = Temporary_Allocation.objects.all().order_by('allocation_no')
+    allocations = Temporary_Allocation.objects.all().order_by("allocation_no")
 
-    return render(request, "App_Allocation/allocate_item.html", {
-        "form": form,
-        "item": item,
-        "pbss": pbss,
-        "allocations": allocations,
-    })
-
+    return render(
+        request,
+        "App_Allocation/allocate_item.html",
+        {
+            "form": form,
+            "item": item,
+            "pbss": pbss,
+            "allocations": allocations,
+        },
+    )
 
 
 # ########################  Confirm Allocation ##########################
@@ -202,6 +246,7 @@ def delete_allocation(request, allocation_id):
 
 
 from datetime import datetime
+
 
 @login_required
 def confirm_allocation_view(request):
@@ -226,16 +271,15 @@ def confirm_allocation_view(request):
         elif filter_by == "All":
             # For the "All" filter, search across multiple fields
             allocations = allocations.filter(
-                Q(allocation_no__icontains=query) |
-                Q(pbs__name__icontains=query) |
-                Q(package__packageId__icontains=query) |
-                Q(item__name__icontains=query) |
-                Q(warehouse__icontains=query) |
-                Q(price__icontains=query) |
-                Q(quantity__icontains=query) 
-                
+                Q(allocation_no__icontains=query)
+                | Q(pbs__name__icontains=query)
+                | Q(package__packageId__icontains=query)
+                | Q(item__name__icontains=query)
+                | Q(warehouse__icontains=query)
+                | Q(price__icontains=query)
+                | Q(quantity__icontains=query)
             )
-    
+
     # Handle filtering by "Entry/Update date"
     if filter_by == "Entry/Update date" and date_filter:
         try:
@@ -247,7 +291,7 @@ def confirm_allocation_view(request):
             pass
 
     # Sort the allocations by allocation_no
-    allocations = allocations.order_by('allocation_no')
+    allocations = allocations.order_by("allocation_no")
 
     context = {
         "allocations": allocations,
@@ -259,12 +303,11 @@ def confirm_allocation_view(request):
     return render(request, "App_Allocation/confirm_allocation.html", context)
 
 
-
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from .models import Temporary_Allocation, Item, Final_Allocation
 from django.contrib.auth.decorators import login_required
+
 
 @login_required
 def confirm_allocation(request, allocation_id):
@@ -283,7 +326,7 @@ def confirm_allocation(request, allocation_id):
             item=allocation.item,
             warehouse=allocation.warehouse,
             quantity=allocation.quantity,
-            price=allocation.price
+            price=allocation.price,
         )
 
         # Update item quantity in Item table
@@ -294,13 +337,18 @@ def confirm_allocation(request, allocation_id):
         allocation.delete()
 
         # Display success message
-        messages.success(request, f"Allocation {allocation.allocation_no} confirmed and transferred to Final Allocation and Entry for Temporary Allocation is Deleted.")
+        messages.success(
+            request,
+            f"Allocation {allocation.allocation_no} confirmed and transferred to Final Allocation and Entry for Temporary Allocation is Deleted.",
+        )
     else:
         # If quantity exceeds, show error message
-        messages.error(request, f"Quantity exceeds available stock for item {item.name}.")
+        messages.error(
+            request, f"Quantity exceeds available stock for item {item.name}."
+        )
 
     # Redirect to the confirmation page
-    return redirect('App_Allocation:confirm_allocation_view')
+    return redirect("App_Allocation:confirm_allocation_view")
 
 
 # ########################  Search & Print for Final Allocation ##########################
@@ -309,9 +357,10 @@ from App_Allocation.models import Final_Allocation
 from django.db.models import Q
 from datetime import datetime
 
+
 def view_final_allocation(request):
     """Renders the Final Allocation search and print page"""
-    
+
     query = request.GET.get("query", "").strip()
     filter_by = request.GET.get("filter_by", "All")
     date_filter = request.GET.get("date", "")
