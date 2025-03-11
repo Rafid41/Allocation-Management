@@ -10,21 +10,28 @@
 
     <!-- Display Success & Error Messages -->
     {% if messages %}
-        {% for message in messages %}
-        <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
-            <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
-            {{ message }}
-            <button type="button" class="custom-close" data-bs-dismiss="alert" aria-label="Close">X</button>
-        </div>
-        {% endfor %}
-    {% endif %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
+        <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+{% endif %}
 
     <form method="POST">
         {% csrf_token %}
         <div class="row">
             <div class="col-md-6">
                 <label>Allocation Number:</label>
-                <input type="number" name="allocation_no" class="form-control" required>
+                <select name="allocation_no" class="form-select" required>
+                    <option value="">Select Allocation Number</option>
+                    {% for allocation in allocation_numbers %}
+                        <option value="{{ allocation.id }}">{{ allocation.allocation_no }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="col-md-6">
                 <label>Item Name:</label>
@@ -105,7 +112,7 @@
             <tbody>
                 {% for allocation in allocations %}
                 <tr>
-                    <td>{{ allocation.allocation_no }}</td>
+                    <td>{{ allocation.allocation_no.allocation_no }}</td>
                     <td>{{ allocation.pbs.name }}</td>
                     <td>{{ allocation.item.name }}</td>
                     <td>{{ allocation.package.packageId }}</td>
@@ -116,30 +123,11 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center text-danger">No Allocations Found</td>
+                    <td colspan="8" class="text-center text-danger">No Allocations Found</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
-<!-- Custom Close Button Styling -->
-<style>
-    .custom-close {
-        background: none;
-        border: none;
-        font-size: 1rem;
-        font-weight: bold;
-        color: inherit;
-        float: right;
-        cursor: pointer;
-    }
-   
-    .table td, .table th {
-        text-align: center;
-        vertical-align: middle;
-}
-
-</style>
 {% endblock %}
