@@ -5,249 +5,151 @@
 {% block title_block %} Confirm Allocation {% endblock %}
 
 {% block body_block %}
+<div class="container mt-4">
+    <h2>Confirm Allocation</h2>
 
-
-<div class="container mt-1">
-    <a href="{% url 'App_Allocation:allocation_page' %}" class="btn btn-outline-secondary">
-        <i class="fa fa-arrow-left"></i> Back
-    </a>
-    <h2 class="text-primary text-center"><b>Confirm Allocations</b></h2>
-    <br>
-
-    <!-- Display Success & Error Messages -->
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
-        <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
-        {{ message }}
-        <button type="button" class="custom-close" data-bs-dismiss="alert" aria-label="Close">X</button>
-    </div>
-    {% endfor %}
-{% endif %}
-
-    <!-- Search Form -->
-    <form method="GET" action="{% url 'App_Allocation:confirm_allocation_view' %}" class="row g-3">
-        <div class="col-md-3">
-            <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
-        </div>
-        <div class="col-md-3">
-            <select name="filter_by" id="filterDropdown" class="form-select" onchange="toggleInputFields()">
-                <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
-                <option value="allocation_no" {% if filter_by == "allocation_no" %}selected{% endif %}>Allocation No</option>
-                <option value="pbs" {% if filter_by == "pbs" %}selected{% endif %}>PBS</option>
-                <option value="package" {% if filter_by == "package" %}selected{% endif %}>Package</option>
-                <option value="item" {% if filter_by == "item" %}selected{% endif %}>Item</option>
-                <option value="warehouse" {% if filter_by == "warehouse" %}selected{% endif %}>Warehouse</option>
-                <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Entry/Update Date</option>
-            </select>
-        </div>
-        <div class="col-md-3" id="datePickerContainer" style="display: none;">
-            <input type="date" name="date_filter" id="dateFilter" class="form-control" value="{{ date_filter|date:'Y-m-d' }}">
+    <form method="GET" action="{% url 'App_Allocation:confirm_allocation_page' %}" class="row g-3">
+        <div class="col-md-6">
+            <input type="text" name="query" id="searchQuery" class="form-control"
+                   placeholder="Search by Allocation No..." value="{{ query }}">
         </div>
         <div class="col-md-2">
-            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+            <button type="submit" class="btn btn-primary">Search</button>
         </div>
     </form>
 
     <hr>
-    <h3 class="text-center text-secondary"><b>Temporary Allocations</b></h3>
-    <br>
 
-    <!-- Table Section -->
-    <div class="table-responsive">
-        
+    <h4>Search Results</h4>
+
+    <div id="printableArea" class="table-responsive">
+        <h3 class="text-center">Allocation Details</h3>
+        <br>
         <table class="table table-bordered table-striped table-hover">
-            <thead class="table-dark">
+            <thead class="table-dark sticky-top">
                 <tr>
                     <th>Allocation No</th>
-                    <th>PBS</th>
-                    <th>Package</th>
-                    <th>Item</th>
+                    <th>Package ID</th>
+                    <th>Item Name</th>
                     <th>Warehouse</th>
                     <th>Quantity</th>
                     <th>Unit Price</th>
-                    <th>Allocation Date</th>
-                    <th>Action</th>
+                    <th>Created At</th>
                 </tr>
             </thead>
-            <tbody>
-                {% if allocations %}
-                    {% for allocation in allocations %}
-                    <tr class="selectable-row">
-                        <td>{{ allocation.allocation_no }}</td>
-                        <td>{{ allocation.pbs.name }}</td>
-                        <td>{{ allocation.package.packageId }}</td>
-                        <td>{{ allocation.item.name }}</td>
-                        <td>{{ allocation.warehouse }}</td>
-                        <td>{{ allocation.quantity }}</td>
-                        <td>৳ {{ allocation.price }}</td>
-                        <td>{{ allocation.created_at|date:"d-m-Y h:i A" }}</td>
-                        <td>
-                            <div class="action-btn">
-                                <!-- Confirm Allocation Button -->
-                                <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#confirmModal{{ allocation.id }}">Confirm</button>
-                    
-                                <!-- Delete Button (Visible on Hover) -->
-                                <button class="btn btn-danger btn-sm delete-btn" data-toggle="modal" data-target="#deleteModal{{ allocation.id }}">Delete</button>
-                            </div>
-                    
-                            <!-- Modal for Confirming Allocation -->
-                            <div class="modal fade" id="confirmModal{{ allocation.id }}" tabindex="-1" aria-labelledby="confirmModalLabel{{ allocation.id }}" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="confirmModalLabel{{ allocation.id }}">Confirm Allocation</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to confirm the allocation of <b>{{ allocation.item.name }}</b> for Allocation No: <b>{{ allocation.allocation_no }}</b>?
-                                        </div>
-                                        <div class="modal-footer">
-                                            <!-- Cancel Button -->
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                            <!-- Confirm Allocation -->
-                                            <form method="POST" action="{% url 'App_Allocation:confirm_allocation' allocation.id %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-success">Confirm Allocation</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                    
-                            <!-- Modal for Confirming Deletion (Already Existing) -->
-                            <div class="modal fade" id="deleteModal{{ allocation.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ allocation.id }}" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="deleteModalLabel{{ allocation.id }}">Confirm Deletion</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to delete <b>{{ allocation.item.name }}</b> from Allocation: <b>{{ allocation.allocation_no }}</b>?
-                                        </div>
-                                        <div class="modal-footer">
-                                            <!-- Cancel Button -->
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                            <!-- Confirm Deletion -->
-                                            <form method="POST" action="{% url 'App_Allocation:delete_allocation' allocation.id %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger">Delete</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="9" class="text-center text-danger">No allocations found</td>
-                    </tr>
-                {% endif %}
+            <tbody id="allocationTableBody">
+                {% for allocation in allocations %}
+                <tr>
+                    <td>{{ allocation.allocation_no.allocation_no }}</td>
+                    <td>{{ allocation.package.packageId }}</td>
+                    <td>{{ allocation.item.name }}</td>
+                    <td>{{ allocation.warehouse }}</td>
+                    <td>{{ allocation.quantity }}</td>
+                    <td>{{ allocation.price }}</td>
+                    <td>{{ allocation.created_at }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-danger">No data available</td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
+
+    <!-- Buttons -->
+    <div class="d-flex justify-content-between mt-3">
+        <button class="btn btn-danger" id="deleteAllocationBtn" data-toggle="modal" data-target="#deleteModal"
+                {% if not allocations %}disabled{% endif %}>Delete Allocation</button>
+
+        <button class="btn btn-success" id="confirmBtn" data-toggle="modal" data-target="#confirmModal"
+                {% if not allocations %}disabled{% endif %}>Confirm Allocation</button>
+    </div>
 </div>
 
-<!-- CSS Styling -->
-<style>
-    .custom-close {
-        background: none;
-        border: none;
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: inherit; /* Inherits the text color */
-        float: right; /* Positions the button to the right */
-        cursor: pointer;
-        padding: 0;
-        margin: 0;
-        position: absolute;
-        top: 10px; /* Adjust position as needed */
-        right: 10px; /* Adjust position as needed */
-    }
-    
-    .alert {
-        position: relative; /* Ensure the alert container is positioned relative for absolute positioning of the close button */
-        padding-right: 40px; /* Ensure there's space for the close button */
-    }
-    
-    /* Table Layout Fix */
-    .table {
-        table-layout: auto; /* Allow the table to adjust column widths automatically */
-        width: 100%;
-    }
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this allocation?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    .table th, .table td {
-        text-align: center;
-        padding: 8px 15px;
-        vertical-align: middle;
-    }
-
-    .table-bordered th, .table-bordered td {
-        border: 1px solid #ddd;
-    }
-
-    .table-dark th {
-        background-color: #343a40;
-        color: white;
-    }
-
-    .table-hover tbody tr:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-    }
-
-    .action-btn {
-        display: none; /* Hide buttons by default */
-    }
-
-    .selectable-row:hover .action-btn {
-        display: inline-flex; /* Show buttons when hovering over the row */
-        gap: 5px;
-    }
-
-    .table-responsive {
-        overflow-x: auto;
-        max-width: 100%;
-        margin-bottom: 20px;
-
-        overflow-y: auto; /* Enables vertical scrolling */
-        max-height: 400px; /* Adjust the height to display a maximum of 20 rows (assuming each row has a height of ~20px) */
-  
-    }
-
-    .btn-sm {
-        font-size: 12px;
-        padding: 5px 10px;
-        margin: 0 5px;
-    }
-</style>
+<!-- Confirm Allocation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Allocation</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to confirm this allocation?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmAllocation">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-    function toggleInputFields() {
-        var filterDropdown = document.getElementById("filterDropdown");
-        var searchQuery = document.getElementById("searchQuery");
-        var datePickerContainer = document.getElementById("datePickerContainer");
+    document.getElementById("confirmDelete").addEventListener("click", function() {
+        let allocationNo = "{{ query }}"; 
+        console.log("Deleting Allocation No:", allocationNo); // Debugging
+    
+        fetch(`/allocation/delete-allocation/${allocationNo}/`, {
+            method: "DELETE",
+            headers: { 
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message || data.error);
+            if (!data.error) location.reload();
+        })
+        .catch(error => console.error("Error:", error));
+    });
+    
+    
 
-        // If "Entry/Update date" is selected, show the date picker and hide the search input
-        if (filterDropdown.value === "Entry/Update date") {
-            searchQuery.style.display = "none";
-            datePickerContainer.style.display = "block";
-        } else {
-            searchQuery.style.display = "block";
-            datePickerContainer.style.display = "none";
-        }
-    }
-
-    // Ensure correct visibility on page load
-    document.addEventListener("DOMContentLoaded", function() {
-        toggleInputFields();
+    document.getElementById("confirmAllocation").addEventListener("click", function() {
+        let allocationNo = "{{ query }}";
+        fetch("{% url 'App_Allocation:confirm_allocation' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            body: new URLSearchParams({ "allocation_no": allocationNo })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                alert(data.message);
+                location.reload();
+            }
+        });
     });
 </script>
 
+<style>
+    .table-responsive {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>
 {% endblock %}

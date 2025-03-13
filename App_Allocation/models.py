@@ -5,13 +5,13 @@ class PBS(models.Model):
     name = models.TextField(unique=True)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 class Allocation_Number(models.Model):
     allocation_no = models.IntegerField(unique=True)  # Unique allocation number
 
     def __str__(self):
-        return self.allocation_no
+        return str(self.allocation_no)
 
 class Temporary_Allocation(models.Model):
     allocation_no = models.ForeignKey(Allocation_Number, on_delete=models.CASCADE)  # Deletes related allocations when removed
@@ -25,7 +25,7 @@ class Temporary_Allocation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Temporary Allocation {self.allocation_no}"
+        return str(self.allocation_no)
 
 class Final_Allocation(models.Model):
     allocation_no = models.ForeignKey(Allocation_Number, on_delete=models.CASCADE)  # Deletes related allocations when removed
@@ -39,4 +39,4 @@ class Final_Allocation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Final Allocation {self.allocation_no}"
+        return str(self.allocation_no)

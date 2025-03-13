@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from .models import PBS, Allocation_Number
 from django.urls import reverse
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Create your views here.
@@ -212,127 +213,115 @@ def allocate_item(request, item_id):
         },
     )
 
-
 # ########################  Confirm Allocation ##########################
-from django.shortcuts import render, get_object_or_404, redirect
+
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.db import transaction
+from .models import Temporary_Allocation, Allocation_Number, Final_Allocation
+from App_Entry.models import Item
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.db.models import Sum
+from .models import Temporary_Allocation, Final_Allocation, Allocation_Number, Item
 from django.contrib import messages
-from django.db.models import Q  # Import Q for complex queries
-from .models import Temporary_Allocation, PBS, Package, Item
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
 
 
-@login_required
-def delete_allocation(request, allocation_id):
-    allocation = get_object_or_404(Temporary_Allocation, id=allocation_id)
-    allocation.delete()
-    messages.success(request, "Allocation deleted successfully.")
-    return redirect("App_Allocation:confirm_allocation_view")
-
-
-from datetime import datetime
-
-
-@login_required
 def confirm_allocation_view(request):
-    query = request.GET.get("query", "").strip()
-    filter_by = request.GET.get("filter_by", "All")
-    date_filter = request.GET.get("date_filter", "")
+    allocation_no = request.GET.get("query", "").strip()
+    allocations = []
 
-    allocations = Temporary_Allocation.objects.all()
+    if allocation_no.isdigit():  # Only search for numeric allocation numbers
+        allocations = Temporary_Allocation.objects.filter(allocation_no__allocation_no=allocation_no)
 
-    # Apply query filters based on the filter_by field
-    if query:
-        if filter_by == "allocation_no":
-            allocations = allocations.filter(allocation_no__icontains=query)
-        elif filter_by == "pbs":
-            allocations = allocations.filter(pbs__name__icontains=query)
-        elif filter_by == "package":
-            allocations = allocations.filter(package__packageId__icontains=query)
-        elif filter_by == "item":
-            allocations = allocations.filter(item__name__icontains=query)
-        elif filter_by == "warehouse":
-            allocations = allocations.filter(warehouse__icontains=query)
-        elif filter_by == "All":
-            # For the "All" filter, search across multiple fields
-            allocations = allocations.filter(
-                Q(allocation_no__icontains=query)
-                | Q(pbs__name__icontains=query)
-                | Q(package__packageId__icontains=query)
-                | Q(item__name__icontains=query)
-                | Q(warehouse__icontains=query)
-                | Q(price__icontains=query)
-                | Q(quantity__icontains=query)
-            )
+    return render(request, "App_ALlocation/confirm_allocation.html", {"allocations": allocations, "query": allocation_no})
 
-    # Handle filtering by "Entry/Update date"
-    if filter_by == "Entry/Update date" and date_filter:
-        try:
-            # Convert the date string to a datetime object and filter by the created_at field
-            date_obj = datetime.strptime(date_filter, "%Y-%m-%d")
-            allocations = allocations.filter(created_at__date=date_obj.date())
-        except ValueError:
-            # If the date string is not valid, ignore the filter
-            pass
 
-    # Sort the allocations by allocation_no
-    allocations = allocations.order_by("allocation_no")
 
-    context = {
+def confirm_allocation(request):
+    """Render the Confirm Allocation page with search functionality."""
+    query = request.GET.get("allocation_no", "").strip()
+    allocations = []
+
+    if query.isdigit():
+        allocations = Temporary_Allocation.objects.filter(allocation_no__allocation_no=query)
+
+    return render(request, "App_Allocation/confirm_allocation.html", {
         "allocations": allocations,
         "query": query,
-        "filter_by": filter_by,
-        "date_filter": date_filter,
-    }
+    })
 
-    return render(request, "App_Allocation/confirm_allocation.html", context)
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def delete_allocation(request, allocation_no):
+    if request.method == "DELETE":
+        try:
+            allocations = Temporary_Allocation.objects.filter(allocation_no__allocation_no=allocation_no)
+            if allocations.exists():
+                allocations.delete()
+                return JsonResponse({"message": "Allocation deleted successfully"}, status=200)
+            else:
+                return JsonResponse({"error": "Allocation not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
 
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from .models import Temporary_Allocation, Item, Final_Allocation
-from django.contrib.auth.decorators import login_required
+def process_allocation(request):
+    """Process and confirm allocations, moving them from Temporary to Final_Allocation."""
+    if request.method == "POST":
+        allocation_no = request.POST.get("allocation_no")
+        allocations = Temporary_Allocation.objects.filter(allocation_no__allocation_no=allocation_no)
 
+        if not allocations.exists():
+            return JsonResponse({"success": False, "message": "No allocations found."})
 
-@login_required
-def confirm_allocation(request, allocation_id):
-    # Get the selected allocation
-    allocation = get_object_or_404(Temporary_Allocation, id=allocation_id)
-    item = allocation.item
+        item_sums = {}
 
-    # Check if the item quantity is sufficient
-    if item.quantity_of_item >= allocation.quantity:
-        # If sufficient, create an entry in Final_Allocation
-        final_allocation = Final_Allocation.objects.create(
-            allocation_no=allocation.allocation_no,
-            item_primary_key=allocation.item_primary_key,
-            pbs=allocation.pbs,
-            package=allocation.package,
-            item=allocation.item,
-            warehouse=allocation.warehouse,
-            quantity=allocation.quantity,
-            price=allocation.price,
-        )
+        # Calculate total allocated quantity per item
+        for alloc in allocations:
+            if alloc.item_primary_key not in item_sums:
+                item_sums[alloc.item_primary_key] = 0
+            item_sums[alloc.item_primary_key] += alloc.quantity
 
-        # Update item quantity in Item table
-        item.quantity_of_item -= allocation.quantity
-        item.save()
+        # Validate available item stock
+        errors = []
+        for item_pk, allocated_qty in item_sums.items():
+            item = Item.objects.get(id=item_pk)
+            if allocated_qty > item.quantity_of_item:
+                errors.append(f"{item.name} exceeds available limit")
 
-        # Delete the temporary allocation
-        allocation.delete()
+        if errors:
+            return JsonResponse({"success": False, "errors": errors})
 
-        # Display success message
-        messages.success(
-            request,
-            f"Allocation {allocation.allocation_no} confirmed and transferred to Final Allocation and Entry for Temporary Allocation is Deleted.",
-        )
-    else:
-        # If quantity exceeds, show error message
-        messages.error(
-            request, f"Quantity exceeds available stock for item {item.name}."
-        )
+        # If valid, process allocation
+        with transaction.atomic():
+            for alloc in allocations:
+                item = alloc.item
+                item.quantity_of_item -= alloc.quantity
+                item.save()
 
-    # Redirect to the confirmation page
-    return redirect("App_Allocation:confirm_allocation_view")
+                Final_Allocation.objects.create(
+                    allocation_no=alloc.allocation_no,
+                    item_primary_key=alloc.item_primary_key,
+                    pbs=alloc.pbs,
+                    package=alloc.package,
+                    item=alloc.item,
+                    warehouse=alloc.warehouse,
+                    quantity=alloc.quantity,
+                    price=alloc.price,
+                )
+
+            allocations.delete()
+
+        return JsonResponse({"success": True, "message": "Allocation confirmed successfully."})
+
+    return JsonResponse({"success": False, "message": "Invalid request."})
 
 
 # ########################  Search & Print for Final Allocation ##########################
