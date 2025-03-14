@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 
-
+''' 
 # Create your views here.
 @login_required
 def allocation_page(request):
@@ -323,7 +323,7 @@ def process_allocation(request):
 
     return JsonResponse({"success": False, "message": "Invalid request."})
 
-
+'''
 # ########################  Search & Print for Final Allocation ##########################
 from django.shortcuts import render
 from App_Allocation.models import Final_Allocation
