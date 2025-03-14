@@ -16,16 +16,10 @@ urlpatterns = [
     path('allocate_item/<int:item_id>/', views.allocate_item, name="allocate_item"),
 
 ###########################
-
-    # path('confirm_allocation_view/', views.confirm_allocation_view, name='confirm_allocation_view'),
-    
-
-    # path("confirm-allocation/", views.confirm_allocation_view, name="confirm_allocation_page"),
-    # path('delete-allocation/<int:allocation_no>/', views.delete_allocation, name='delete_allocation'),
-
-    # path("confirm/", views.confirm_allocation, name="confirm_allocation"),
     path("confirm_allocation/", views.confirm_allocation_view, name="confirm_allocation"),  # Fixed path name
     path("delete_allocation/<int:allocation_no>/", views.delete_allocation, name="delete_allocation"),
     path("confirm_allocation_process/<int:allocation_no>/", views.confirm_allocation, name="confirm_allocation_process"),  # Unique name
     path("final_allocation/", views.final_allocation_search, name="final_allocation"),
+    
+    path("generate-report/", views.generate_report, name="generate_report"),
 ]

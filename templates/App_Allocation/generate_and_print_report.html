@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Allocation Report {% endblock %}
+
+{% block body_block %}
+
+<a href="{% url 'App_Allocation:allocation_page' %}" class="btn btn-outline-secondary">
+    <i class="fa fa-arrow-left"></i> Back
+</a>
+
+<div class="container mt-4">
+    <h2 class="text-primary text-center mb-4"><b>Allocation Report</b></h2>
+    
+    <!-- Search Box -->
+    <form method="GET" action="{% url 'App_Allocation:generate_report' %}" class="row g-3">
+        <div class="col-md-6">
+            <input type="text" name="query" class="form-control" placeholder="Enter Allocation No..." value="{{ query }}">
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <!-- Data Grid View -->
+    <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Allocation No</th>
+                    <th>Package ID</th>
+                    <th>Item Name</th>
+                    <th>Warehouse</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if allocations %}
+                    {% for allocation in allocations %}
+                    <tr>
+                        <td>{{ allocation.allocation_no }}</td>
+                        <td>{{ allocation.package.packageId }}</td>
+                        <td>{{ allocation.item.name }}</td>
+                        <td>{{ allocation.warehouse }}</td>
+                        <td>{{ allocation.quantity }}</td>
+                        <td>৳ {{ allocation.price }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-danger">No Allocations Found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <br>
+
+    <!-- Print Button -->
+    <div class="text-center">
+        {% if allocations %}
+        <button onclick="printReport()" class="btn btn-danger btn-lg">
+            <i class="fas fa-print"></i> Print Report
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Print Script -->
+<script>
+    function printReport() {
+        window.print();
+    }
+</script>
+
+{% endblock %}

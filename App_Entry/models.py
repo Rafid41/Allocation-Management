@@ -31,7 +31,7 @@ class Item(models.Model):
     unit_of_item = models.CharField(
         max_length=10, choices=UNIT_CHOICES, default="Nos."
     )  # Updated field
-    unit_price = models.BigIntegerField(default=0)
+    unit_price = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
     quantity_of_item = models.BigIntegerField(default=0)
     package = models.ForeignKey(
         Package,

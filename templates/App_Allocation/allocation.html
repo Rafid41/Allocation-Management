@@ -37,8 +37,14 @@
         </a>
 
         <br>
-        <a href="{% url 'App_Allocation:final_allocation' %}" class="btn btn-warning btn-lg">
+        <a href="{% url 'App_Allocation:final_allocation' %}" class="btn btn-warning btn-lg mb-3">
             <i class="fas fa-eye"></i> View Final Allocation
+        </a>
+
+
+        <br>
+        <a href="{% url 'App_Allocation:generate_report' %}" class="btn btn-danger btn-lg">
+            <i class="fas fa-file-pdf"></i> Generate Printed Report
         </a>
     </div>
 </div>
