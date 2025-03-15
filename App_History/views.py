@@ -13,7 +13,7 @@ def history(request):
         if filter_by == "allocation_no":
             results = results.filter(allocation_no__allocation_no__icontains=query)
         elif filter_by == "pbs":
-            results = results.filter(pbs__pbs_name__icontains=query)
+            results = results.filter(pbs__name__icontains=query)
         elif filter_by == "package":
             results = results.filter(package__packageId__icontains=query)
         elif filter_by == "item":
