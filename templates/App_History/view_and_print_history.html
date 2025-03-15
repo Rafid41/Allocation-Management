@@ -2,30 +2,30 @@
 {% load crispy_forms_tags %}
 {% load static %}
 
-{% block title_block %} Status {% endblock %}
+{% block title_block %} History {% endblock %}
 
 {% block body_block %}
 <a href="{% url 'App_Home:home_page' %}" class="btn btn-outline-secondary">
     <i class="fa fa-arrow-left"></i> Back
 </a>
-<center><h1><b> Status </b></h1></center>
+<center><h1><b>History</b></h1></center>
 <div class="container mt-4">
-    <h2>Search Items</h2>
+    <h2>Search Allocations</h2>
 
-    <form method="GET" action="{% url 'App_Status:status_page' %}" class="row g-3">
+    <form method="GET" action="{% url 'App_History:history_page' %}" class="row g-3">
         <div class="col-md-4">
-            <!-- This input field will turn into a date picker if "Entry/Update date" is selected -->
             <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
         </div>
 
         <div class="col-md-3">
             <select name="filter_by" id="filterDropdown" class="form-select" onchange="toggleInputFields()">
                 <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
-                <option value="Package ID" {% if filter_by == "Package ID" %}selected{% endif %}>Package ID</option>
-                <option value="Item Name" {% if filter_by == "Item Name" %}selected{% endif %}>Item Name</option>
-                <option value="Warehouse" {% if filter_by == "Warehouse" %}selected{% endif %}>Warehouse</option>
-                <option value="Unit" {% if filter_by == "Unit" %}selected{% endif %}>Unit</option>
-                <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Entry/Update Date</option>
+                <option value="allocation_no" {% if filter_by == "allocation_no" %}selected{% endif %}>Allocation No</option>
+                <option value="pbs" {% if filter_by == "pbs" %}selected{% endif %}>PBS</option>
+                <option value="package" {% if filter_by == "package" %}selected{% endif %}>Package</option>
+                <option value="item" {% if filter_by == "item" %}selected{% endif %}>Item</option>
+                <option value="warehouse" {% if filter_by == "warehouse" %}selected{% endif %}>Warehouse</option>
+                <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Allocation Date</option>
             </select>
         </div>
 
@@ -44,36 +44,38 @@
     <h4>Search Results</h4>
 
     <div id="printableArea" class="table-responsive">
-        <h3 class="text-center">Status</h3>
+        <h3 class="text-center">History</h3>
         <br>
         <table class="table table-bordered table-striped table-hover">
             <thead class="table-dark sticky-top">
                 <tr>
-                    <th>Package ID</th>
-                    <th>Item Name</th>
+                    <th>Allocation No</th>
+                    <th>PBS</th>
+                    <th>Package</th>
+                    <th>Item</th>
                     <th>Warehouse</th>
-                    <th>Unit</th>
                     <th>Quantity</th>
-                    <th>Unit Price</th>
-                    <th>Entry/Update date</th>
+                    <th>Price</th>
+                    <th>Allocation date</th>
                 </tr>
             </thead>
             <tbody>
                 {% if items %}
                     {% for item in items %}
                     <tr>
+                        <td>{{ item.allocation_no.allocation_no }}</td>
+                        <td>{{ item.pbs }}</td>
                         <td>{{ item.package.packageId }}</td>
-                        <td>{{ item.name }}</td>
+                        <td>{{ item.item.name }}</td>
                         <td>{{ item.warehouse }}</td>
-                        <td>{{ item.unit_of_item }}</td>
-                        <td>{{ item.quantity_of_item }}</td>
-                        <td>{{ item.unit_price }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.price }}</td>
                         <td>{{ item.created_at }}</td>
                     </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="7" class="text-center text-danger">No matching data found</td>
+                        <td colspan="8" class="text-center text-danger">No matching data found</td>
                     </tr>
                 {% endif %}
             </tbody>
@@ -132,20 +134,6 @@
             size: A4;
             margin: 0.5in;
         }
-
-        /* Hide the page title and URL */
-        @media print {
-            @page {
-                margin: 0.5in;
-            }
-            body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            h1, h2 {
-                display: none;
-            }
-        }
     }
 </style>
 
@@ -155,7 +143,6 @@
         var searchQuery = document.getElementById("searchQuery");
         var datePickerContainer = document.getElementById("datePickerContainer");
 
-        // If "Entry/Update date" is selected, show the date picker and hide the search input
         if (filterDropdown.value === "Entry/Update date") {
             searchQuery.style.display = "none";
             datePickerContainer.style.display = "block";
@@ -165,7 +152,6 @@
         }
     }
 
-    // Ensure the correct visibility on page load
     document.addEventListener("DOMContentLoaded", function() {
         toggleInputFields();
     });

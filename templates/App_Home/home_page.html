@@ -43,14 +43,14 @@
 
 <div class="container_column">
     <center>
-        <h1>Home Page</h1>
+        <h1><b>Home Page</b></h1>
     </center>
     <div class="container_side_by_side">
         <div class="section" >
             <div class="btn_column">
                 <a class="btn btn-outline-secondary" style="font-size: 40px;" href="{% url 'App_Allocation:allocation_page' %}"><b>Allocation</b></a>
                 <a class="btn btn-outline-secondary" style="font-size: 40px;"  href="{% url 'App_Status:status_page' %}"><b>Status</b></a>
-                <a class="btn btn-outline-secondary" style="font-size: 40px;"  href=""><b>History</b></a>
+                <a class="btn btn-outline-secondary" style="font-size: 40px;"  href="{% url 'App_History:history_page' %}"><b>History</b></a>
             </div>
         </div>
         <div class="section" >

@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "App_Entry",
     "App_Status",
     "App_Allocation",
+    "App_History",
     "django_extensions",
 ]
 

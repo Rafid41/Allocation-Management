@@ -5,11 +5,12 @@
 {% block title_block %} Allocation {% endblock %}
 
 {% block body_block %}
+<a href="{% url 'App_Home:home_page' %}" class="btn btn-outline-secondary">
+    <i class="fa fa-arrow-left"></i> Back
+</a>
 <center>
     <h1 class="mb-4"><b>Allocation Page</b></h1>
 </center>
-<br/>
-<br/>
 <br/>
 <div class="container d-flex justify-content-center">
     <div class="text-center">
@@ -46,6 +47,7 @@
         <a href="{% url 'App_Allocation:generate_report' %}" class="btn btn-danger btn-lg">
             <i class="fas fa-file-pdf"></i> Generate Printed Report
         </a>
+        <br>
     </div>
 </div>
 

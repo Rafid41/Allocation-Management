@@ -17,6 +17,7 @@ urlpatterns = [
     path("entry/", include("App_Entry.urls")),
     path("status/", include("App_Status.urls")),
     path("allocation/", include("App_Allocation.urls")),
+    path("history/", include("App_History.urls")),
 ]
 
 
