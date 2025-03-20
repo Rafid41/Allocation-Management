@@ -75,15 +75,19 @@
     {% endif %}
 
     <!-- Allocation Number List -->
-    <div class="list-container mt-3 mb-4">
-        {% for allocation in allocation_numbers %}
-            <div class="list-item">
-                <i class="fa fa-hashtag text-primary"></i> {{ allocation.allocation_no }}
-            </div>
-        {% empty %}
-            <p class="text-center text-muted">No Allocation Numbers available.</p>
-        {% endfor %}
-    </div>
+<!-- Allocation Number List -->
+<div class="list-container mt-3 mb-4">
+    {% for allocation in allocation_numbers %}
+        <div class="list-item d-flex justify-content-between align-items-center">
+            <span class="mx-auto"><i class="fa fa-hashtag text-primary"></i> {{ allocation.allocation_no }}</span>
+            <span class="badge bg-secondary ms-auto"><i class="fa fa-user"></i> {{ allocation.user.username }}</span>
+        </div>
+    {% empty %}
+        <p class="text-center text-muted">No Allocation Numbers available.</p>
+    {% endfor %}
+</div>
+
+
 
     <br>
     

@@ -1,5 +1,6 @@
 from django.db import models
 from App_Entry.models import Package, Item
+from django.contrib.auth.models import User
 
 class PBS(models.Model):
     name = models.TextField(unique=True)
@@ -8,7 +9,9 @@ class PBS(models.Model):
         return str(self.name)
 
 class Allocation_Number(models.Model):
-    allocation_no = models.IntegerField(unique=True)  # Unique allocation number
+    allocation_no = models.IntegerField(unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
 
     def __str__(self):
         return str(self.allocation_no)
