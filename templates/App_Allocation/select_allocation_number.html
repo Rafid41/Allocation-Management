@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Select Allocation Number {% endblock %}
+
+{% block body_block %}
+
+<style>
+    .custom-card {
+        max-width: 550px; /* Adjust the width */
+        margin: 0 auto; /* Center the card */
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .custom-form-group {
+        max-width: 300px; /* Adjust dropdown width */
+        margin: 0 auto;
+    }
+
+    .custom-btn {
+        max-width: 200px; /* Adjust button width */
+        display: block;
+        margin: 10px auto;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="card custom-card">
+        <h2 class="text-center text-primary"><i class="fas fa-list"></i> <b>Select Allocation Number</b></h2>
+        
+        <form method="post" class="mt-3">
+            {% csrf_token %}
+
+            <div class="form-group text-center custom-form-group">
+                <label for="allocation_no" class="fw-bold">
+                    <i class="fa fa-hashtag"></i> Choose Allocation Number
+                </label>
+                <select name="allocation_no" id="allocation_no" class="form-control" required>
+                    <option value="" disabled selected>Select an allocation</option>
+                    {% for allocation in allocation_numbers %}
+                        <option value="{{ allocation.id }}">{{ allocation.allocation_no }}</option>
+                    {% empty %}
+                        <option disabled>No available allocations</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success mt-3 custom-btn">
+                <i class="fa fa-check"></i> Confirm
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

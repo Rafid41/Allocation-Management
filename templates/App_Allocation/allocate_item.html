@@ -10,28 +10,24 @@
 
     <!-- Display Success & Error Messages -->
     {% if messages %}
-    {% for message in messages %}
-    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
-        <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
-        {{ message }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-    {% endfor %}
-{% endif %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
+                <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <form method="POST">
         {% csrf_token %}
         <div class="row">
             <div class="col-md-6">
                 <label>Allocation Number:</label>
-                <select name="allocation_no" class="form-select" required>
-                    <option value="">Select Allocation Number</option>
-                    {% for allocation in allocation_numbers %}
-                        <option value="{{ allocation.id }}">{{ allocation.allocation_no }}</option>
-                    {% endfor %}
-                </select>
+                <input type="text" class="form-control" value="{{ allocation_no_obj.allocation_no }}" readonly>
+                <input type="hidden" name="allocation_no" value="{{ allocation_no_obj.id }}">
             </div>
             <div class="col-md-6">
                 <label>Item Name:</label>
@@ -80,7 +76,7 @@
         <!-- Buttons (Cancel on the left and Allocate on the right) -->
         <div class="row mt-4 d-flex justify-content-between">
             <div class="col-md-6 text-start">
-                <a href="{% url 'App_Allocation:Search_and_Select' %}" class="btn btn-danger">
+                <a href="{% url 'App_Allocation:Search_and_Select' allocation_no_obj.id  %}" class="btn btn-danger">
                     <i class="fas fa-times"></i> Cancel
                 </a>
             </div>

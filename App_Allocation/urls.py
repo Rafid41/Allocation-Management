@@ -12,8 +12,10 @@ urlpatterns = [
         name="view_PBS_and_addNew",
     ),
     path("view_allocation_numbers/", views.view_allocation_numbers_and_Add_New, name="view_allocation_numbers_and_Add_New"),
-    path('Search_and_Select/', views.Search_and_Select, name='Search_and_Select'),
-    path('allocate_item/<int:item_id>/', views.allocate_item, name="allocate_item"),
+    # path('Search_and_Select/<int:allocation_id>/', views.Search_and_Select, name='Search_and_Select'),
+    path('Search_and_Select/<int:allocation_id>/', views.Search_and_Select, name='Search_and_Select'),
+
+    path('allocate_item/<int:allocation_id>/<int:item_id>/', views.allocate_item, name="allocate_item"),
 
 ###########################
     path("confirm_allocation/", views.confirm_allocation_view, name="confirm_allocation"),  # Fixed path name
@@ -22,4 +24,5 @@ urlpatterns = [
     path("final_allocation/", views.final_allocation_search, name="final_allocation"),
     
     path("generate-report/", views.generate_report, name="generate_report"),
+    path("select_allocation_number/", views.select_allocation_number, name="select_allocation_number"),
 ]
