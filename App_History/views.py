@@ -1,6 +1,6 @@
 # App_Allocation\views\view_final_allocation.py
 from django.shortcuts import render
-from App_Allocation.models import Final_Allocation
+from App_Allocation.models import Final_Allocation, Allocation_Number
 
 def history(request):
     query = request.GET.get("query", "")
@@ -8,6 +8,7 @@ def history(request):
     date_filter = request.GET.get("date", "")
 
     results = Final_Allocation.objects.all().order_by('-created_at')
+    # allocations_numbers = Allocation_Number.objects.all()
 
     if query:
         if filter_by == "allocation_no":
@@ -21,7 +22,7 @@ def history(request):
         elif filter_by == "warehouse":
             results = results.filter(warehouse__icontains=query)
         elif filter_by == "status":
-            results = results.filter(status__icontains=query)
+            results = results.filter(allocation_no__status__icontains=query)
 
     if date_filter:
         results = results.filter(created_at__date=date_filter)

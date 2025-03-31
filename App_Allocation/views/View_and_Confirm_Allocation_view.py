@@ -52,8 +52,11 @@ def confirm_allocation(request, allocation_id):
                 warehouse=allocation.warehouse,
                 quantity=allocation.quantity,
                 price=allocation.price,
-                status="Allocated"
             )
+
+            # Update status to "Allocated"
+            allocation_no_obj.status = "Allocated"
+            allocation_no_obj.save()
         
         allocations.delete()
         messages.success(request, "Allocation confirmed successfully.")

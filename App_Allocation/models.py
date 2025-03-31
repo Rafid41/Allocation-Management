@@ -11,6 +11,14 @@ class PBS(models.Model):
 class Allocation_Number(models.Model):
     allocation_no = models.IntegerField(unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    STATUS_CHOICES = [
+        ("Pending Approval", "Pending Approval"),
+        ("Allocated", "Allocated"),
+        ("Cancelled", "Cancelled"),
+    ]
+    status = models.CharField(
+        max_length=100, choices=STATUS_CHOICES, default="Pending Approval"
+    )
 
 
     def __str__(self):
@@ -42,13 +50,7 @@ class Final_Allocation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-    STATUS_CHOICES = [
-        ("Allocated", "Allocated"),
-        ("Cancelled", "Cancelled"),
-    ]
-    status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES, default="Allocated"
-    )
+
 
     def __str__(self):
         return str(self.allocation_no)
