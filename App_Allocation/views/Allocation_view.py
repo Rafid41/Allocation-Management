@@ -127,6 +127,8 @@ def allocate_item(request, allocation_id, item_id):
 
         if total_allocated + quantity > item.quantity_of_item:
             messages.error(request, "Total allocated quantity exceeds available stock!")
+        elif quantity == 0:
+            messages.error(request, "Quantity cannot be zero.")
         elif not pbs_id:
             messages.error(request, "Please select a valid PBS before submitting.")
         else:
