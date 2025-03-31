@@ -20,6 +20,8 @@ def history(request):
             results = results.filter(item__name__icontains=query)
         elif filter_by == "warehouse":
             results = results.filter(warehouse__icontains=query)
+        elif filter_by == "status":
+            results = results.filter(status__icontains=query)
 
     if date_filter:
         results = results.filter(created_at__date=date_filter)

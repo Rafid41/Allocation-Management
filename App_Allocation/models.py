@@ -41,5 +41,14 @@ class Final_Allocation(models.Model):
     price = models.DecimalField(max_digits=15, decimal_places=2)  
     created_at = models.DateTimeField(auto_now_add=True)
 
+
+    STATUS_CHOICES = [
+        ("Allocated", "Allocated"),
+        ("Cancelled", "Cancelled"),
+    ]
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default="Allocated"
+    )
+
     def __str__(self):
         return str(self.allocation_no)
