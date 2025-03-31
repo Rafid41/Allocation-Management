@@ -5,12 +5,13 @@
 {% block title_block %} Entry {% endblock %}
 
 {% block body_block %}
-
+<a href="{% url 'App_Home:home_page' %}" class="btn btn-outline-secondary">
+    <i class="fa fa-arrow-left"></i> Back
+</a>
 <center>
     <h1><b>Entry Page</b></h1>
     <br>
     <a href="{%url 'App_Entry:view_package_and_addNew'%}"  class="btn btn-primary btn-lg">Create New Package</a>
-    <br>
     <br>
     <br>
     <a href="{%url 'App_Entry:add_item_to_package'%}"  class="btn btn-secondary btn-lg">Add Item to Package</a>

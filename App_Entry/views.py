@@ -79,9 +79,10 @@ def add_item_to_package(request):
         item_name = request.POST.get("item_name")
         warehouse = request.POST.get("warehouse")
         unit_of_item = request.POST.get("unit_of_item")
-        unit_price = int(request.POST.get("unit_price"))
+        unit_price = request.POST.get("unit_price")
         quantity_of_item = int(request.POST.get("quantity_of_item"))
         description = request.POST.get("description")
+        created_at= request.POST.get("created_at")
 
         if unit_of_item not in UNIT_CHOICES:
             messages.error(request, "Invalid unit selected.")
@@ -120,6 +121,8 @@ def add_item_to_package(request):
             unit_price=unit_price,
             quantity_of_item=quantity_of_item,
             description=description,
+            created_at=created_at if created_at else now()
+
         )
 
         success_message = f"Added {item_name} to package {package.packageId} in {warehouse} warehouse."
@@ -159,6 +162,7 @@ def edit_item(request, item_id):
         unit_price = request.POST.get("unit_price")
         quantity_of_item = request.POST.get("quantity_of_item")
         description = request.POST.get("description")
+        created_at = request.POST.get("created_at")
 
         # Validation
         if not all([package_id, item_name, warehouse, unit_of_item, unit_price, quantity_of_item]):
@@ -184,7 +188,7 @@ def edit_item(request, item_id):
                 return redirect("App_Entry:edit_item", item_id=item.id)
 
         # Check if the price has changed and update all entries with the same package and item
-        new_price = int(unit_price)
+        new_price = unit_price
         if item.unit_price != new_price:
             Item.objects.filter(package_id=package_id, name=item_name).update(unit_price=new_price)
             messages.success(request, f"Price updated for all '{item_name}' in package '{package_id}'.")
@@ -197,6 +201,7 @@ def edit_item(request, item_id):
         item.unit_price = new_price
         item.quantity_of_item = int(quantity_of_item)
         item.description = description
+        item.created_at = created_at
 
         item.save()  # Save changes
 

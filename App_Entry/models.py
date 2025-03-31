@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils.timezone import now
 
 class Package(models.Model):
     packageId = models.BigIntegerField(unique=True)
@@ -39,7 +39,7 @@ class Item(models.Model):
         related_name="package_of_item",
         null=True,
     )
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=now)
 
     def __str__(self):
         return str(self.name)

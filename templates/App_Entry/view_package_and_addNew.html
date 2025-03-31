@@ -55,10 +55,26 @@
     .no-spinner {
         -moz-appearance: textfield;
     }
+
+    .custom-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        border: none;
+        background: none;
+        color: red;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .custom-close:hover {
+        color: darkred;
+    }
 </style>
 
-<a href="{% url 'App_Entry:entry_page' %}">
-    <i color='#B2BEB5' class="fa fa-arrow-left fa-2x" aria-hidden="true"></i>
+<a href="{% url 'App_Entry:entry_page' %}" class="btn btn-outline-secondary">
+    <i class="fa fa-arrow-left"></i> Back
 </a>
 
 <!-- Container for Existing Package List -->
@@ -74,7 +90,9 @@
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+                        <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
                         {{ message }}
+                        <button type="button" class="custom-close" data-bs-dismiss="alert" aria-label="Close">X</button>
                     </div>
                 {% endfor %}
             {% endif %}
