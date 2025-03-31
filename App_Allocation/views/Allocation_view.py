@@ -167,3 +167,22 @@ def allocate_item(request, allocation_id, item_id):
             "allocations": allocations,
         },
     )
+
+
+@login_required
+def delete_allocation_in_allocate_page(request, allocation_id):
+    allocation = get_object_or_404(Temporary_Allocation, id=allocation_id)
+    item = get_object_or_404(Item, id=allocation.item_primary_key)
+
+    if request.method == "POST":
+        # Add back the allocated quantity to the Item stock
+        item.quantity_of_item += allocation.quantity
+        item.save()
+        
+        # Delete the allocation entry
+        allocation.delete()
+        
+        messages.success(request, "Allocation entry deleted successfully.")
+        return redirect("App_Allocation:allocate_item", allocation_id=allocation.allocation_no.id, item_id=item.id)
+
+    return redirect("App_Allocation:allocate_item", allocation_id=allocation.allocation_no.id, item_id=item.id)

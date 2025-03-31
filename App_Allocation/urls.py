@@ -16,6 +16,7 @@ urlpatterns = [
     path('Search_and_Select/<int:allocation_id>/', views.Search_and_Select, name='Search_and_Select'),
 
     path('allocate_item/<int:allocation_id>/<int:item_id>/', views.allocate_item, name="allocate_item"),
+    path("delete_allocation_in_allocate_page/<int:allocation_id>/", views.delete_allocation_in_allocate_page, name="delete_allocation_in_allocate_page"),
 
 ###########################
     path("confirm_allocation/", views.confirm_allocation_view, name="confirm_allocation"),  # Fixed path name
