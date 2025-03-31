@@ -34,10 +34,17 @@
             </div>
         </div>
     </div>
-    
 </center>
+<br>
+<div class="d-flex justify-content-center">
+    <a href="{%url 'App_Allocation:view_confirm_allocation' allocation_id %}" class="btn btn-warning d-flex align-items-center">
+        <i class="fas fa-eye mr-2"></i> View and Confirm current Allocation
+    </a>
+</div>
 
-<div class="container mt-4">
+
+
+<div class="container mt-3">
     <br>
 
     <form method="GET" action="{% url 'App_Allocation:Search_and_Select' allocation_number %}" class="row g-3">
