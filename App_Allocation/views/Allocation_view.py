@@ -100,136 +100,13 @@ from App_Allocation.models import Temporary_Allocation, Final_Allocation, PBS, I
 from App_Allocation.forms import TemporaryAllocationForm
 from django.contrib.auth.decorators import login_required
 
-# def get_available_allocation_numbers():
-#     """
-#     Fetch allocation numbers that are not already in Final_Allocation, sorted in descending order.
-#     """
-#     final_allocations = Final_Allocation.objects.values_list("allocation_no", flat=True)
-#     return Allocation_Number.objects.exclude(id__in=final_allocations).order_by("-id")
-
-# @login_required
-# def allocate_item(request,allocation_no, item_id):
-#     item = get_object_or_404(Item, id=item_id)
-#     pbss = PBS.objects.all()
-#     allocation_numbers = get_available_allocation_numbers()
-
-#     if request.method == "POST":
-#         form = TemporaryAllocationForm(request.POST)
-#         allocation_no_id = request.POST.get("allocation_no")
-#         pbs_id = request.POST.get("pbs")
-#         quantity = request.POST.get("quantity")
-
-#         # Convert quantity to integer safely
-#         try:
-#             quantity = int(quantity)
-#         except (TypeError, ValueError):
-#             messages.error(request, "Invalid quantity entered.")
-#             return redirect("App_Allocation:allocate_item", item_id=item.id)
-
-#         allocation_no = get_object_or_404(Allocation_Number, id=allocation_no_id)
-#         existing_allocations = Temporary_Allocation.objects.filter(
-#             allocation_no=allocation_no, item_primary_key=item.id
-#         )
-#         total_allocated = sum(existing.quantity for existing in existing_allocations)
-
-#         if total_allocated + quantity > item.quantity_of_item:
-#             messages.error(
-#                 request, "Total allocated quantity exceeds available stock!"
-#             )
-#         elif not pbs_id:
-#             messages.error(request, "Please select a valid PBS before submitting.")
-#         else:
-#             allocation = form.save(commit=False)
-#             allocation.item = item
-#             allocation.item_primary_key = item.id
-#             allocation.package = item.package
-#             allocation.warehouse = item.warehouse
-#             allocation.price = item.unit_price
-#             allocation.pbs = get_object_or_404(PBS, id=pbs_id)
-#             allocation.allocation_no = allocation_no
-#             allocation.save()
-#             messages.success(request, "Item allocated successfully!")
-#             return redirect("App_Allocation:Search_and_Select")
-#     else:
-#         form = TemporaryAllocationForm()
-
-#     allocations = Temporary_Allocation.objects.all().order_by("-allocation_no")
-
-#     return render(
-#         request,
-#         "App_Allocation/allocate_item.html",
-#         {
-#             "form": form,
-#             "item": item,
-#             "pbss": pbss,
-#             "allocation_numbers": allocation_numbers,
-#             "allocations": allocations,
-#         },
-#     )
 
 
-# @login_required
-# def allocate_item(request, allocation_no, item_id):
-#     item = get_object_or_404(Item, id=item_id)
-#     allocation_no_obj = get_object_or_404(Allocation_Number, id=allocation_no)
-#     pbss = PBS.objects.all()
-
-#     if request.method == "POST":
-#         form = TemporaryAllocationForm(request.POST)
-#         pbs_id = request.POST.get("pbs")
-#         quantity = request.POST.get("quantity")
-
-#         try:
-#             quantity = int(quantity)
-#         except (TypeError, ValueError):
-#             messages.error(request, "Invalid quantity entered.")
-#             return redirect("App_Allocation:allocate_item", allocation_no=allocation_no, item_id=item.id)
-
-#         existing_allocations = Temporary_Allocation.objects.filter(
-#             allocation_no=allocation_no_obj, item_primary_key=item.id
-#         )
-#         total_allocated = sum(existing.quantity for existing in existing_allocations)
-
-#         if total_allocated + quantity > item.quantity_of_item:
-#             messages.error(request, "Total allocated quantity exceeds available stock!")
-#         elif not pbs_id:
-#             messages.error(request, "Please select a valid PBS before submitting.")
-#         else:
-#             allocation = form.save(commit=False)
-#             allocation.item = item
-#             allocation.item_primary_key = item.id
-#             allocation.package = item.package
-#             allocation.warehouse = item.warehouse
-#             allocation.price = item.unit_price
-#             allocation.pbs = get_object_or_404(PBS, id=pbs_id)
-#             allocation.allocation_no = allocation_no_obj
-#             allocation.save()
-#             messages.success(request, "Item allocated successfully!")
-#             return redirect("App_Allocation:allocate_item", allocation_no=allocation_no, item_id=item.id)
-
-#     else:
-#         form = TemporaryAllocationForm()
-
-#     allocations = Temporary_Allocation.objects.filter(allocation_no=allocation_no_obj).order_by("-created_at")
-
-#     return render(
-#         request,
-#         "App_Allocation/allocate_item.html",
-#         {
-#             "form": form,
-#             "item": item,
-#             "allocation_no_obj": allocation_no_obj,
-#             "pbss": pbss,
-#             "allocations": allocations,
-#         },
-#     )
 
 @login_required
 def allocate_item(request, allocation_id, item_id):
     item = get_object_or_404(Item, id=item_id)
-    # print(f"Looking for Allocation_Number with ID: {allocation_no}")  # Debugging
     allocation_no_obj = get_object_or_404(Allocation_Number, id=allocation_id)
-   
     pbss = PBS.objects.all()
 
     if request.method == "POST":
@@ -261,9 +138,17 @@ def allocate_item(request, allocation_id, item_id):
             allocation.price = item.unit_price
             allocation.pbs = get_object_or_404(PBS, id=pbs_id)
             allocation.allocation_no = allocation_no_obj
-            allocation.save()
-            messages.success(request, "Item allocated successfully!")
-            # Redirect to Search_and_Select with allocation_id (not allocation_no)
+
+            # Ensure item has enough stock before saving allocation
+            if item.quantity_of_item >= quantity:
+                allocation.save()
+                # Subtract allocated quantity from item stock
+                item.quantity_of_item -= quantity
+                item.save()
+                messages.success(request, "Item allocated successfully!")
+            else:
+                messages.error(request, "Not enough stock available for allocation.")
+
             return redirect("App_Allocation:Search_and_Select", allocation_id=allocation_id)
 
     else:
