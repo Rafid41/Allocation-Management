@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title_block %}Cancel & Download Allocation{% endblock %}
+
+{% block body_block %}
+<div class="container mt-4">
+    <a href="{% url 'App_Home:home_page' %}" class="btn btn-outline-secondary">
+        <i class="fa fa-arrow-left"></i> Back
+    </a>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show mt-3 text-center mx-auto" style="max-width: 600px;" role="alert">
+            <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endfor %}
+    {% endif %}
+    <h2 class="text-center"><b>Cancel & Download Allocation</b></h1>
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card mt-3">
+                <div class="card-header bg-danger text-white">
+                    <i class="fa fa-times-circle"></i> Cancel Allocation
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="cancel_allocation">
+
+                        <div class="form-group">
+                            <label for="allocated_allocation"><b>Select Allocated Allocation:</b></label>
+                            <select name="allocated_allocation" id="allocated_allocation" class="form-control">
+                                <option value="" selected disabled>Choose an allocation...</option>
+                                {% for allocation in allocated_allocations %}
+                                    <option value="{{ allocation.id }}">{{ allocation.allocation_no }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger btn-block">
+                            <i class="fa fa-trash"></i> Cancel Allocation
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fa fa-download"></i> Download Cancelled Allocation Report
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="download_cancelled">
+
+                        <div class="form-group">
+                            <label for="cancelled_allocation"><b>Select Cancelled Allocation:</b></label>
+                            <select name="cancelled_allocation" id="cancelled_allocation" class="form-control">
+                                <option value="" selected disabled>Choose an allocation...</option>
+                                {% for allocation in cancelled_allocations %}
+                                    <option value="{{ allocation.id }}">{{ allocation.allocation_no }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fa fa-file-word"></i> Download Report
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        border: none;
+        background: none;
+        color: red;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .custom-close:hover {
+        color: darkred;
+    }
+</style>
+
+{% endblock %}

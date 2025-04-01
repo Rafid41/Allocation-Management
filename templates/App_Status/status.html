@@ -66,7 +66,7 @@
                         <td>{{ item.warehouse }}</td>
                         <td>{{ item.unit_of_item }}</td>
                         <td>{{ item.quantity_of_item }}</td>
-                        <td>{{ item.created_at }}</td>
+                        <td>{{ item.created_at | date:"y-m-d" }}</td>
                     </tr>
                     {% endfor %}
                 {% else %}

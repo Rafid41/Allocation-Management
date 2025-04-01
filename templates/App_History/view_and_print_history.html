@@ -73,7 +73,7 @@
                         <td>{{ item.quantity }}</td>
                         <td>{{ item.price }}</td>
                         <td>{{ item.created_at }}</td>
-                        <td class="{% if item.allocation_no.status == 'Allocated' %}text-success{% elif item.status == 'Cancelled' %}text-danger{% endif %}">
+                        <td class="{% if item.allocation_no.status == 'Allocated' %}text-success{% elif item.allocation_no.status == 'Cancelled' %}text-danger{% endif %}">
                             {{ item.allocation_no.status }}
                         </td>
                     </tr>

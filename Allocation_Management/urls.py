@@ -18,6 +18,7 @@ urlpatterns = [
     path("status/", include("App_Status.urls")),
     path("allocation/", include("App_Allocation.urls")),
     path("history/", include("App_History.urls")),
+    path("cancellation/", include("App_Cancellation.urls")),
 ]
 
 
