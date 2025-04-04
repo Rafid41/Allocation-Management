@@ -15,6 +15,7 @@ class Allocation_Number(models.Model):
         ("Pending Approval", "Pending Approval"),
         ("Allocated", "Allocated"),
         ("Cancelled", "Cancelled"),
+        ("Modified", "Modified"),
     ]
     status = models.CharField(
         max_length=100, choices=STATUS_CHOICES, default="Pending Approval"

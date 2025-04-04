@@ -8,7 +8,9 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 import io
-
+from django.utils import timezone
+from App_History.models import History
+from django.db.models import Q
 
 def set_paragraph_format(paragraph, space_before=0, space_after=12, alignment=WD_PARAGRAPH_ALIGNMENT.CENTER):
     """Helper function to format paragraphs with spacing, alignment, and font."""
@@ -53,7 +55,8 @@ def set_table_borders(table):
 
 def cancellation_view(request):
     allocated_allocations = Allocation_Number.objects.filter(
-        status="Allocated", final_allocation__isnull=False
+        Q(status="Allocated") | Q(status="Modified"),
+        final_allocation__isnull=False
     ).distinct()
     cancelled_allocations = Allocation_Number.objects.filter(status="Cancelled")
 
@@ -61,6 +64,7 @@ def cancellation_view(request):
         action = request.POST.get("action")
 
         if action == "cancel_allocation":
+            dhaka_time = timezone.localtime(timezone.now())
             allocation_id = request.POST.get("allocated_allocation")
             if allocation_id:
                 allocation = Allocation_Number.objects.get(id=allocation_id)
@@ -71,6 +75,21 @@ def cancellation_view(request):
                     item = Item.objects.get(id=entry.item_primary_key)
                     item.quantity_of_item += entry.quantity
                     item.save()
+
+
+                History.objects.create(
+                        allocation_no=allocation.allocation_no,  # Ensure it's an integer
+                        pbs=entry.pbs,
+                        package=entry.package.packageId,  # Assuming packageId holds the value
+                        item=entry.item,
+                        warehouse=entry.warehouse,
+                        quantity=entry.quantity,
+                        price=entry.price,
+                        created_at=dhaka_time,
+                        status="Cancelled",
+                        remarks="Cancelled at: " + dhaka_time.strftime("%Y-%m-%d %I:%M %p"),  
+                    )
+                
 
                 allocation.status = "Cancelled"
                 allocation.save()
