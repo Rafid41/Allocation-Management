@@ -43,9 +43,9 @@
     <hr>
 
     <h4>Search Results</h4>
-
-    <div id="printableArea" class="table-responsive">
-        <h3 class="text-center">History</h3>
+    <h3 class="text-center">History</h3>
+    <div id="printableArea" class="table-responsive custom-scroll">
+        
         <br>
         <table class="table table-bordered table-striped table-hover">
             <thead class="table-dark sticky-top">
@@ -57,7 +57,6 @@
                     <th>Warehouse</th>
                     <th>Quantity</th>
                     <th>Price</th>
-                    {% comment %} <th>Allocation date</th> {% endcomment %}
                     <th>Status</th>
                     <th>Remarks</th>
                 </tr>
@@ -73,24 +72,20 @@
                         <td>{{ item.warehouse }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>{{ item.price }}</td>
-                        {% comment %} <td>{{ item.created_at }}</td> {% endcomment %}
                         <td class="{% if item.status == 'Allocated' %}text-success
                             {% elif item.status == 'Cancelled' %}text-danger
                             {% elif item.status == 'Modified' %}text-warning
                             {% endif %}">
-                                <b>{{ item.status }}</b>
-                        </td>
-            
+                            <b>{{ item.status }}</b>
                         </td>
                         <td>
-                            {{ item.remarks }} <br>
+                            {{ item.remarks|safe }} <br>
                         </td>
-
                     </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="8" class="text-center text-danger">No matching data found</td>
+                        <td colspan="9" class="text-center text-danger">No matching data found</td>
                     </tr>
                 {% endif %}
             </tbody>
@@ -99,52 +94,56 @@
 </div>
 
 <style>
-    /* Improve table readability */
     .table {
         font-size: 14px;
         text-align: center;
     }
 
-    /* Fixed table header */
     .sticky-top {
         position: sticky;
         top: 0;
         z-index: 1020;
     }
 
-    /* Make table header stand out */
     .table-dark th {
         background-color: #343a40 !important;
         color: white !important;
     }
 
-    /* Improve spacing and border visibility */
     .table-bordered th, .table-bordered td {
         border: 1px solid #ddd !important;
         padding: 10px;
     }
 
-    /* Hover effect for better interaction */
     .table-hover tbody tr:hover {
         background-color: rgba(0, 0, 0, 0.05);
     }
 
-    /* Hide unnecessary elements when printing */
+    /* Max 50 row height scrollbar on screen only */
+    .custom-scroll {
+        max-height: 1800px;
+        overflow-y: auto;
+    }
+
+    /* Disable scroll during print */
     @media print {
         body * {
             visibility: hidden;
         }
+
         #printableArea, #printableArea * {
             visibility: visible;
         }
+
         #printableArea {
             position: absolute;
             left: 0;
             top: 0;
             width: 100%;
+            max-height: none !important;
+            overflow: visible !important;
         }
 
-        /* Add margins to the printed page */
         @page {
             size: A4;
             margin: 0.5in;

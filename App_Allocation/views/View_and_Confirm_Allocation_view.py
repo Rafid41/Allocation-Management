@@ -80,7 +80,7 @@ def confirm_allocation(request, allocation_id):
                 price=allocation.price,
                 created_at=dhaka_time,  
                 status="Allocated",
-                remarks="Allocated at: " + dhaka_time.strftime("%Y-%m-%d %I:%M %p"),
+                remarks="Allocated at: <b>" + dhaka_time.strftime("%Y-%m-%d %I:%M %p") + "</b>",
             )
 
         # Delete temporary allocations
