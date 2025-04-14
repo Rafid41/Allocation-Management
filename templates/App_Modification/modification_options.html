@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title_block %}Modification Options{% endblock %}
+
+{% block body_block %}
+<a href="{% url 'App_Modification:modification_menu' %}" class="btn btn-outline-secondary">
+    <i class="fa fa-arrow-left"></i> Back
+</a>
+<div class="container mt-4">
+    <h2 class="text-center mt-3"><b>Modification Options for Allocation:</b> <b class="text-info">{{ allocation.allocation_no }}</b></h2>
+    <br/>
+    <div class="row justify-content-center mt-4">
+
+        <div class="col-md-6 text-center">
+            <div class="mb-3">
+                <a href="{% url 'App_Modification:view_final_allocation' allocation.id %}" class="btn btn-danger px-4">
+                    <i class="fa fa-trash"></i> Delete Item
+                </a>
+            </div>
+            <div>
+                {% comment %} {% url 'App_Modification:search_and_select_item' allocation.id %} {% endcomment %}
+                <a href="{% url 'App_Modification:search_and_select_item' allocation.id %}" class="btn btn-success px-4">
+                    <i class="fa fa-plus-circle"></i> Add Item
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

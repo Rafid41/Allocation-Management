@@ -19,6 +19,7 @@ urlpatterns = [
     path("allocation/", include("App_Allocation.urls")),
     path("history/", include("App_History.urls")),
     path("cancellation/", include("App_Cancellation.urls")),
+    path("modification/", include("App_Modification.urls")),
 ]
 
 
