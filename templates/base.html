@@ -68,18 +68,10 @@
         {% block css_block %} {% endblock %}
     </head>
     <body>
-        <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-            <ul class="navbar-nav">
-                {% if user.is_authenticated %}
-                <li class="nav-item-active">
-                    {% comment %} a class="nav-link" href="{% url 'index' %}">
-                    {% endcomment %}
-                    <a class="nav-link" href="{% url 'App_Home:home_page' %}">
-                        Home
-                    </a>
-                </li>
-                {%endif%}
+        {% include "partials/navbar.html" %}
 
+        {% comment %} <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+            <ul class="navbar-nav">
                 <!-- dropdown navigation bar on username-->
                 {% if user.is_authenticated %}
                 <div clas="nav-item dropdown">
@@ -94,15 +86,7 @@
 
                     <!-- menu items in drop down -->
                     <div class="dropdown-menu">
-                        {% comment %}
-                        <a
-                            class="dropdown-item"
-                            href="{% url 'App_Login:pass_change' %}"
-                            >Change Password</a
-                        >
-
-                        <hr />
-                        {% endcomment %}
+                        
                         <a
                             class="dropdown-item"
                             href="{% url 'App_Login:logout' %}"
@@ -126,8 +110,50 @@
                 </li>
 
                 {% endif %}
+
+                
+                {% if user.is_authenticated %}
+                <li class="nav-item-active">
+                    
+                    <a class="nav-link" href="{% url 'App_Home:home_page' %}">
+                        Home
+                    </a>
+                </li>
+                <li class="nav-item-active">   
+                    <a class="nav-link" href="{% url 'App_Allocation:allocation_page' %}">
+                        Allocation
+                    </a>
+                </li>
+                <li class="nav-item-active">   
+                    <a class="nav-link" href="{% url 'App_Status:status_page' %}">
+                        Status
+                    </a>
+                </li>
+                <li class="nav-item-active">   
+                    <a class="nav-link" href="{% url 'App_History:history_page' %}">
+                        History
+                    </a>
+                </li>
+                <li class="nav-item-active">   
+                    <a class="nav-link" href="{% url 'App_Modification:modification_menu' %}">
+                        Modification
+                    </a>
+                </li>
+                <li class="nav-item-active">   
+                    <a class="nav-link" href="{% url 'App_Cancellation:cancellation' %}">
+                        Cancellation
+                    </a>
+                </li>
+                <li class="nav-item-active">   
+                    <a class="nav-link" href="{% url 'App_Entry:entry_page' %}">
+                        Entry
+                    </a>
+                </li>
+                {%endif%}
+
+                
             </ul>
-        </nav>
+        </nav> {% endcomment %}
 
         <div class="container" style="padding-top: 20px">
             {% block body_block %} {% endblock %}
@@ -136,6 +162,6 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>     
     </body>
 </html>

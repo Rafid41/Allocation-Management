@@ -1,0 +1,74 @@
+<!-- templates/partials/navbar.html -->
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav mr-auto">
+            {% if user.is_authenticated %}
+                <li class="nav-item {% if request.resolver_match.url_name == 'home_page' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'App_Home:home_page' %}">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'allocation_page' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'App_Allocation:allocation_page' %}">
+                        <i class="fas fa-tasks"></i> Allocation
+                    </a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'status_page' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'App_Status:status_page' %}">
+                        <i class="fas fa-info-circle"></i> Status
+                    </a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'history_page' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'App_History:history_page' %}">
+                        <i class="fas fa-history"></i> History
+                    </a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'modification_menu' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'App_Modification:modification_menu' %}">
+                        <i class="fas fa-edit"></i> Modification
+                    </a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'cancellation' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'App_Cancellation:cancellation' %}">
+                        <i class="fas fa-ban"></i> Cancellation
+                    </a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'entry_page' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'App_Entry:entry_page' %}">
+                        <i class="fas fa-plus-circle"></i> Entry
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+
+        <ul class="navbar-nav">
+            {% if user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                        <i class="fas fa-user-circle"></i> @{{ user.username }}
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item text-danger" href="{% url 'App_Login:logout' %}">
+                            <i class="fas fa-sign-out-alt"></i> <strong>Logout</strong>
+                        </a>
+                    </div>
+                </li>
+            {% else %}
+                <li class="nav-item {% if request.resolver_match.url_name == 'signup' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'App_Login:signup' %}">
+                        <i class="fas fa-user-plus"></i> Sign Up
+                    </a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'App_Login:login' %}">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
