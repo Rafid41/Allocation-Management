@@ -2,86 +2,54 @@
 {% load crispy_forms_tags %}
 {% load static %}
 
-{% block title_block %} Allocation Report {% endblock %}
+{% block title_block %}Download Allocation Letter{% endblock %}
 
 {% block body_block %}
-
-<a href="{% url 'App_Allocation:allocation_page' %}" class="btn btn-outline-secondary">
-    <i class="fa fa-arrow-left"></i> Back
-</a>
-
 <div class="container mt-4">
-    <h2 class="text-primary text-center mb-4"><b>Allocation Report</b></h2>
-    
-    <!-- Search Box -->
-    <form method="GET" action="{% url 'App_Allocation:generate_report' %}" class="row g-3">
-        <div class="col-md-6">
-            <input type="text" name="query" class="form-control" placeholder="Enter Allocation No..." value="{{ query }}">
+    <a href="{% url 'App_Allocation:allocation_page' %}" class="btn btn-outline-secondary">
+        <i class="fa fa-arrow-left"></i> Back
+    </a>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show mt-3 text-center mx-auto" style="max-width: 600px;" role="alert">
+            <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
-        <div class="col-md-3">
-            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+        {% endfor %}
+    {% endif %}
+
+    <h2 class="text-center"><b>Download Allocation Letter</b></h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card mt-4">
+                <div class="card-header bg-success text-white">
+                    <i class="fa fa-file-word"></i> Download Allocation Letter
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="allocation_no"><b>Select Allocation Number:</b></label>
+                            <select name="allocation_no" id="allocation_no" class="form-control" required>
+                                <option value="" selected disabled>Choose an allocation...</option>
+                                {% for allocation in allocated_allocations %}
+                                    <option value="{{ allocation.id }}">{{ allocation.allocation_no }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-block">
+                            <i class="fa fa-download"></i> Download Letter (.docx)
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-    </form>
-
-    <hr>
-
-    <!-- Data Grid View -->
-    <div class="table-responsive" id="printSection" style="max-height: 350px; overflow-y: auto;">
-        <table class="table table-bordered table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Allocation No</th>
-                    <th>Package ID</th>
-                    <th>Item Name</th>
-                    <th>Warehouse</th>
-                    <th>Quantity</th>
-                    <th>Unit Price</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if allocations %}
-                    {% for allocation in allocations %}
-                    <tr>
-                        <td>{{ allocation.allocation_no }}</td>
-                        <td>{{ allocation.package.packageId }}</td>
-                        <td>{{ allocation.item.name }}</td>
-                        <td>{{ allocation.warehouse }}</td>
-                        <td>{{ allocation.quantity }}</td>
-                        <td>৳ {{ allocation.price }}</td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="6" class="text-center text-danger">No Allocations Found</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-
-    <br>
-
-    <!-- Print Button -->
-    <div class="text-center">
-        {% if allocations %}
-        <button onclick="printReport()" class="btn btn-danger btn-lg">
-            <i class="fas fa-print"></i> Print Report
-        </button>
-        {% endif %}
     </div>
 </div>
-
-<!-- Print Script -->
-<script>
-    function printReport() {
-        var printContents = document.getElementById("printSection").innerHTML;
-        var originalContents = document.body.innerHTML;
-
-        document.body.innerHTML = "<html><head><title>Print</title></head><body>" + printContents + "</body></html>";
-        window.print();
-        document.body.innerHTML = originalContents;
-        location.reload(); // Reload the page to restore original content
-    }
-</script>
-
 {% endblock %}

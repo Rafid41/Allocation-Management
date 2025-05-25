@@ -23,9 +23,9 @@ urlpatterns = [
     # path("confirm_allocation_process/<int:allocation_no>/", views.confirm_allocation, name="confirm_allocation_process"),  # Unique name
     path("final_allocation/", views.final_allocation_search, name="final_allocation"),
     path("delete_allocation_in_view_page/<int:allocation_id>/", views.delete_allocation_in_view_page, name="delete_allocation_in_view_page"),
-    path("generate-report/", views.generate_report, name="generate_report"),
     path("select_allocation_number/", views.select_allocation_number, name="select_allocation_number"),
     path('view_confirm_allocation/<int:allocation_id>/', views.view_confirm_allocation, name='view_confirm_allocation'),
     path('delete-all-allocations/<int:allocation_id>/', views.delete_all_allocations, name='delete_all_allocations'),
     path('confirm-allocation/<int:allocation_id>/', views.confirm_allocation, name='confirm_allocation'),
+    path("final-allocation/individual-download/", views.individual_allocation_download, name="individual_final_allocation_download"),
 ]
