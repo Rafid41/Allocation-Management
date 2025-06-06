@@ -52,5 +52,22 @@
             </div>
         </div>
     </div>
+
+    <div class="alert alert-warning text-center mt-4" style="color: #856404; background-color: #fff3cd; border-color: #ffeeba;">
+    <strong><i class="fas fa-exclamation-triangle"></i> Attention:</strong> 
+    To generate this report correctly, you must have 
+    <span style="color: #007bff;"><b>Times New Roman</b></span> (for English) and 
+    <span style="color: #d63384;"><b>Nikosh</b></span> (for Bengali) fonts installed on your computer.
+</div>
+
+<div class="text-center mt-2 mb-4">
+    <a href="{% static 'fonts/times-new-roman.ttf' %}" class="btn btn-outline-primary btn-sm mr-2" download>
+        <i class="fas fa-font"></i> Download <b>Times New Roman</b>
+    </a>
+    <a href="{% static 'fonts/Nikosh.ttf' %}" class="btn btn-outline-danger btn-sm" download>
+        <i class="fas fa-font"></i> Download <b>Nikosh</b>
+    </a>
+</div>
+
 </div>
 {% endblock %}

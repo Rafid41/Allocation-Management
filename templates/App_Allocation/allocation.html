@@ -3,8 +3,42 @@
 {% load static %}
 
 {% block title_block %} Allocation {% endblock %}
+{% block css_block %}
+<style>
+    .allocation-btn {
+        font-size: 1.25rem;
+        padding: 15px 25px;
+        margin-bottom: 20px;
+        width: 400px;
+        text-align: left;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-{% block body_block %}
+    .allocation-btn i {
+        margin-right: 12px;
+    }
+
+    .allocation-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .allocation-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    @media (max-width: 400px) {
+        .allocation-btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% comment %} {% block body_block %}
 <a href="{% url 'App_Home:home_page' %}" class="btn btn-outline-secondary">
     <i class="fa fa-arrow-left"></i> Back
 </a>
@@ -43,4 +77,37 @@
     </div>
 </div>
 
+{% endblock %} {% endcomment %}
+{% block body_block %}
+<a href="{% url 'App_Home:home_page' %}" class="btn btn-outline-secondary mb-3">
+    <i class="fa fa-arrow-left"></i> Back
+</a>
+
+<center>
+    <h1 class="mb-4"><b>Allocation Page</b></h1>
+</center>
+
+<div class="container allocation-section">
+
+    <a href="{% url 'App_Allocation:view_PBS_and_addNew' %}" class="btn btn-primary allocation-btn">
+        <i class="fas fa-plus-circle"></i> Add New PBS
+    </a>
+
+    <a href="{% url 'App_Allocation:view_allocation_numbers_and_Add_New'%}" class="btn btn-info allocation-btn">
+        <i class="fas fa-plus-circle"></i> Insert New Allocation Number
+    </a>
+
+    <a href="{% url 'App_Allocation:select_allocation_number'%}" class="btn btn-secondary allocation-btn">
+        <i class="fas fa-tasks"></i> Allocate Items to PBS
+    </a>
+
+    <a href="{% url 'App_Allocation:final_allocation' %}" class="btn btn-warning allocation-btn">
+        <i class="fas fa-eye"></i> View Final Allocation
+    </a>
+
+    <a href="{% url 'App_Allocation:individual_final_allocation_download' %}" class="btn btn-success allocation-btn">
+        <i class="fas fa-file-word"></i> Generate Printed Report
+    </a>
+
+</div>
 {% endblock %}

@@ -17,6 +17,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
 MEDIA_DIR = BASE_DIR / "media"
+STATICFILES_DIRS = [
+    STATIC_DIR,
+]
 
 
 # Quick-start development settings - unsuitable for production
@@ -75,6 +78,7 @@ TEMPLATES = [
         "DIRS": [
             TEMPLATE_DIR,
         ],
+        
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

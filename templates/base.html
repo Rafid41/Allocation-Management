@@ -70,90 +70,7 @@
     <body>
         {% include "partials/navbar.html" %}
 
-        {% comment %} <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-            <ul class="navbar-nav">
-                <!-- dropdown navigation bar on username-->
-                {% if user.is_authenticated %}
-                <div clas="nav-item dropdown">
-                    <a
-                        class="nav-link dropdown-toggle"
-                        href="#"
-                        id="navbardrop"
-                        data-toggle="dropdown"
-                    >
-                        @{{user.username}}
-                    </a>
-
-                    <!-- menu items in drop down -->
-                    <div class="dropdown-menu">
-                        
-                        <a
-                            class="dropdown-item"
-                            href="{% url 'App_Login:logout' %}"
-                            ><b>Logout</b></a
-                        >
-                        
-                    </div>
-                </div>
-
-                {% else %}
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'App_Login:signup' %}"
-                        >Sign Up</a
-                    >
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'App_Login:login' %}"
-                        >Login</a
-                    >
-                </li>
-
-                {% endif %}
-
-                
-                {% if user.is_authenticated %}
-                <li class="nav-item-active">
-                    
-                    <a class="nav-link" href="{% url 'App_Home:home_page' %}">
-                        Home
-                    </a>
-                </li>
-                <li class="nav-item-active">   
-                    <a class="nav-link" href="{% url 'App_Allocation:allocation_page' %}">
-                        Allocation
-                    </a>
-                </li>
-                <li class="nav-item-active">   
-                    <a class="nav-link" href="{% url 'App_Status:status_page' %}">
-                        Status
-                    </a>
-                </li>
-                <li class="nav-item-active">   
-                    <a class="nav-link" href="{% url 'App_History:history_page' %}">
-                        History
-                    </a>
-                </li>
-                <li class="nav-item-active">   
-                    <a class="nav-link" href="{% url 'App_Modification:modification_menu' %}">
-                        Modification
-                    </a>
-                </li>
-                <li class="nav-item-active">   
-                    <a class="nav-link" href="{% url 'App_Cancellation:cancellation' %}">
-                        Cancellation
-                    </a>
-                </li>
-                <li class="nav-item-active">   
-                    <a class="nav-link" href="{% url 'App_Entry:entry_page' %}">
-                        Entry
-                    </a>
-                </li>
-                {%endif%}
-
-                
-            </ul>
-        </nav> {% endcomment %}
+        
 
         <div class="container" style="padding-top: 20px">
             {% block body_block %} {% endblock %}
@@ -164,4 +81,5 @@
 
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>     
     </body>
+    
 </html>
