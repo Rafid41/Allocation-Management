@@ -12,6 +12,8 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt
 from docx.oxml.ns import qn
 from docx.enum.table import WD_ALIGN_VERTICAL
+from django.utils import timezone
+import pytz
 
 
 def set_font(run, font_name):
@@ -93,7 +95,11 @@ def individual_allocation_download(request):
             ref_date_para.paragraph_format.tab_stops.add_tab_stop(Pt(468), WD_PARAGRAPH_ALIGNMENT.RIGHT)
 
             # Format current date in Bengali
-            today = datetime.datetime.now().strftime('%d/%m/%Y')
+           # Set the Dhaka timezone
+            dhaka_tz = pytz.timezone('Asia/Dhaka')
+
+            # Get current time in Dhaka timezone
+            today = timezone.now().astimezone(dhaka_tz).strftime('%d/%m/%Y')
             bengali_date = convert_to_bengali_digits(today)
 
             # Add text: Reference left, Date right
@@ -216,7 +222,7 @@ def individual_allocation_download(request):
                     str(entry.pbs.name),
                     str(entry.item),
                     str(entry.price),
-                    str(entry.package.packageId),
+                    "PBSF-"+str(entry.package.packageId)+" Lot-1",
                     str(entry.warehouse),
                     "On Payment O&M Store"
                 ]

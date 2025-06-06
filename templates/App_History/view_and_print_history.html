@@ -74,7 +74,7 @@
                         <td>{{ item.price }}</td>
                         <td class="{% if item.status == 'Allocated' %}text-success
                             {% elif item.status == 'Cancelled' %}text-danger
-                            {% elif item.status == 'Modified' %}text-warning
+                            {% elif item.status == 'Modified' %}text-primary
                             {% endif %}">
                             <b>{{ item.status }}</b>
                         </td>
