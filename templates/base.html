@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+{% load static %}
+{% load tz %}
+
+
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -67,7 +70,7 @@
 
         {% block css_block %} {% endblock %}
     </head>
-    <body>
+    <body style="background-color: #f0f2f5;">
         {% include "partials/navbar.html" %}
 
         
@@ -79,7 +82,17 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>     
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>  +
+        
+        
+        <footer class="bg-dark text-light mt-5 py-3">
+    <div class="container text-center">
+        <img src="{% static 'logo/BREB_Logo.svg.png' %}" alt="Logo" style="height: 150px; margin-bottom: 1px;">
+        <p class="mb-0">© {% now "Y" %} Allocation Management System. All rights reserved.</p>
+    </div>
+</footer>
+
+
     </body>
     
 </html>
