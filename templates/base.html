@@ -66,7 +66,7 @@
         />
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
         {% comment %} {% endcomment %} {% comment %} main part {% endcomment %}
-        <title>{% block title_block %} Task Manager {% endblock %}</title>
+        <title>{% block title_block %} Allocation Management {% endblock %}</title>
 
         {% block css_block %} {% endblock %}
     </head>
@@ -84,14 +84,7 @@
 
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>  +
         
-        
-        <footer class="bg-dark text-light mt-5 py-3">
-    <div class="container text-center">
-        <img src="{% static 'logo/BREB_Logo.svg.png' %}" alt="Logo" style="height: 150px; margin-bottom: 1px;">
-        <p class="mb-0">© {% now "Y" %} Allocation Management System. All rights reserved.</p>
-    </div>
-</footer>
-
+        {% include "partials/footer.html" %}
 
     </body>
     
