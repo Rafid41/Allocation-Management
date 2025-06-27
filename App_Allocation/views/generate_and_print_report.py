@@ -1,19 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
+from django.contrib import messages
+from django.utils import timezone
+from django.db.models import Q
+
 from App_Allocation.models import Allocation_Number, Final_Allocation
+
 from docx import Document
 from docx.shared import Pt, Inches
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from django.contrib import messages
-from django.db.models import Q
-import datetime
-from docx.oxml.ns import qn
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from docx.shared import Pt
-from docx.oxml.ns import qn
 from docx.enum.table import WD_ALIGN_VERTICAL
-from django.utils import timezone
+from docx.oxml.ns import qn
+
+import datetime
 import pytz
+
 
 
 def set_font(run, font_name):
@@ -203,27 +204,37 @@ def individual_allocation_download(request):
             for i, text in enumerate(headers):
                 hdr_cells[i].text = text
                 hdr_cells[i].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-                for run in hdr_cells[i].paragraphs[0].runs:
+
+                para = hdr_cells[i].paragraphs[0]
+                para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # ✅ center align the paragraph
+
+                for run in para.runs:
                     run.font.size = Pt(12)
-                    run.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
                     run.bold = True
                     run.font.name = "Nikosh"
                     # Ensure Bengali font for complex scripts
                     rFonts = run._element.rPr.get_or_add_rFonts()
                     rFonts.set(qn("w:cs"), "Nikosh")
 
-            # Populate data rows
-            for entry in entries:
+
+            # Widen column 5
+            hdr_cells[4].width = Inches(2.5)
+
+            first_col7_cell = None
+
+            for idx, entry in enumerate(entries):
                 row_cells = table.add_row().cells
+                row_cells[4].width = Inches(2.0)
+
                 values = [
                     str(entry.pbs.name),
                     str(entry.item),
                     str(entry.price),
                     str(entry.quantity),
-                    "PBSF-" + str(entry.package.packageId) + " Lot-1",
-                    str(entry.warehouse),
-                    "On Payment O&M Store",
+                    f"PBSF-{entry.package.packageId} Lot-1",
+                    str(entry.warehouse)
                 ]
+
                 for i, value in enumerate(values):
                     row_cells[i].text = value
                     row_cells[i].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
@@ -232,9 +243,34 @@ def individual_allocation_download(request):
                     for run in para.runs:
                         run.font.size = Pt(11)
                         run.font.name = "Times New Roman"
-                        # Ensure English font for complex layout
                         rFonts = run._element.rPr.get_or_add_rFonts()
                         rFonts.set(qn("w:cs"), "Times New Roman")
+
+                if idx == 0:
+                    first_col7_cell = row_cells[6]
+                else:
+                    first_col7_cell.merge(row_cells[6])
+
+            
+            # Set value and formatting for the merged column 7 cell
+            first_col7_cell.text = "On Payment O&M Store"
+            first_col7_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
+            para = first_col7_cell.paragraphs[0]
+            para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+            # Ensure the paragraph has text and formatting
+            if not para.runs:
+                run = para.add_run("On Payment O&M Store")
+            else:
+                para.runs[0].text = "On Payment O&M Store"
+                run = para.runs[0]
+
+            run.font.size = Pt(11)
+            run.font.name = "Times New Roman"
+            rFonts = run._element.rPr.get_or_add_rFonts()
+            rFonts.set(qn("w:cs"), "Times New Roman")
+
 
             # doc.add_paragraph()
 
