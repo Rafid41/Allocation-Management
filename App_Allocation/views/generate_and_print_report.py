@@ -22,18 +22,18 @@ def set_font(run, font_name):
     rPr = r.get_or_add_rPr()
     rFonts = rPr.get_or_add_rFonts()
     # This makes sure complex scripts (like Bengali) use the font too
-    rFonts.set(qn('w:cs'), font_name)
-
+    rFonts.set(qn("w:cs"), font_name)
 
 
 # Mapping for English to Bengali digits
 def convert_to_bengali_digits(number):
-    en_to_bn_digits = str.maketrans('0123456789', '০১২৩৪৫৬৭৮৯')
+    en_to_bn_digits = str.maketrans("0123456789", "০১২৩৪৫৬৭৮৯")
     return str(number).translate(en_to_bn_digits)
 
+
 def individual_allocation_download(request):
-    if request.method == 'POST':
-        allocation_id = request.POST.get('allocation_no')
+    if request.method == "POST":
+        allocation_id = request.POST.get("allocation_no")
         if allocation_id:
             allocation = get_object_or_404(Allocation_Number, id=allocation_id)
             entries = Final_Allocation.objects.filter(allocation_no=allocation)
@@ -41,7 +41,7 @@ def individual_allocation_download(request):
 
             if not entries.exists():
                 messages.error(request, "No allocation entries found for this number.")
-                return redirect('App_Allocation:individual_allocation_download')
+                return redirect("App_Allocation:individual_allocation_download")
 
             doc = Document()
 
@@ -56,22 +56,20 @@ def individual_allocation_download(request):
             section.header_distance = Inches(0.2)
             section.footer_distance = Inches(0.2)
 
-
             # Header lines
             header_lines = [
                 "এমপিএসএস পরিদপ্তর",
                 "সদর দপ্তর ভবন, নিকুঞ্জ-২, ঢাকা।",
-               
             ]
             for line in header_lines:
                 p = doc.add_paragraph()
                 p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
                 run = p.add_run(line)
                 run.font.size = Pt(12)
-                set_font(run, "Nikosh") # Set Bengali font for header
+                set_font(run, "Nikosh")  # Set Bengali font for header
                 # run.bold = True
 
-            header_email=[
+            header_email = [
                 "E-mail: mpssreb@yahoo.com",
             ]
 
@@ -81,25 +79,26 @@ def individual_allocation_download(request):
                 run = p.add_run(line)
                 run.font.size = Pt(14)
                 set_font(run, "Times New Roman")  # Set eNGLISH font for email
-                
 
             # Get current year and convert to Bengali last two digits
             current_year = datetime.datetime.now().year
             last_two_digits_bengali = convert_to_bengali_digits(str(current_year)[-2:])
 
-           # Reference number and current date (in Bengali) on the same line
+            # Reference number and current date (in Bengali) on the same line
             ref_date_para = doc.add_paragraph()
             ref_date_para.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
 
             # Set a right-aligned tab stop (6.5 inches ~ A4 width)
-            ref_date_para.paragraph_format.tab_stops.add_tab_stop(Pt(468), WD_PARAGRAPH_ALIGNMENT.RIGHT)
+            ref_date_para.paragraph_format.tab_stops.add_tab_stop(
+                Pt(468), WD_PARAGRAPH_ALIGNMENT.RIGHT
+            )
 
             # Format current date in Bengali
-           # Set the Dhaka timezone
-            dhaka_tz = pytz.timezone('Asia/Dhaka')
+            # Set the Dhaka timezone
+            dhaka_tz = pytz.timezone("Asia/Dhaka")
 
             # Get current time in Dhaka timezone
-            today = timezone.now().astimezone(dhaka_tz).strftime('%d/%m/%Y')
+            today = timezone.now().astimezone(dhaka_tz).strftime("%d/%m/%Y")
             bengali_date = convert_to_bengali_digits(today)
 
             # Add text: Reference left, Date right
@@ -107,7 +106,6 @@ def individual_allocation_download(request):
             run = ref_date_para.add_run(ref_text)
             run.font.size = Pt(12)
             set_font(run, "Nikosh")
-
 
             # doc.add_paragraph()
 
@@ -118,7 +116,7 @@ def individual_allocation_download(request):
                 run.font.size = Pt(12)
                 set_font(run, "Times New Roman")
                 run.bold = True
-                
+
             # doc.add_paragraph()
 
             # Recipient block
@@ -133,7 +131,7 @@ def individual_allocation_download(request):
                 for run in p.runs:
                     run.font.size = Pt(12)
                     set_font(run, "Nikosh")
-                    #run.bold = True
+                    # run.bold = True
 
             # doc.add_paragraph()
 
@@ -148,9 +146,11 @@ def individual_allocation_download(request):
             # Parts of the paragraph before, the English phrase, and after
             part1 = "বাপবিবোর্ডের “"
             english_text = "PBS Fund (084)"
-            part2 = "” এর আওতায় সংগ্রহকৃত মালামাল নিম্নের ছকে উল্লেখিত কেন্দ্রীয় পন্যাগার হতে মূল্য পরিশোধ স্বাপেক্ষে "\
-                    "নিম্নোক্তভাবে বরাদ্দ প্রদান করা হলো। বরাদ্দপ্রাপ্ত মালামাল এর মূল্য বাপবিবো’র হিসাব পরিদপ্তরে জমা প্রদানের রশিদ দাখিল পূর্বক "\
-                    "নিম্নের ছকে উল্লেখিত কেন্দ্রীয় পন্যাগার হতে মালামালসমূহ গ্রহন করবে। "
+            part2 = (
+                "” এর আওতায় সংগ্রহকৃত মালামাল নিম্নের ছকে উল্লেখিত কেন্দ্রীয় পন্যাগার হতে মূল্য পরিশোধ স্বাপেক্ষে "
+                "নিম্নোক্তভাবে বরাদ্দ প্রদান করা হলো। বরাদ্দপ্রাপ্ত মালামাল এর মূল্য বাপবিবো’র হিসাব পরিদপ্তরে জমা প্রদানের রশিদ দাখিল পূর্বক "
+                "নিম্নের ছকে উল্লেখিত কেন্দ্রীয় পন্যাগার হতে মালামালসমূহ গ্রহন করবে। "
+            )
 
             bold_part = "তবে মূল্য পরিশোধের পূর্বে কেন্দ্রীয় পণ্যাগারে আইটেমটির মজুদের তথ্য নেওয়ার জন্য অনুরোধ করা হলো।"
 
@@ -164,10 +164,10 @@ def individual_allocation_download(request):
             # Run 2: English phrase in Times New Roman
             run2 = para.add_run(english_text)
             run2.font.size = Pt(12)
-            run2.font.name = 'Times New Roman'
+            run2.font.name = "Times New Roman"
             # For Word to recognize font properly (sometimes needed)
             rFonts = run2._element.rPr.rFonts
-            rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+            rFonts.set(qn("w:eastAsia"), "Times New Roman")
 
             # Run 3: Bengali after English phrase
             run3 = para.add_run(part2)
@@ -182,25 +182,22 @@ def individual_allocation_download(request):
 
             para.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
 
-
-
-
-
             # doc.add_paragraph()
 
             # Create table
-            table = doc.add_table(rows=1, cols=6)
-            table.style = 'Table Grid'
+            table = doc.add_table(rows=1, cols=7)
+            table.style = "Table Grid"
 
             # Set column headers
             hdr_cells = table.rows[0].cells
             headers = [
-                'গ্রহণকারী সমিতির নাম',
-                'আইটেম নং',
-                'একক মূল্য\n (টাকা)',
-                'বরাদ্দকৃত প্রকল্প ও প্যাকেজ/ সাব-প্যাকেজ নং',
-                'পণ্যাগারের নাম',
-                'বরাদ্দের ধরণ ও স্টোর'
+                "গ্রহণকারী সমিতির নাম",
+                "আইটেম নং",
+                "একক মূল্য\n (টাকা)",
+                "পরিমাণ (টি)",
+                "বরাদ্দকৃত প্রকল্প ও প্যাকেজ/ সাব-প্যাকেজ নং",
+                "পণ্যাগারের নাম",
+                "বরাদ্দের ধরণ ও স্টোর",
             ]
 
             for i, text in enumerate(headers):
@@ -213,7 +210,7 @@ def individual_allocation_download(request):
                     run.font.name = "Nikosh"
                     # Ensure Bengali font for complex scripts
                     rFonts = run._element.rPr.get_or_add_rFonts()
-                    rFonts.set(qn('w:cs'), "Nikosh")
+                    rFonts.set(qn("w:cs"), "Nikosh")
 
             # Populate data rows
             for entry in entries:
@@ -222,9 +219,10 @@ def individual_allocation_download(request):
                     str(entry.pbs.name),
                     str(entry.item),
                     str(entry.price),
-                    "PBSF-"+str(entry.package.packageId)+" Lot-1",
+                    str(entry.quantity),
+                    "PBSF-" + str(entry.package.packageId) + " Lot-1",
                     str(entry.warehouse),
-                    "On Payment O&M Store"
+                    "On Payment O&M Store",
                 ]
                 for i, value in enumerate(values):
                     row_cells[i].text = value
@@ -232,11 +230,11 @@ def individual_allocation_download(request):
                     para = row_cells[i].paragraphs[0]
                     para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
                     for run in para.runs:
-                        run.font.size = Pt(12)
+                        run.font.size = Pt(11)
                         run.font.name = "Times New Roman"
                         # Ensure English font for complex layout
                         rFonts = run._element.rPr.get_or_add_rFonts()
-                        rFonts.set(qn('w:cs'), "Times New Roman")
+                        rFonts.set(qn("w:cs"), "Times New Roman")
 
             # doc.add_paragraph()
 
@@ -254,47 +252,57 @@ def individual_allocation_download(request):
                 {"text": "(       )     ", "align": WD_PARAGRAPH_ALIGNMENT.RIGHT},
                 {"text": "উপ-পরিচালক(কারিগরী)", "align": WD_PARAGRAPH_ALIGNMENT.RIGHT},
                 {"text": "", "align": WD_PARAGRAPH_ALIGNMENT.RIGHT},
-
                 # Left-aligned block
                 {"text": "অনুলিপি:", "align": WD_PARAGRAPH_ALIGNMENT.LEFT},
-                {"text": "১।      উপ-পরিচালক, কেন্দ্রীয় পণ্যাগার, বাপবিবো,.......।", "align": WD_PARAGRAPH_ALIGNMENT.LEFT},
-                {"text": "২।      উপ-পরিচালক, মালামাল হিসাব, বাপবিবো, ঢাকা।", "align": WD_PARAGRAPH_ALIGNMENT.LEFT},
-                {"text": "৩।      জেনারেল ম্যানেজার,..... পবিস।", "align": WD_PARAGRAPH_ALIGNMENT.LEFT},
-
+                {
+                    "text": "১।      উপ-পরিচালক, কেন্দ্রীয় পণ্যাগার, বাপবিবো,.......।",
+                    "align": WD_PARAGRAPH_ALIGNMENT.LEFT,
+                },
+                {
+                    "text": "২।      উপ-পরিচালক, মালামাল হিসাব, বাপবিবো, ঢাকা।",
+                    "align": WD_PARAGRAPH_ALIGNMENT.LEFT,
+                },
+                {
+                    "text": "৩।      জেনারেল ম্যানেজার,..... পবিস।",
+                    "align": WD_PARAGRAPH_ALIGNMENT.LEFT,
+                },
                 # Right-aligned block
                 {"text": "", "align": WD_PARAGRAPH_ALIGNMENT.RIGHT},
                 {"text": "(          )     ", "align": WD_PARAGRAPH_ALIGNMENT.RIGHT},
-                {"text": "সহকারী প্রকৌশলী", "align": WD_PARAGRAPH_ALIGNMENT.RIGHT}
+                {"text": "সহকারী প্রকৌশলী", "align": WD_PARAGRAPH_ALIGNMENT.RIGHT},
             ]
 
             for sig in sigs:
                 p = doc.add_paragraph(sig["text"])
                 p.alignment = sig["align"]
-                
+
                 # 🔧 Remove spacing after/before paragraph
                 p.paragraph_format.space_after = Pt(0)
                 p.paragraph_format.space_before = Pt(0)
-                
+
                 for run in p.runs:
                     set_font(run, font_name="Nikosh")
 
-
             response = HttpResponse(
-                content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
             filename = f"Allocation_Letter_{allocation.allocation_no}.docx"
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            response["Content-Disposition"] = f'attachment; filename="{filename}"'
             doc.save(response)
             return response
 
         messages.error(request, "Please select an allocation number.")
-        return redirect('App_Allocation:individual_allocation_download')
+        return redirect("App_Allocation:individual_allocation_download")
 
     allocated_allocations = Allocation_Number.objects.filter(
-        Q(status='Allocated') | Q(status='Modified'),
-        allocation_no__in=Final_Allocation.objects.values_list('allocation_no', flat=True).distinct()
-    ).order_by('-allocation_no')
+        Q(status="Allocated") | Q(status="Modified"),
+        allocation_no__in=Final_Allocation.objects.values_list(
+            "allocation_no", flat=True
+        ).distinct(),
+    ).order_by("-allocation_no")
 
-    return render(request, 'App_Allocation/generate_and_print_report.html', {
-        'allocated_allocations': allocated_allocations
-    })
+    return render(
+        request,
+        "App_Allocation/generate_and_print_report.html",
+        {"allocated_allocations": allocated_allocations},
+    )
