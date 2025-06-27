@@ -194,8 +194,8 @@ def individual_allocation_download(request):
             headers = [
                 "গ্রহণকারী সমিতির নাম",
                 "আইটেম নং",
-                "একক মূল্য\n (টাকা)",
-                "পরিমাণ (টি)",
+                "একক মূল্য\n(টাকা)",
+                "পরিমাণ\n(টি)",
                 "বরাদ্দকৃত প্রকল্প ও প্যাকেজ/ সাব-প্যাকেজ নং",
                 "পণ্যাগারের নাম",
                 "বরাদ্দের ধরণ ও স্টোর",
@@ -322,7 +322,7 @@ def individual_allocation_download(request):
             response = HttpResponse(
                 content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             )
-            filename = f"Allocation_Letter_{allocation.allocation_no}.docx"
+            filename = f"Allocation_Report_{allocation.allocation_no}.docx"
             response["Content-Disposition"] = f'attachment; filename="{filename}"'
             doc.save(response)
             return response
