@@ -68,6 +68,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "Allocation_Management.middleware.LoginRequiredMiddleware",
+    'Allocation_Management.middleware.AutoLogoutMiddleware',
 ]
 
 ROOT_URLCONF = "Allocation_Management.urls"
