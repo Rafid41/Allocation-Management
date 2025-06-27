@@ -1,0 +1,36 @@
+Custom Non-Commercial License (2025)
+
+Copyright (c) 2025 Rafid Al Nahiyan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to use,
+copy, modify, and distribute the Software **for non-commercial purposes only**, subject to
+the following conditions:
+
+1. Commercial Use Restriction:
+   The Software, or any derivative works based on it, **must NOT be sold,
+   sublicensed, leased, rented, or distributed for commercial gain** without
+   prior explicit written permission from the copyright holder.
+
+2. Attribution:
+   Any copy or substantial portion of the Software, including modified
+   versions, must retain the above copyright notice, this permission notice,
+   and this restriction.
+
+3. Modification Notice:
+   Any modifications or derivative works must be clearly marked as such and
+   not misrepresented as the original Software.
+
+4. Warranty Disclaimer:
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+
+By using, copying, modifying, or distributing this Software, you agree to
+abide by the above terms.
+
+
