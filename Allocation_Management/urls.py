@@ -20,6 +20,7 @@ urlpatterns = [
     path("history/", include("App_History.urls")),
     path("cancellation/", include("App_Cancellation.urls")),
     path("modification/", include("App_Modification.urls")),
+    path("user_group/", include("App_User_Group.urls")),
 ]
 
 

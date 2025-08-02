@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "App_History",
     "App_Cancellation",
     "App_Modification",
+    "App_User_Group",
     "django_extensions",
 ]
 
@@ -66,6 +67,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    'App_User_Group.middleware.UserGroupAccessMiddleware',
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "Allocation_Management.middleware.LoginRequiredMiddleware",

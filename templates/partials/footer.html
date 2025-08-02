@@ -1,7 +1,33 @@
-{% load static %}
+{% comment %} {% load static %}
 <footer class="bg-dark text-light mt-5 py-3">
     <div class="container text-center">
         <img src="{% static 'logo/BREB_Logo_hq.svg.png' %}" alt="Logo" style="height: 150px; margin-bottom: 1px;">
         <p class="mb-0">© {% now "Y" %} Allocation Management System. All rights reserved.</p>
     </div>
-</footer>
+</footer> {% endcomment %}
+
+{% load static %}
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+    .footer-wrapper {
+        display: flex;
+        flex-direction: column;
+        min-height: 80vh;
+    }
+    .footer-push {
+        flex: 1;
+    }
+</style>
+
+<div class="footer-wrapper">
+    <div class="footer-push"></div>
+    <footer class="bg-dark text-light py-3">
+        <div class="container text-center">
+            <img src="{% static 'logo/BREB_Logo_hq.svg.png' %}" alt="Logo" style="height: 150px; margin-bottom: 1px;">
+            <p class="mb-0">© {% now "Y" %} Allocation Management System. All rights reserved.</p>
+        </div>
+    </footer>
+</div>

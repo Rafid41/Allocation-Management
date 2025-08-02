@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %}Access Denied{% endblock %}
+
+{% block css_block %}
+<style>
+    .access-denied-container {
+        max-width: 500px;
+        margin: 60px auto;
+        padding: 40px;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .icon {
+        font-size: 60px;
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .main-text {
+        font-size: 30px;
+        color: #dc3545;
+        margin-top: 20px;
+        font-weight: bold;
+    }
+
+    .sub-text, .contact-text {
+        font-size: 18px;
+        color: #343a40;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+
+    .contact-text {
+        color: #007bff;
+    }
+
+    .back-button {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block body_block %}
+<div class="container">
+    <div class="back-button">
+        <a href="{% url 'App_Home:home_page' %}" class="btn btn-outline-secondary">
+            <i class="fa fa-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <div class="access-denied-container">
+        <div class="icon">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+
+        <div class="main-text">
+            Access Denied
+        </div>
+
+        <div class="sub-text">
+            You do not have permission to access this page.
+        </div>
+
+        <div class="contact-text">
+            If you think it's a mistake, contact Administrator.
+        </div>
+    </div>
+</div>
+{% endblock %}
