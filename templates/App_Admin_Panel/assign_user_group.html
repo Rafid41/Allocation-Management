@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block body_block %}
+{% if request.user.is_superuser %}
+<div class="container mt-4">
+    <h2><i class="fa fa-users-cog"></i> Assign Group to <b class="text-success">{{ user.username }}</b></h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="group">Select User Group:</label>
+            <select name="user_group_type" class="form-control">
+                {% for key, val in group_choices %}
+                    <option value="{{ key }}">{{ val }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> Assign Group</button>
+    </form>
+</div>
+{% endif %}
+{% endblock %}
