@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Admin Panel Home {% endblock %}
+
+{% block body_block %}
+{% if request.user.is_superuser %}
+<div class="container my-5">
+
+    <a href="{% url 'App_Home:home_page' %}" class="btn btn-outline-secondary mb-4">
+        <i class="fa fa-arrow-left"></i> Back
+    </a>
+
+    <div class="text-center mb-5">
+        <h1 class="display-4 font-weight-bold text-success">
+            <i class="fas fa-tools"></i> Admin Panel
+        </h1>
+        <p class="lead"><b>Manage system users and their access</b></p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-4 mb-3">
+            <a href="#" class="btn btn-primary btn-lg btn-block">
+                <i class="fas fa-user-plus"></i> Add New User
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="#" class="btn btn-secondary btn-lg btn-block">
+                <i class="fas fa-user-cog"></i> Change User Group
+            </a>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="container my-5">
+    <div class="alert alert-danger text-center" role="alert">
+        <i class="fas fa-exclamation-triangle"></i> You do not have permission to access this page.
+    </div>
+</div>
+{% endif %}
+{% endblock %}

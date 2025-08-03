@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "App_Cancellation",
     "App_Modification",
     "App_User_Group",
+    "App_Admin_Panel",
     "django_extensions",
 ]
 

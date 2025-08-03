@@ -21,6 +21,7 @@ urlpatterns = [
     path("cancellation/", include("App_Cancellation.urls")),
     path("modification/", include("App_Modification.urls")),
     path("user_group/", include("App_User_Group.urls")),
+    path("admin_panel/", include("App_Admin_Panel.urls")),
 ]
 
 
