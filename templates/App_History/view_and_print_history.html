@@ -56,7 +56,7 @@
                     <th>Item</th>
                     <th>Warehouse</th>
                     <th>Quantity</th>
-                    <th>Price</th>
+                    {% comment %} <th>Price</th> {% endcomment %}
                     <th>Status</th>
                     <th>Remarks</th>
                 </tr>
@@ -71,7 +71,7 @@
                         <td>{{ item.item }}</td>
                         <td>{{ item.warehouse }}</td>
                         <td>{{ item.quantity }}</td>
-                        <td>{{ item.price }}</td>
+                        {% comment %} <td>{{ item.price }}</td> {% endcomment %}
                         <td class="{% if item.status == 'Allocated' %}text-success
                             {% elif item.status == 'Cancelled' %}text-danger
                             {% elif item.status == 'Modified' %}text-primary
