@@ -1,0 +1,75 @@
+<!-- templates/App_Admin_Panel/change_user_group_list.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title_block %} Change User Group List {% endblock %}
+
+{% block body_block %}
+{% if request.user.is_superuser %}
+
+<div class="container mt-4">
+    <a href="{% url 'App_Admin_Panel:admin_panel_home' %}" class="btn btn-outline-secondary">
+        <i class="fa fa-arrow-left"></i> Back
+    </a>
+    
+    <h3 class="mb-4"><center><b>Change User Group</b></center></h3>
+
+    <form method="get" class="form-inline mb-4">
+        <input type="text" name="q" class="form-control mr-2 w-50" placeholder="Search by username or email" value="{{ search_query }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover shadow-sm">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Username</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Current User Group</th>
+                    <th scope="col" class="text-center">Change</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.first_name }} {{ user.last_name }}</td>
+                    <td>{{ user_groups|get_item:user.id|default:"Not Assigned" }}</td>
+                    <td class="text-center">
+                        {% comment %} {% url 'App_Admin_Panel:change_user_group_form' user.id %} {% endcomment %}
+                        <a href="#" 
+                           class="btn btn-sm btn-outline-primary" 
+                           style="opacity: 0; transition: opacity 0.3s;">
+                           Change
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No users found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Hover effect using inline JS -->
+<script>
+    document.querySelectorAll("tbody tr").forEach(row => {
+        row.addEventListener("mouseenter", () => {
+            const btn = row.querySelector(".btn");
+            if (btn) btn.style.opacity = "1";
+        });
+        row.addEventListener("mouseleave", () => {
+            const btn = row.querySelector(".btn");
+            if (btn) btn.style.opacity = "0";
+        });
+    });
+</script>
+
+{% endif %}
+{% endblock %}
