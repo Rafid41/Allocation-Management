@@ -40,7 +40,7 @@
                     <td>{{ user_groups|get_item:user.id|default:"Not Assigned" }}</td>
                     <td class="text-center">
                         {% comment %} {% url 'App_Admin_Panel:change_user_group_form' user.id %} {% endcomment %}
-                        <a href="#" 
+                        <a href="{% url 'App_Admin_Panel:change_user_group' user.id %}" 
                            class="btn btn-sm btn-outline-primary" 
                            style="opacity: 0; transition: opacity 0.3s;">
                            Change

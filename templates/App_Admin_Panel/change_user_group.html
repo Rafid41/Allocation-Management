@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_block %}
+{% if request.user.is_superuser %}
+
+<a href="{% url 'App_Admin_Panel:change_user_group' %}" class="btn btn-outline-secondary">
+        <i class="fa fa-arrow-left"></i> Back
+</a>
+<div class="container mt-4">
+    <h4 class="mb-4">Change Group for User: <strong class="text-success">{{ user.username }}</strong></h4>
+
+    <form method="post" class="shadow p-4 bg-light rounded">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="user_group_type">Select User Group:</label>
+            <select class="form-control" name="user_group_type" id="user_group_type" required>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if value == user_group.user_group_type %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Update Group</button>
+        <a href="{% url 'App_Admin_Panel:change_user_group' %}" class="btn btn-secondary mt-3 ml-2">Back</a>
+    </form>
+</div>
+{% endif %}
+{% endblock %}
