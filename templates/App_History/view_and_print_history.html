@@ -1,4 +1,161 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load tz %}
+
+{% block title_block %} History {% endblock %}
+
+{% block body_block %}
+<a href="{% url 'App_Home:home_page' %}" class="btn btn-outline-secondary">
+    <i class="fa fa-arrow-left"></i> Back
+</a>
+
+<div class="container mt-4">
+    <h2 class="text-center mb-3">History</h2>
+
+    <form method="GET" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
+        </div>
+        <div class="col-md-3">
+            <select name="filter_by" id="filterDropdown" class="form-select" onchange="toggleInputFields()">
+                <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
+                <option value="allocation_no" {% if filter_by == "allocation_no" %}selected{% endif %}>Allocation No</option>
+                <option value="pbs" {% if filter_by == "pbs" %}selected{% endif %}>PBS</option>
+                <option value="package" {% if filter_by == "package" %}selected{% endif %}>Package</option>
+                <option value="item" {% if filter_by == "item" %}selected{% endif %}>Item</option>
+                <option value="warehouse" {% if filter_by == "warehouse" %}selected{% endif %}>Warehouse</option>
+                <option value="status" {% if filter_by == "status" %}selected{% endif %}>Status</option>
+                <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Allocation Date</option>
+            </select>
+        </div>
+        <div class="col-md-3" id="datePickerContainer" style="display: none;">
+            <input type="date" name="date" class="form-control" value="{{ date_filter }}">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">Search</button>
+            <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+        </div>
+    </form>
+
+    <div id="printableArea" class="table-responsive">
+        <table class="table table-bordered table-striped table-hover text-center">
+            <thead class="table-dark sticky-top">
+                <tr>
+                    <th>Allocation No</th>
+                    <th>PBS</th>
+                    <th>Package</th>
+                    <th>Item</th>
+                    <th>Warehouse</th>
+                    <th>Quantity</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                    <th>CS&M</th>
+                    <th>Carry from Warehouse</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if items %}
+                    {% for item in items %}
+                        <tr>
+                            <td>{{ item.allocation_no }}</td>
+                            <td>{{ item.pbs }}</td>
+                            <td>{{ item.package }}</td>
+                            <td>{{ item.item }}</td>
+                            <td>{{ item.warehouse }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td class="{% if item.status == 'Allocated' %}text-success{% elif item.status == 'Cancelled' %}text-danger{% elif item.status == 'Modified' %}text-primary{% endif %}">
+                                <strong>{{ item.status }}</strong>
+                            </td>
+                            <td>{{ item.remarks|safe }}</td>
+
+                            <!-- CS&M -->
+                            <td>
+                                {% if item.CS_and_M %}
+                                    {{ item.CS_and_M|date:"d/m/y" }}<br>
+                                {% endif %}
+                                {% if can_edit_cs %}
+                                    <button class="btn btn-sm btn-outline-primary mt-1" onclick="showInput('{{ item.id }}', 'cs')">Update</button>
+                                    <div id="input_cs_{{ item.id }}" style="display: none;" class="mt-1">
+                                        <input type="date"
+                                            id="date_cs_{{ item.id }}"
+                                            class="form-control form-control-sm"
+                                            {% if item.CS_and_M %}
+                                                value="{{ item.CS_and_M|date:'Y-m-d' }}"
+                                            {% endif %}>
+                                        <button class="btn btn-sm btn-success mt-1" onclick="submitDate('{{ item.id }}', 'cs')">Save</button>
+                                    </div>
+                                {% endif %}
+                            </td>
+
+
+                           <!-- Carry From Warehouse -->
+                            <td>
+                                {% if item.carry_from_warehouse %}
+                                    {{ item.carry_from_warehouse|date:"d/m/y" }}<br>
+                                {% endif %}
+                                {% if can_edit_carry %}
+                                    <button class="btn btn-sm btn-outline-primary mt-1" onclick="showInput('{{ item.id }}', 'carry')">Update</button>
+                                    <div id="input_carry_{{ item.id }}" style="display: none;" class="mt-1">
+                                        <input type="date"
+                                            id="date_carry_{{ item.id }}"
+                                            class="form-control form-control-sm"
+                                            {% if item.carry_from_warehouse %}
+                                                value="{{ item.carry_from_warehouse|date:'Y-m-d' }}"
+                                            {% endif %}>
+                                        <button class="btn btn-sm btn-success mt-1" onclick="submitDate('{{ item.id }}', 'carry')">Save</button>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center text-danger">No matching data found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function toggleInputFields() {
+        const filter = document.getElementById("filterDropdown").value;
+        document.getElementById("datePickerContainer").style.display = filter === "Entry/Update date" ? "block" : "none";
+        document.getElementById("searchQuery").style.display = filter === "Entry/Update date" ? "none" : "block";
+    }
+
+    function printResults() {
+        window.print();
+    }
+
+    function showInput(id, field) {
+        document.getElementById(`input_${field}_${id}`).style.display = 'block';
+    }
+
+    function submitDate(id, field) {
+        const datetime = document.getElementById(`date_${field}_${id}`).value;
+        if (!datetime) return alert("Please select a date.");
+
+        fetch(`/history/update-date/${id}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": '{{ csrf_token }}',
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ field: field, date: datetime })
+        }).then(res => {
+            if (res.ok) location.reload();
+            else res.json().then(data => alert(data.error || "Failed"));
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", toggleInputFields);
+</script>
+{% endblock %}
+
+
+{% comment %} {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 {% load static %}
 
@@ -56,7 +213,7 @@
                     <th>Item</th>
                     <th>Warehouse</th>
                     <th>Quantity</th>
-                    {% comment %} <th>Price</th> {% endcomment %}
+                   
                     <th>Status</th>
                     <th>Remarks</th>
                 </tr>
@@ -71,7 +228,7 @@
                         <td>{{ item.item }}</td>
                         <td>{{ item.warehouse }}</td>
                         <td>{{ item.quantity }}</td>
-                        {% comment %} <td>{{ item.price }}</td> {% endcomment %}
+                        
                         <td class="{% if item.status == 'Allocated' %}text-success
                             {% elif item.status == 'Cancelled' %}text-danger
                             {% elif item.status == 'Modified' %}text-primary
@@ -174,4 +331,4 @@
         window.print();
     }
 </script>
-{% endblock %}
+{% endblock %} {% endcomment %}
