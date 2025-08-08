@@ -15,17 +15,34 @@ class UserGroupAccessMiddleware:
             except User_Group.DoesNotExist:
                 group_type = "View History and Status only"
 
-            # Exact paths to allow
-            allowed_paths = [
+            # Common allowed paths for restricted users
+            common_allowed_paths = [
                 "/home/",
-                "/status/",
                 "/history/",
-                "/user_group/access-denied/", 
+                "/user_group/access-denied/",
                 "/accounts/logout/"
             ]
 
+            path_for_View_History_and_Status_only = [
+                "/status/",
+            ]+ common_allowed_paths
+
+
+            # Restriction logic
             if group_type == "View History and Status only":
-                if not any(path.startswith(p) for p in allowed_paths):
+                if not any(path.startswith(p) for p in path_for_View_History_and_Status_only):
                     return redirect("App_User_Group:access-denied")
+
+            elif group_type == "Only_View_History_and_Edit_CS&M_Column":
+                if not any(path.startswith(p) for p in common_allowed_paths):
+                    return redirect("App_User_Group:access-denied")
+
+            elif group_type == "Only_View_History_and_Edit_Carry_From_Warehouse_Column":
+                if not any(path.startswith(p) for p in common_allowed_paths):
+                    return redirect("App_User_Group:access-denied")
+
+            elif group_type == "Editor":
+                # Editor has full access → no restriction
+                pass
 
         return self.get_response(request)
