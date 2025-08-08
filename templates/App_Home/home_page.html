@@ -63,65 +63,101 @@
 </style>
 {% endblock %}
 
-
 {% block body_block %}
 <div class="container">
     <div class="home-header">
         <h1><i class="fas fa-home"></i> Home Page</h1>
     </div>
 
-    <div class="row text-center">
-        <div class="col-md-4">
-            <a href="{% url 'App_Allocation:allocation_page' %}" class="section-link">
-                <div class="section-card bg-allocation">
-                    <i class="fas fa-tasks"></i>
-                    <h4>Allocation</h4>
-                </div>
-            </a>
+    {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
+        {# FULL ACCESS FOR EDITOR & SUPERUSER #}
+        <div class="row text-center">
+            <div class="col-md-4">
+                <a href="{% url 'App_Allocation:allocation_page' %}" class="section-link">
+                    <div class="section-card bg-allocation">
+                        <i class="fas fa-tasks"></i>
+                        <h4>Allocation</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{% url 'App_Status:status_page' %}" class="section-link">
+                    <div class="section-card bg-status">
+                        <i class="fas fa-info-circle"></i>
+                        <h4>Status</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{% url 'App_History:history_page' %}" class="section-link">
+                    <div class="section-card bg-history">
+                        <i class="fas fa-history"></i>
+                        <h4>History</h4>
+                    </div>
+                </a>
+            </div>
         </div>
-        <div class="col-md-4">
-            <a href="{% url 'App_Status:status_page' %}" class="section-link">
-                <div class="section-card bg-status">
-                    <i class="fas fa-info-circle"></i>
-                    <h4>Status</h4>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="{% url 'App_History:history_page' %}" class="section-link">
-                <div class="section-card bg-history">
-                    <i class="fas fa-history"></i>
-                    <h4>History</h4>
-                </div>
-            </a>
-        </div>
-    </div>
 
-    <div class="row text-center mt-4">
-        <div class="col-md-4">
-            <a href="{% url 'App_Modification:modification_menu' %}" class="section-link">
-                <div class="section-card bg-modify">
-                    <i class="fas fa-edit"></i>
-                    <h4>Modification</h4>
-                </div>
-            </a>
+        <div class="row text-center mt-4">
+            <div class="col-md-4">
+                <a href="{% url 'App_Modification:modification_menu' %}" class="section-link">
+                    <div class="section-card bg-modify">
+                        <i class="fas fa-edit"></i>
+                        <h4>Modification</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{% url 'App_Cancellation:cancellation' %}" class="section-link">
+                    <div class="section-card bg-cancel">
+                        <i class="fas fa-ban"></i>
+                        <h4>Cancellation</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{% url 'App_Entry:entry_page' %}" class="section-link">
+                    <div class="section-card bg-entry">
+                        <i class="fas fa-plus-circle"></i>
+                        <h4>Entry</h4>
+                    </div>
+                </a>
+            </div>
         </div>
-        <div class="col-md-4">
-            <a href="{% url 'App_Cancellation:cancellation' %}" class="section-link">
-                <div class="section-card bg-cancel">
-                    <i class="fas fa-ban"></i>
-                    <h4>Cancellation</h4>
-                </div>
-            </a>
+
+    {% elif request.user.user_group.user_group_type == "View History and Status only" %}
+        {# HISTORY + STATUS ONLY #}
+        <div class="row text-center">
+            <div class="col-md-6">
+                <a href="{% url 'App_Status:status_page' %}" class="section-link">
+                    <div class="section-card bg-status">
+                        <i class="fas fa-info-circle"></i>
+                        <h4>Status</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{% url 'App_History:history_page' %}" class="section-link">
+                    <div class="section-card bg-history">
+                        <i class="fas fa-history"></i>
+                        <h4>History</h4>
+                    </div>
+                </a>
+            </div>
         </div>
-        <div class="col-md-4">
-            <a href="{% url 'App_Entry:entry_page' %}" class="section-link">
-                <div class="section-card bg-entry">
-                    <i class="fas fa-plus-circle"></i>
-                    <h4>Entry</h4>
-                </div>
-            </a>
+
+    {% elif request.user.user_group.user_group_type == "Only_View_History_and_Edit_CS&M_Column" or request.user.user_group.user_group_type == "Only_View_History_and_Edit_Carry_From_Warehouse_Column" %}
+        {# HISTORY ONLY #}
+        <div class="row text-center">
+            <div class="col-md-12">
+                <a href="{% url 'App_History:history_page' %}" class="section-link">
+                    <div class="section-card bg-history">
+                        <i class="fas fa-history"></i>
+                        <h4>History</h4>
+                    </div>
+                </a>
+            </div>
         </div>
-    </div>
+    {% endif %}
 </div>
 {% endblock %}
