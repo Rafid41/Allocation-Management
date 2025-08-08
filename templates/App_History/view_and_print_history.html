@@ -25,7 +25,8 @@
                 <option value="item" {% if filter_by == "item" %}selected{% endif %}>Item</option>
                 <option value="warehouse" {% if filter_by == "warehouse" %}selected{% endif %}>Warehouse</option>
                 <option value="status" {% if filter_by == "status" %}selected{% endif %}>Status</option>
-                <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Allocation Date</option>
+                <option value="cs_and_m_date" {% if filter_by == "cs_and_m_date" %}selected{% endif %}>CS&amp;M Date</option>
+                <option value="carry_from_warehouse_date" {% if filter_by == "carry_from_warehouse_date" %}selected{% endif %}>Carry from Warehouse Date</option>
             </select>
         </div>
         <div class="col-md-3" id="datePickerContainer" style="display: none;">
@@ -37,6 +38,7 @@
         </div>
     </form>
 
+    <!-- Printable Table -->
     <div id="printableArea" class="table-responsive">
         <table class="table table-bordered table-striped table-hover text-center">
             <thead class="table-dark sticky-top">
@@ -49,8 +51,14 @@
                     <th>Quantity</th>
                     <th>Status</th>
                     <th>Remarks</th>
-                    <th>CS&M</th>
-                    <th>Carry from Warehouse</th>
+                    <th>
+                        CS&M<br>
+                        <span style="font-size: 0.75em; font-style: italic;">(dd/mm/yy)</span>
+                    </th>
+                    <th>
+                        Carry from Warehouse<br>
+                        <span style="font-size: 0.75em; font-style: italic;">(dd/mm/yy)</span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -69,12 +77,12 @@
                             <td>{{ item.remarks|safe }}</td>
 
                             <!-- CS&M -->
-                            <td>
+                            <td class="date-cell">
                                 {% if item.CS_and_M %}
                                     {{ item.CS_and_M|date:"d/m/y" }}<br>
                                 {% endif %}
                                 {% if can_edit_cs %}
-                                    <button class="btn btn-sm btn-outline-primary mt-1" onclick="showInput('{{ item.id }}', 'cs')">Update</button>
+                                    <button class="btn btn-sm btn-outline-primary mt-1 update-btn" onclick="showInput('{{ item.id }}', 'cs')">Update</button>
                                     <div id="input_cs_{{ item.id }}" style="display: none;" class="mt-1">
                                         <input type="date"
                                             id="date_cs_{{ item.id }}"
@@ -87,14 +95,13 @@
                                 {% endif %}
                             </td>
 
-
-                           <!-- Carry From Warehouse -->
-                            <td>
+                            <!-- Carry From Warehouse -->
+                            <td class="date-cell">
                                 {% if item.carry_from_warehouse %}
                                     {{ item.carry_from_warehouse|date:"d/m/y" }}<br>
                                 {% endif %}
                                 {% if can_edit_carry %}
-                                    <button class="btn btn-sm btn-outline-primary mt-1" onclick="showInput('{{ item.id }}', 'carry')">Update</button>
+                                    <button class="btn btn-sm btn-outline-primary mt-1 update-btn" onclick="showInput('{{ item.id }}', 'carry')">Update</button>
                                     <div id="input_carry_{{ item.id }}" style="display: none;" class="mt-1">
                                         <input type="date"
                                             id="date_carry_{{ item.id }}"
@@ -118,11 +125,39 @@
     </div>
 </div>
 
+<style>
+    /* Hide the update button by default */
+    .date-cell button.update-btn {
+        display: none;
+    }
+    /* Show button when hovering over the cell */
+    .date-cell:hover button.update-btn {
+        display: inline-block;
+    }
+
+    /* Print only the table */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #printableArea, #printableArea * {
+            visibility: visible;
+        }
+        #printableArea {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+    }
+</style>
+
 <script>
     function toggleInputFields() {
         const filter = document.getElementById("filterDropdown").value;
-        document.getElementById("datePickerContainer").style.display = filter === "Entry/Update date" ? "block" : "none";
-        document.getElementById("searchQuery").style.display = filter === "Entry/Update date" ? "none" : "block";
+        const isDateFilter = ["allocation_date", "cs_and_m_date", "carry_from_warehouse_date"].includes(filter);
+        document.getElementById("datePickerContainer").style.display = isDateFilter ? "block" : "none";
+        document.getElementById("searchQuery").style.display = isDateFilter ? "none" : "block";
     }
 
     function printResults() {
@@ -153,182 +188,3 @@
     document.addEventListener("DOMContentLoaded", toggleInputFields);
 </script>
 {% endblock %}
-
-
-{% comment %} {% extends 'base.html' %}
-{% load crispy_forms_tags %}
-{% load static %}
-
-{% block title_block %} History {% endblock %}
-
-{% block body_block %}
-<a href="{% url 'App_Home:home_page' %}" class="btn btn-outline-secondary">
-    <i class="fa fa-arrow-left"></i> Back
-</a>
-<center><h1><b>History</b></h1></center>
-<div class="container mt-4">
-    <h2>Search Allocations</h2>
-
-    <form method="GET" action="{% url 'App_History:history_page' %}" class="row g-3">
-        <div class="col-md-4">
-            <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
-        </div>
-
-        <div class="col-md-3">
-            <select name="filter_by" id="filterDropdown" class="form-select" onchange="toggleInputFields()">
-                <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
-                <option value="allocation_no" {% if filter_by == "allocation_no" %}selected{% endif %}>Allocation No</option>
-                <option value="pbs" {% if filter_by == "pbs" %}selected{% endif %}>PBS</option>
-                <option value="package" {% if filter_by == "package" %}selected{% endif %}>Package</option>
-                <option value="item" {% if filter_by == "item" %}selected{% endif %}>Item</option>
-                <option value="warehouse" {% if filter_by == "warehouse" %}selected{% endif %}>Warehouse</option>
-                <option value="status" {% if filter_by == "status" %}selected{% endif %}>Status</option>
-                <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Allocation Date</option>
-            </select>
-        </div>
-
-        <div class="col-md-3" id="datePickerContainer" style="display: none;">
-            <input type="date" name="date" id="dateInput" class="form-control" value="{{ date_filter }}">
-        </div>
-
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary me-3">Search</button>
-            <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
-        </div>
-    </form>
-
-    <hr>
-
-    <h4>Search Results</h4>
-    <h3 class="text-center">History</h3>
-    <div id="printableArea" class="table-responsive custom-scroll">
-        
-        <br>
-        <table class="table table-bordered table-striped table-hover">
-            <thead class="table-dark sticky-top">
-                <tr>
-                    <th>Allocation No</th>
-                    <th>PBS</th>
-                    <th>Package</th>
-                    <th>Item</th>
-                    <th>Warehouse</th>
-                    <th>Quantity</th>
-                   
-                    <th>Status</th>
-                    <th>Remarks</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if items %}
-                    {% for item in items %}
-                    <tr>
-                        <td>{{ item.allocation_no }}</td>
-                        <td>{{ item.pbs }}</td>
-                        <td>{{ item.package }}</td>
-                        <td>{{ item.item }}</td>
-                        <td>{{ item.warehouse }}</td>
-                        <td>{{ item.quantity }}</td>
-                        
-                        <td class="{% if item.status == 'Allocated' %}text-success
-                            {% elif item.status == 'Cancelled' %}text-danger
-                            {% elif item.status == 'Modified' %}text-primary
-                            {% endif %}">
-                            <b>{{ item.status }}</b>
-                        </td>
-                        <td>
-                            {{ item.remarks|safe }} <br>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="9" class="text-center text-danger">No matching data found</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<style>
-    .table {
-        font-size: 14px;
-        text-align: center;
-    }
-
-    .sticky-top {
-        position: sticky;
-        top: 0;
-        z-index: 1020;
-    }
-
-    .table-dark th {
-        background-color: #343a40 !important;
-        color: white !important;
-    }
-
-    .table-bordered th, .table-bordered td {
-        border: 1px solid #ddd !important;
-        padding: 10px;
-    }
-
-    .table-hover tbody tr:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-    }
-
-    /* Max 50 row height scrollbar on screen only */
-    .custom-scroll {
-        max-height: 1800px;
-        overflow-y: auto;
-    }
-
-    /* Disable scroll during print */
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-
-        #printableArea, #printableArea * {
-            visibility: visible;
-        }
-
-        #printableArea {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            max-height: none !important;
-            overflow: visible !important;
-        }
-
-        @page {
-            size: A4;
-            margin: 0.5in;
-        }
-    }
-</style>
-
-<script>
-    function toggleInputFields() {
-        var filterDropdown = document.getElementById("filterDropdown");
-        var searchQuery = document.getElementById("searchQuery");
-        var datePickerContainer = document.getElementById("datePickerContainer");
-
-        if (filterDropdown.value === "Entry/Update date") {
-            searchQuery.style.display = "none";
-            datePickerContainer.style.display = "block";
-        } else {
-            searchQuery.style.display = "block";
-            datePickerContainer.style.display = "none";
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        toggleInputFields();
-    });
-
-    function printResults() {
-        window.print();
-    }
-</script>
-{% endblock %} {% endcomment %}
