@@ -23,6 +23,7 @@ urlpatterns = [
     path("user_group/", include("App_User_Group.urls")),
     path("admin_panel/", include("App_Admin_Panel.urls")),
     path("project_home/", include("Project_App_Home.urls")),
+    path("project_entry/", include("Project_App_Entry.urls")),
 ]
 
 

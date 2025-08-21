@@ -1,5 +1,8 @@
-{% extends 'base.html' %} {% load crispy_forms_tags %} {% load static %} {%
-block title_block %}Entry{% endblock %} {% block css_block %}
+{% extends 'base.html' %} 
+{% load crispy_forms_tags %} 
+{% load static %} 
+{% block title_block %}ProjectEntry{% endblock %} 
+{% block css_block %}
 <style>
     /* Centered layout */
     .entry-container {
@@ -83,23 +86,25 @@ block title_block %}Entry{% endblock %} {% block css_block %}
         }
     }
 </style>
-{% endblock %} {% block body_block %}
-<div class="entry-container">
-    <a
-        href="{% url 'Project_Apps.Project_App_Home:project_home_page' %}"
+{% endblock %} 
+{% block body_block %}
+   <a
+        href="{% url 'Project_App_Home:project_home_page' %}"
         class="btn btn-outline-secondary back-btn"
     >
         <i class="fa fa-arrow-left"></i> Back
     </a>
+<div class="entry-container">
+ 
 
-    <h1><b>Entry Page</b></h1>
+    <h1><b>Project Entry Page</b></h1>
     {% comment %} {% url 'App_Entry:view_package_and_addNew' %} {% endcomment %}
     <a href="" class="btn btn-primary">
-        <i class="fa fa-plus-circle"></i> Create New Package
+        <i class="fa fa-plus-circle"></i> Create New Project
     </a>
     {% comment %} {% url 'App_Entry:add_item_to_package' %} {% endcomment %}
     <a href="" class="btn btn-secondary">
-        <i class="fa fa-box"></i> Add Item to Package
+        <i class="fa fa-box"></i> Add Item to Project
     </a>
 </div>
 {% endblock %}

@@ -58,7 +58,8 @@ INSTALLED_APPS = [
     "App_Admin_Panel",
     "django_extensions",
     # for project
-    'Project_App_Home',
+    "Project_App_Home",
+    "Project_App_Entry",
 ]
 
 # bootstrap, bootstrap3, bootstrap4, uni-form
@@ -70,11 +71,11 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    'App_User_Group.middleware.UserGroupAccessMiddleware',
+    "App_User_Group.middleware.UserGroupAccessMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "Allocation_Management.middleware.LoginRequiredMiddleware",
-    'Allocation_Management.middleware.AutoLogoutMiddleware',
+    "Allocation_Management.middleware.AutoLogoutMiddleware",
 ]
 
 ROOT_URLCONF = "Allocation_Management.urls"
@@ -85,7 +86,6 @@ TEMPLATES = [
         "DIRS": [
             TEMPLATE_DIR,
         ],
-        
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
