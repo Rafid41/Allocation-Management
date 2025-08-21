@@ -50,6 +50,7 @@
     .bg-modify     { background-color: #28a745; }     /* Green */
     .bg-cancel     { background-color: #dc3545; }     /* Red */
     .bg-entry      { background-color: #fd7e14; }     /* Orange */
+    .bg-project    { background-color: #6610f2; }     /* Purple */
 
     a.section-link {
         text-decoration: none;
@@ -99,7 +100,7 @@
         </div>
 
         <div class="row text-center mt-4">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <a href="{% url 'App_Modification:modification_menu' %}" class="section-link">
                     <div class="section-card bg-modify">
                         <i class="fas fa-edit"></i>
@@ -107,7 +108,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <a href="{% url 'App_Cancellation:cancellation' %}" class="section-link">
                     <div class="section-card bg-cancel">
                         <i class="fas fa-ban"></i>
@@ -115,11 +116,20 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <a href="{% url 'App_Entry:entry_page' %}" class="section-link">
                     <div class="section-card bg-entry">
                         <i class="fas fa-plus-circle"></i>
                         <h4>Entry</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                {% comment %} {% url 'App_Project:project_page' %} {% endcomment %}
+                <a href="{% url 'Project_Apps.App_Project_Home:project_home_page' %}" class="section-link">
+                    <div class="section-card bg-project">
+                        <i class="fas fa-project-diagram"></i>
+                        <h4>Project</h4>
                     </div>
                 </a>
             </div>

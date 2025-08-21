@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %}Project Home{% endblock %}
+
+{% block css_block %}
+<style>
+.home-header {
+    margin: 30px 0;
+    text-align: center;
+}
+
+.home-header h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #6f42c1;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Project Home compact button style */
+.section-card {
+    min-height: 160px;               /* smaller height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 25px;              /* smaller padding for pill effect */
+    border-radius: 40px;             /* pill shape */
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    background: linear-gradient(145deg, #ff7e5f, #feb47b);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.section-card::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: -100%;
+    background: rgba(255,255,255,0.1);
+    transform: skewX(-20deg);
+    transition: all 0.5s ease;
+}
+
+.section-card:hover::after {
+    left: 100%;
+}
+
+.section-card i {
+    font-size: 2.5rem;               /* smaller icon */
+    margin-bottom: 12px;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.section-card h4 {
+    font-size: 1.4rem;               /* smaller font */
+    margin: 0;
+}
+
+.section-card:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 12px 20px rgba(0,0,0,0.25);
+}
+
+.section-card:hover i {
+    transform: rotate(10deg) scale(1.1);
+    color: #fffacd;
+}
+
+/* Unique gradient colors */
+.bg-allocation { background: linear-gradient(135deg, #1abc9c, #16a085); }
+.bg-status     { background: linear-gradient(135deg, #6a11cb, #2575fc); }
+.bg-history    { background: linear-gradient(135deg, #f7971e, #ffd200); }
+.bg-modify     { background: linear-gradient(135deg, #43cea2, #185a9d); }
+.bg-cancel     { background: linear-gradient(135deg, #ff416c, #ff4b2b); }
+.bg-entry      { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+
+a.section-link {
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .section-card {
+        padding: 25px 20px;
+        min-height: 140px;
+    }
+    .section-card h4 {
+        font-size: 1.2rem;
+    }
+    .section-card i {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block body_block %}
+<div class="container">
+    <div class="home-header">
+        <h1><i class="fas fa-rocket"></i> Project Home Page</h1>
+    </div>
+
+    {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <a href="" class="section-link">
+                    <div class="section-card bg-allocation">
+                        <i class="fas fa-tasks"></i>
+                        <h4>Allocation</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4 mb-4">
+                <a href="" class="section-link">
+                    <div class="section-card bg-status">
+                        <i class="fas fa-info-circle"></i>
+                        <h4>Status</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4 mb-4">
+                <a href="" class="section-link">
+                    <div class="section-card bg-history">
+                        <i class="fas fa-history"></i>
+                        <h4>History</h4>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <a href="" class="section-link">
+                    <div class="section-card bg-modify">
+                        <i class="fas fa-edit"></i>
+                        <h4>Modification</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4 mb-4">
+                <a href="" class="section-link">
+                    <div class="section-card bg-cancel">
+                        <i class="fas fa-ban"></i>
+                        <h4>Cancellation</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4 mb-4">
+                <a href="" class="section-link">
+                    <div class="section-card bg-entry">
+                        <i class="fas fa-plus-circle"></i>
+                        <h4>Entry</h4>
+                    </div>
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

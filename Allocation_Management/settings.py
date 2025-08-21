@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     "App_User_Group",
     "App_Admin_Panel",
     "django_extensions",
+    # for project
+    'Project_Apps.App_Project_Home',
 ]
 
 # bootstrap, bootstrap3, bootstrap4, uni-form

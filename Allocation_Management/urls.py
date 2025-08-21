@@ -22,6 +22,7 @@ urlpatterns = [
     path("modification/", include("App_Modification.urls")),
     path("user_group/", include("App_User_Group.urls")),
     path("admin_panel/", include("App_Admin_Panel.urls")),
+    path("project_home/", include("Project_Apps.App_Project_Home.urls")),
 ]
 
 
