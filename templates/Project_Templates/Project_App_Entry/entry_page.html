@@ -1,0 +1,105 @@
+{% extends 'base.html' %} {% load crispy_forms_tags %} {% load static %} {%
+block title_block %}Entry{% endblock %} {% block css_block %}
+<style>
+    /* Centered layout */
+    .entry-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: 50px;
+    }
+
+    /* Header */
+    .entry-container h1 {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #34495e;
+        margin-bottom: 40px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Buttons style */
+    .entry-container .btn {
+        width: 250px;
+        padding: 15px 20px;
+        margin: 15px 0;
+        border-radius: 40px; /* pill shape */
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Primary button gradient */
+    .entry-container .btn-primary {
+        background: linear-gradient(135deg, #1abc9c, #16a085);
+        border: none;
+        color: white;
+    }
+
+    .entry-container .btn-primary:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Secondary button gradient */
+    .entry-container .btn-secondary {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        border: none;
+        color: white;
+    }
+
+    .entry-container .btn-secondary:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Back button style */
+    .back-btn {
+        margin-bottom: 30px;
+        font-size: 1rem;
+        padding: 10px 20px;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .entry-container h1 {
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+        }
+        .entry-container .btn {
+            width: 200px;
+            font-size: 1rem;
+            padding: 12px 15px;
+        }
+    }
+</style>
+{% endblock %} {% block body_block %}
+<div class="entry-container">
+    <a
+        href="{% url 'Project_Apps.Project_App_Home:project_home_page' %}"
+        class="btn btn-outline-secondary back-btn"
+    >
+        <i class="fa fa-arrow-left"></i> Back
+    </a>
+
+    <h1><b>Entry Page</b></h1>
+    {% comment %} {% url 'App_Entry:view_package_and_addNew' %} {% endcomment %}
+    <a href="" class="btn btn-primary">
+        <i class="fa fa-plus-circle"></i> Create New Package
+    </a>
+    {% comment %} {% url 'App_Entry:add_item_to_package' %} {% endcomment %}
+    <a href="" class="btn btn-secondary">
+        <i class="fa fa-box"></i> Add Item to Package
+    </a>
+</div>
+{% endblock %}

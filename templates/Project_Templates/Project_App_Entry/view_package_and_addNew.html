@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Entry {% endblock %}
+
+{% block body_block %}
+
+<style>
+    .data-grid {
+        display: grid;
+        grid-template-columns: 1fr; /* Single column layout */
+        gap: 5px;
+        max-width: 600px; /* Increased width */
+        max-height: 400px; /* Increased height */
+        margin: 0 auto;
+        overflow-y: auto; /* Enable vertical scrolling */
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 8px;
+        background: #f9f9f9;
+    }
+
+    .package-header {
+        background-color: #e0e0e0;
+        padding: 10px;
+        font-weight: bold;
+        text-align: center;
+        border-radius: 5px;
+    }
+
+    .item-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 5px;
+    }
+
+    .item-table th, .item-table td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+    }
+
+    .item-table th {
+        background: #ddd;
+    }
+
+    /* Hide number input arrows */
+    .no-spinner::-webkit-outer-spin-button,
+    .no-spinner::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .no-spinner {
+        -moz-appearance: textfield;
+    }
+
+    .custom-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        border: none;
+        background: none;
+        color: red;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .custom-close:hover {
+        color: darkred;
+    }
+</style>
+
+<a href="{% url 'App_Entry:entry_page' %}" class="btn btn-outline-secondary">
+    <i class="fa fa-arrow-left"></i> Back
+</a>
+
+<!-- Container for Existing Package List -->
+<div class="container mt-5 card p-4 shadow">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <br>
+            <h2 class="text-center">
+                <b><i class="fa fa-box"></i> Existing Package List</b>
+            </h2>
+
+            <!-- Display Success & Error Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+                        <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+                        {{ message }}
+                        <button type="button" class="custom-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Data Grid for Existing Packages -->
+            <div class="data-grid mt-3">
+                {% for package in current_package_list %}
+                    <div class="package-header">
+                        <b><i class="fa fa-box"></i> {{ package.packageId }}</b>
+                    </div>
+                    <table class="item-table">
+                        <!-- Table content here -->
+                    </table>
+                {% empty %}
+                    <p class="text-center">No packages available.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Container for Add New Package Form -->
+<div class="container card p-4 shadow mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form method="post" class="card p-3 shadow">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="packageId">
+                        <b><i class="fa fa-plus-circle"></i> Add New Package</b>
+                    </label>
+                    <input type="text" name="packageId" class="form-control no-spinner" required placeholder="Enter Package ID">
+                </div>
+                
+                <button type="submit" class="btn btn-primary mt-3 w-100">
+                    <i class="fa fa-plus"></i> Create Package
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<br>
+<br>
+
+{% endblock %}
