@@ -1,46 +1,3 @@
-# # App_Allocation\views\view_final_allocation.py
-# from django.shortcuts import render,redirect, get_object_or_404
-# from django.contrib.auth.decorators import login_required
-# from App_Allocation.models import Final_Allocation, Allocation_Number
-# from .models import History
-
-# @login_required
-# def history(request):
-#     query = request.GET.get("query", "")
-#     filter_by = request.GET.get("filter_by", "All")
-#     date_filter = request.GET.get("date", "")
-
-#     results = History.objects.all().order_by('-created_at')
-#     # allocations_numbers = Allocation_Number.objects.all()
-
-#     if query:
-#         if filter_by == "allocation_no":
-#             results = results.filter(allocation_no__icontains=query)
-#         elif filter_by == "pbs":
-#             results = results.filter(pbs__icontains=query)
-#         elif filter_by == "package":
-#             results = results.filter(package__icontains=query)
-#         elif filter_by == "item":
-#             results = results.filter(item__icontains=query)
-#         elif filter_by == "warehouse":
-#             results = results.filter(warehouse__icontains=query)
-#         elif filter_by == "status":
-#             results = results.filter(status__icontains=query)
-
-#     if date_filter:
-#         results = results.filter(created_at__date=date_filter)
-
-#     context = {
-#         "items": results,
-#         "query": query,
-#         "filter_by": filter_by,
-#         "date_filter": date_filter,
-#     }
-
-#     return render(request, "App_History/view_and_print_history.html", context)
-
-
-# App_Allocation/views/view_final_allocation.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from App_History.models import History
@@ -50,16 +7,17 @@ from datetime import datetime, time
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from App_Login.models import User_Group
 
 @login_required
 def history(request):
     query = request.GET.get("query", "")
     filter_by = request.GET.get("filter_by", "All")
     date_filter = request.GET.get("date", "")
+    date_status = request.GET.get("date_status", "all")  # <-- NEW
 
     results = History.objects.all().order_by('-created_at')
 
+    # Non-date filters
     if query and filter_by not in ["allocation_date", "cs_and_m_date", "carry_from_warehouse_date"]:
         if filter_by == "allocation_no":
             results = results.filter(allocation_no__icontains=query)
@@ -74,13 +32,24 @@ def history(request):
         elif filter_by == "status":
             results = results.filter(status__icontains=query)
 
-    if date_filter:
-        if filter_by == "allocation_date":
+    # Date filters
+    if filter_by == "allocation_date":
+        if date_filter:
             results = results.filter(created_at__date=date_filter)
-        elif filter_by == "cs_and_m_date":
+        if date_status == "empty":
+            results = results.filter(created_at__isnull=True)
+
+    elif filter_by == "cs_and_m_date":
+        if date_filter:
             results = results.filter(CS_and_M__date=date_filter)
-        elif filter_by == "carry_from_warehouse_date":
+        if date_status == "empty":
+            results = results.filter(CS_and_M__isnull=True)
+
+    elif filter_by == "carry_from_warehouse_date":
+        if date_filter:
             results = results.filter(carry_from_warehouse__date=date_filter)
+        if date_status == "empty":
+            results = results.filter(carry_from_warehouse__isnull=True)
 
     # Determine group permission
     group = request.user.user_group.user_group_type if hasattr(request.user, "user_group") else ""
@@ -90,12 +59,12 @@ def history(request):
         "query": query,
         "filter_by": filter_by,
         "date_filter": date_filter,
+        "date_status": date_status,  # <-- Pass to template
         "can_edit_cs": group in ["Editor", "Only_View_History_and_Edit_CS&M_Column"],
         "can_edit_carry": group in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"]
     }
 
     return render(request, "App_History/view_and_print_history.html", context)
-
 
 
 @login_required
