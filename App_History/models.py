@@ -4,9 +4,10 @@ from django.db import models
 class History(models.Model):
     allocation_no = models.IntegerField() 
     pbs = models.TextField()  
-    package = models.BigIntegerField()
+    package = models.TextField()
     item = models.TextField() 
     warehouse = models.CharField(max_length=50)  
+    unit = models.TextField()  
     quantity = models.IntegerField()  
     price = models.DecimalField(max_digits=15, decimal_places=2)  
     created_at = models.DateTimeField(auto_now=True) 

@@ -1,8 +1,9 @@
 from django.db import models
 from django.utils.timezone import now
+from django.utils import timezone
 
 class Package(models.Model):
-    packageId = models.BigIntegerField(unique=True)
+    packageId = models.TextField(unique=True)
 
     def __str__(self):
         return str(self.packageId)  # Convert packageId to a string
@@ -39,7 +40,7 @@ class Item(models.Model):
         related_name="package_of_item",
         null=True,
     )
-    created_at = models.DateTimeField(default=now)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return str(self.name)

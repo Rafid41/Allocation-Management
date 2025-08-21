@@ -1,20 +1,8 @@
-import json
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from App_Entry.models import Package, Item
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.views.generic import (
-    CreateView,
-    UpdateView,
-    ListView,
-    DetailView,
-    View,
-    TemplateView,
-    DeleteView,
-)
 from django import forms
 from django.contrib import messages
 from django.urls import reverse
@@ -33,22 +21,20 @@ def view_package_and_addNew(request):
     """Handles both displaying the package list and adding a new package."""
 
     if request.method == "POST":
-        package_id = request.POST.get("packageId")
+        package_id = request.POST.get("packageId", "").strip()  # Trim spaces
 
         if package_id:
-            # Ensure packageId is a valid integer
-            try:
-                package_id = int(package_id)
-                if Package.objects.filter(packageId=package_id).exists():
-                    messages.error(request, "This package ID already exists!")
-                else:
-                    Package.objects.create(packageId=package_id)
-                    messages.success(request, "Package added successfully!")
-                    return HttpResponseRedirect(
-                        reverse("App_Entry:view_package_and_addNew")
-                    )
-            except ValueError:
-                messages.error(request, "Invalid package ID. Please enter a number.")
+            # Check if this packageId already exists
+            if Package.objects.filter(packageId=package_id).exists():
+                messages.error(request, "This package ID already exists!")
+            else:
+                Package.objects.create(packageId=package_id)
+                messages.success(request, "Package added successfully!")
+                return HttpResponseRedirect(
+                    reverse("App_Entry:view_package_and_addNew")
+                )
+        else:
+            messages.error(request, "Package ID cannot be empty.")
 
     # Fetch all packages with their items and sort by packageId, item name, and warehouse
     packages = Package.objects.all().order_by("packageId")

@@ -47,7 +47,8 @@
 <div class="container mt-3">
     <br>
 
-    <form method="GET" action="{% url 'App_Allocation:Search_and_Select' allocation_number %}" class="row g-3">
+    {% comment %} <form method="GET" action="{% url 'App_Allocation:Search_and_Select' allocation_number %}" class="row g-3"> {% endcomment %}
+    <form method="GET" action="{% url 'App_Allocation:Search_and_Select' allocation_id %}" class="row g-3">
         <div class="col-md-4">
             <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
         </div>
