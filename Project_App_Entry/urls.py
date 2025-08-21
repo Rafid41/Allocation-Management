@@ -6,11 +6,11 @@ app_name = "Project_App_Entry"
 urlpatterns = [
     # Page rendering
     path("", views.entry_page, name="entry_page"),
-#     path(
-#         "view_package_and_addNew/",
-#         views.view_package_and_addNew,
-#         name="view_package_and_addNew",
-#     ),
+    path(
+        "view_project_and_addNew/",
+        views.view_project_and_addNew,
+        name="view_project_and_addNew",
+    ),
 #     path(
 #         "add_item_to_package/",
 #         views.add_item_to_package,

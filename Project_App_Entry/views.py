@@ -1,7 +1,7 @@
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
-from App_Entry.models import Package, Item
+from Project_App_Entry.models import Project, Project_Item
 from django.contrib.auth.decorators import login_required
 from django import forms
 from django.contrib import messages
@@ -13,42 +13,42 @@ def entry_page(request):
     return render(request, "Project_Templates/Project_App_Entry/project_entry_page.html")
 
 
-'''
 
 
 
-##################################  view package and add new Package #################################
-def view_package_and_addNew(request):
-    """Handles both displaying the package list and adding a new package."""
+
+##################################  view project and add new Project #################################
+def view_project_and_addNew(request):
+    """Handles both displaying the project list and adding a new project."""
 
     if request.method == "POST":
-        package_id = request.POST.get("packageId", "").strip()  # Trim spaces
+        project_id = request.POST.get("projectId", "").strip()  # Trim spaces
 
-        if package_id:
-            # Check if this packageId already exists
-            if Package.objects.filter(packageId=package_id).exists():
-                messages.error(request, "This package ID already exists!")
+        if project_id:
+            # Check if this projectId already exists
+            if Project.objects.filter(projectId=project_id).exists():
+                messages.error(request, "This project ID already exists!")
             else:
-                Package.objects.create(packageId=package_id)
-                messages.success(request, "Package added successfully!")
+                Project.objects.create(projectId=project_id)
+                messages.success(request, "Project added successfully!")
                 return HttpResponseRedirect(
-                    reverse("App_Entry:view_package_and_addNew")
+                    reverse("Project_App_Entry:view_project_and_addNew")
                 )
         else:
-            messages.error(request, "Package ID cannot be empty.")
+            messages.error(request, "Project ID cannot be empty.")
 
-    # Fetch all packages with their items and sort by packageId, item name, and warehouse
-    packages = Package.objects.all().order_by("packageId")
-    items = Item.objects.select_related("package").order_by("package__packageId", "name", "warehouse")
+    # Fetch all projects with their items and sort by projectId, item name, and warehouse
+    projects = Project.objects.all().order_by("projectId")
+    items = Project_Item.objects.select_related("project").order_by("project__projectId", "name", "warehouse")
 
     return render(
         request,
-        "App_Entry/view_package_and_addNew.html",
-        {"current_package_list": packages, "items": items},
+        "Project_Templates/Project_App_Entry/view_project_and_addNew.html",
+        {"current_project_list": projects, "items": items},
     )
 
 
-
+'''
 ############################## Add New Item to a Package ##########################################
 
 from django.utils.timezone import now

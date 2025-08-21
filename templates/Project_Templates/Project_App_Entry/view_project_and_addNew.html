@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 {% load static %}
 
-{% block title_block %} Entry {% endblock %}
+{% block title_block %}Project Entry {% endblock %}
 
 {% block body_block %}
 
@@ -73,17 +73,17 @@
     }
 </style>
 
-<a href="{% url 'App_Entry:entry_page' %}" class="btn btn-outline-secondary">
+<a href="{% url 'Project_App_Entry:entry_page' %}" class="btn btn-outline-secondary">
     <i class="fa fa-arrow-left"></i> Back
 </a>
 
-<!-- Container for Existing Package List -->
+<!-- Container for Existing Project List -->
 <div class="container mt-5 card p-4 shadow">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <br>
             <h2 class="text-center">
-                <b><i class="fa fa-box"></i> Existing Package List</b>
+                <b><i class="fa fa-project-diagram"></i> Existing Project List</b>
             </h2>
 
             <!-- Display Success & Error Messages -->
@@ -97,17 +97,17 @@
                 {% endfor %}
             {% endif %}
 
-            <!-- Data Grid for Existing Packages -->
+            <!-- Data Grid for Existing Projects -->
             <div class="data-grid mt-3">
-                {% for package in current_package_list %}
+                {% for project in current_project_list %}
                     <div class="package-header">
-                        <b><i class="fa fa-box"></i> {{ package.packageId }}</b>
+                        <b><i class="fa fa-project-diagram"></i> {{ project.projectId }}</b>
                     </div>
                     <table class="item-table">
                         <!-- Table content here -->
                     </table>
                 {% empty %}
-                    <p class="text-center">No packages available.</p>
+                    <p class="text-center">No Project available.</p>
                 {% endfor %}
             </div>
         </div>
@@ -122,14 +122,14 @@
                 {% csrf_token %}
                 
                 <div class="form-group">
-                    <label for="packageId">
-                        <b><i class="fa fa-plus-circle"></i> Add New Package</b>
+                    <label for="projectId">
+                        <b><i class="fa fa-plus-circle"></i> Add New Project</b>
                     </label>
-                    <input type="text" name="packageId" class="form-control no-spinner" required placeholder="Enter Package ID">
+                    <input type="text" name="projectId" class="form-control no-spinner" required placeholder="Enter Project ID">
                 </div>
                 
                 <button type="submit" class="btn btn-primary mt-3 w-100">
-                    <i class="fa fa-plus"></i> Create Package
+                    <i class="fa fa-plus"></i> Create Project
                 </button>
             </form>
         </div>

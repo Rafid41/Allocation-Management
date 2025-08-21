@@ -99,12 +99,12 @@
 
     <h1><b>Project Entry Page</b></h1>
     {% comment %} {% url 'App_Entry:view_package_and_addNew' %} {% endcomment %}
-    <a href="" class="btn btn-primary">
+    <a href="{% url 'Project_App_Entry:view_project_and_addNew' %}" class="btn btn-primary">
         <i class="fa fa-plus-circle"></i> Create New Project
     </a>
     {% comment %} {% url 'App_Entry:add_item_to_package' %} {% endcomment %}
     <a href="" class="btn btn-secondary">
-        <i class="fa fa-box"></i> Add Item to Project
+        <i class="fa fa-project-diagram"></i> Add Item to Project
     </a>
 </div>
 {% endblock %}
