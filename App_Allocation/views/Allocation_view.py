@@ -141,6 +141,7 @@ def allocate_item(request, allocation_id, item_id):
             allocation.price = item.unit_price
             allocation.pbs = get_object_or_404(PBS, id=pbs_id)
             allocation.allocation_no = allocation_no_obj
+            allocation.unit_of_item = item.unit_of_item
 
             # Ensure item has enough stock before saving allocation
             if item.quantity_of_item >= quantity:

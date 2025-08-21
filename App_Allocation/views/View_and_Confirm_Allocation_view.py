@@ -63,6 +63,7 @@ def confirm_allocation(request, allocation_id):
                 warehouse=allocation.warehouse,
                 quantity=allocation.quantity,
                 price=allocation.price,
+                unit_of_item=allocation.unit_of_item,
             )
 
             # Update Allocation_Number status to "Allocated"
@@ -75,6 +76,7 @@ def confirm_allocation(request, allocation_id):
                 pbs=allocation.pbs,
                 package=allocation.package.packageId,
                 item=allocation.item,
+                unit_of_item=allocation.unit_of_item,
                 warehouse=allocation.warehouse,
                 quantity=allocation.quantity,
                 price=allocation.price,

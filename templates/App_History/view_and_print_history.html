@@ -47,6 +47,7 @@
                     <th>PBS</th>
                     <th>Package</th>
                     <th>Item</th>
+                    <th>Unit</th>
                     <th>Warehouse</th>
                     <th>Quantity</th>
                     <th>Status</th>
@@ -69,6 +70,7 @@
                             <td>{{ item.pbs }}</td>
                             <td>{{ item.package }}</td>
                             <td>{{ item.item }}</td>
+                            <td>{{ item.unit_of_item }}</td>
                             <td>{{ item.warehouse }}</td>
                             <td>{{ item.quantity }}</td>
                             <td class="{% if item.status == 'Allocated' %}text-success{% elif item.status == 'Cancelled' %}text-danger{% elif item.status == 'Modified' %}text-primary{% endif %}">

@@ -7,7 +7,7 @@ class History(models.Model):
     package = models.TextField()
     item = models.TextField() 
     warehouse = models.CharField(max_length=50)  
-    unit = models.TextField()  
+    unit_of_item = models.TextField()  
     quantity = models.IntegerField()  
     price = models.DecimalField(max_digits=15, decimal_places=2)  
     created_at = models.DateTimeField(auto_now=True) 
