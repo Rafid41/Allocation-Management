@@ -9,7 +9,7 @@
     <div class="row">
         <div class="col-lg-8 mx-auto">
             <div class="card shadow-lg border-0">
-                <div class="card-header bg-warning text-white text-center">
+                <div class="card-header bg-info text-white text-center">
                     <h3><i class="fas fa-edit"></i> Edit Item</h3>
                 </div>
                 <div class="card-body">
@@ -30,11 +30,11 @@
 
                         <div class="row">
                             <div class="col-md-6">
-                                <label><i class="fas fa-box"></i> Select Package:</label>
-                                <select name="package" class="form-control" required>
-                                    {% for package in packages %}
-                                    <option value="{{ package.id }}" {% if item.package.id == package.id %}selected{% endif %}>
-                                        {{ package.packageId }}
+                                <label><i class="fa fa-project-diagram"></i> Select Project:</label>
+                                <select name="project" class="form-control" required>
+                                    {% for project in projects %}
+                                    <option value="{{ project.id }}" {% if item.project.id == project.id %}selected{% endif %}>
+                                        {{ project.projectId }}
                                     </option>
                                     {% endfor %}
                                 </select>
@@ -66,11 +66,8 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-2">
-                                <label><i class="fas fa-dollar-sign"></i> Unit Price:</label>
-                                <input type="number" name="unit_price" class="form-control" step="0.01" min="0" value="{{ item.unit_price }}" required>
-                            </div>
-                            <div class="col-md-4">
+                            
+                            <div class="col-md-6">
                                 <label><i class="fas fa-sort-numeric-up"></i> Quantity:</label>
                                 <input type="number" name="quantity_of_item" class="form-control" value="{{ item.quantity_of_item }}" required>
                             </div>
@@ -87,10 +84,10 @@
                         </div>
 
                         <div class="d-flex justify-content-between mt-4">
-                            <a href="{% url 'App_Entry:add_item_to_package' %}" class="btn btn-secondary">
+                            <a href="{% url 'Project_App_Entry:add_item_to_project' %}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> Cancel
                             </a>
-                            <button type="submit" class="btn btn-warning">
+                            <button type="submit" class="btn btn-info">
                                 <i class="fas fa-save"></i> Update Item
                             </button>
                         </div>

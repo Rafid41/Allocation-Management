@@ -2,18 +2,18 @@
 {% load crispy_forms_tags %}
 {% load static %}
 
-{% block title_block %}Add Item to Package{% endblock %}
+{% block title_block %}Add Item to Project{% endblock %}
 
 {% block body_block %}
-<a href="{% url 'App_Entry:entry_page' %}" class="btn btn-outline-secondary">
+<a href="{% url 'Project_App_Entry:entry_page' %}" class="btn btn-outline-secondary">
     <i class="fa fa-arrow-left"></i> Back
 </a>
 <div class="container">
     <div class="row">
         <div class="col-lg-8 mx-auto">
             <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white text-center">
-                    <h3><i class="fas fa-box"></i> Add Item to Package</h3>
+                <div class="card-header bg-secondary text-white text-center">
+                    <h3><i class="fa fa-project-diagram"></i> Add Item to Project</h3>
                 </div>
                 <div class="card-body">
                     {% if messages %}
@@ -31,11 +31,11 @@
 
                         <div class="row">
                             <div class="col-md-6">
-                                <label><i class="fas fa-boxes"></i> Select Package:</label>
-                                <select name="package" class="form-control" required>
-                                    <option value="">-- Select Package --</option>
-                                    {% for package in packages %}
-                                    <option value="{{ package.id }}">{{ package.packageId }}</option>
+                                <label><i class="fa fa-project-diagram"></i> Select Project:</label>
+                                <select name="project" class="form-control" required>
+                                    <option value="">-- Select Project --</option>
+                                    {% for project in projects %}
+                                    <option value="{{ project.id }}">{{ project.projectId }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -62,11 +62,8 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-2">
-                                <label><i class="fas fa-dollar-sign"></i> Unit Price:</label>
-                                <input type="number" name="unit_price" class="form-control" step="0.01" min="0" required>
-                            </div>
-                            <div class="col-md-4">
+                           
+                            <div class="col-md-6">
                                 <label><i class="fas fa-cubes"></i> Quantity:</label>
                                 <input type="number" name="quantity_of_item" class="form-control" required>
                             </div>
@@ -81,7 +78,7 @@
                             <input type="date" name="created_at" class="form-control">
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-block mt-4">
+                        <button type="submit" class="btn btn-secondary btn-block mt-4">
                             <i class="fas fa-plus-circle"></i> Add Item
                         </button>
                         
@@ -91,16 +88,15 @@
         </div>
     </div>
 
-    <h3 class="mt-5 text-center"><i class="fas fa-list"></i> Package Item List</h3>
+    <h3 class="mt-5 text-center"><i class="fas fa-list"></i> Project Item List</h3>
     <table class="table table-hover table-bordered table-striped mt-3">
         <thead class="table-dark">
             <tr class="text-center">
-                <th>Package ID</th>
+                <th>Project ID</th>
                 <th>Item Name</th>
                 <th>Description</th>
                 <th>Warehouse</th>
                 <th>Unit</th>
-                <th>Unit Price</th>
                 <th>Quantity</th>
                 <th>Entry/Update Date</th>
                 <th>Actions</th>
@@ -109,17 +105,16 @@
         <tbody>
             {% for item in items %}
             <tr class="text-center">
-                <td>{{ item.package.packageId }}</td>
+                <td>{{ item.project.projectId }}</td>
                 <td>{{ item.name }}</td>
                 <td>{{ item.description }}</td>
                 <td>{{ item.warehouse }}</td>
                 <td>{{ item.unit_of_item }}</td>
-                <td>৳ {{ item.unit_price }}</td>
                 <td>{{ item.quantity_of_item }}</td>
                 <td>{{ item.created_at|date:"Y-m-d" }}</td>
                 <td class="action-cell">
                     <div class="action-buttons">
-                        <a href="{% url 'App_Entry:edit_item' item.id %}" class="btn btn-warning btn-sm">
+                        <a href="{% url 'Project_App_Entry:edit_item' item.id %}" class="btn btn-info btn-sm">
                             <i class="fas fa-edit"></i> Edit
                         </a>
                         <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ item.id }}">
@@ -139,11 +134,11 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                            Are you sure you want to delete <strong>{{ item.name }}</strong> from package <strong>{{ item.package.packageId }}</strong>?
+                            Are you sure you want to delete <strong>{{ item.name }}</strong> from project <strong>{{ item.project.projectId }}</strong>?
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                            <a href="{% url 'App_Entry:delete_item' item.id %}" class="btn btn-danger">Yes, Delete</a>
+                            <a href="{% url 'Project_App_Entry:delete_item' item.id %}" class="btn btn-danger">Yes, Delete</a>
                         </div>
                     </div>
                 </div>
