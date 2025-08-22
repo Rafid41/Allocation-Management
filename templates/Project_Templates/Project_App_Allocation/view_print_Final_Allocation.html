@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Project Final Allocation {% endblock %}
+
+{% block body_block %}
+<a href="{% url 'Project_App_Allocation:allocation_page' %}" class="btn btn-outline-secondary">
+    <i class="fa fa-arrow-left"></i> Back
+</a>
+<center><h1><b>Project Final Allocation</b></h1></center>
+<div class="container mt-4">
+    <h2>Search Allocations</h2>
+
+    <form method="GET" action="{% url 'Project_App_Allocation:final_allocation' %}" class="row g-3">
+        <div class="col-md-4">
+            <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
+        </div>
+
+        <div class="col-md-3">
+            <select name="filter_by" id="filterDropdown" class="form-select" onchange="toggleInputFields()">
+                <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
+                <option value="allocation_no" {% if filter_by == "allocation_no" %}selected{% endif %}>Allocation No</option>
+                <option value="pbs" {% if filter_by == "pbs" %}selected{% endif %}>PBS</option>
+                <option value="project" {% if filter_by == "project" %}selected{% endif %}>Project</option>
+                <option value="item" {% if filter_by == "item" %}selected{% endif %}>Item</option>
+                <option value="warehouse" {% if filter_by == "warehouse" %}selected{% endif %}>Warehouse</option>
+                <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Entry/Update Date</option>
+            </select>
+        </div>
+
+        <div class="col-md-3" id="datePickerContainer" style="display: none;">
+            <input type="date" name="date" id="dateInput" class="form-control" value="{{ date_filter }}">
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary me-3">Search</button>
+            <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <h4>Search Results</h4>
+
+    <div id="printableArea" class="table-responsive">
+        <h3 class="text-center">Final Allocation Data</h3>
+        <br>
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark sticky-top">
+                <tr>
+                    <th>Allocation No</th>
+                    <th>PBS</th>
+                    <th>Project</th>
+                    <th>Item</th>
+                    <th>Warehouse</th>
+                    <th>Quantity</th>
+                    <th>Allocation date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if items %}
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.allocation_no.allocation_no }}</td>
+                        <td>{{ item.pbs }}</td>
+                        <td>{{ item.project.projectId }}</td>
+                        <td>{{ item.item.name }}</td>
+                        <td>{{ item.warehouse }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.created_at }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-danger">No matching data found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    /* Improve table readability */
+    .table {
+        font-size: 14px;
+        text-align: center;
+    }
+
+    /* Fixed table header */
+    .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+    }
+
+    /* Make table header stand out */
+    .table-dark th {
+        background-color: #343a40 !important;
+        color: white !important;
+    }
+
+    /* Improve spacing and border visibility */
+    .table-bordered th, .table-bordered td {
+        border: 1px solid #ddd !important;
+        padding: 10px;
+    }
+
+    /* Hover effect for better interaction */
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Hide unnecessary elements when printing */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #printableArea, #printableArea * {
+            visibility: visible;
+        }
+        #printableArea {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+
+        /* Add margins to the printed page */
+        @page {
+            size: A4;
+            margin: 0.5in;
+        }
+    }
+</style>
+
+<script>
+    function toggleInputFields() {
+        var filterDropdown = document.getElementById("filterDropdown");
+        var searchQuery = document.getElementById("searchQuery");
+        var datePickerContainer = document.getElementById("datePickerContainer");
+
+        if (filterDropdown.value === "Entry/Update date") {
+            searchQuery.style.display = "none";
+            datePickerContainer.style.display = "block";
+        } else {
+            searchQuery.style.display = "block";
+            datePickerContainer.style.display = "none";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleInputFields();
+    });
+
+    function printResults() {
+        window.print();
+    }
+</script>
+{% endblock %}

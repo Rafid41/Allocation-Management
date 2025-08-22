@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %}Download Allocation Letter{% endblock %}
+
+{% block body_block %}
+
+<style>
+    .page-title {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-top: 20px;
+    }
+
+    .custom-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
+        overflow: hidden;
+    }
+
+    .custom-card .card-header {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .custom-card .card-body {
+        background-color: #fdfdfd;
+        padding: 25px;
+    }
+
+    .custom-btn {
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 10px;
+        transition: 0.3s ease;
+    }
+
+    .custom-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0px 5px 12px rgba(0,0,0,0.2);
+    }
+
+    .font-alert {
+        border-radius: 12px;
+        font-size: 0.95rem;
+        padding: 15px;
+    }
+
+    .font-downloads .btn {
+        border-radius: 20px;
+        font-weight: 600;
+        padding: 5px 15px;
+    }
+
+    .back-btn {
+        margin-top: 5px;
+    }
+</style>
+
+<a href="{% url 'Project_App_Allocation:allocation_page' %}" class="btn btn-outline-secondary back-btn">
+    <i class="fa fa-arrow-left"></i> Back
+</a>
+
+<div class="container mt-4">
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show mt-3 text-center mx-auto" style="max-width: 700px;" role="alert">
+            <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <h2 class="text-center page-title"><i class="fa fa-file-word text-primary"></i> Download Project Final Allocation Report</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card mt-4 custom-card">
+                <div class="card-header text-white">
+                    <i class="fa fa-download"></i> Generate & Download Allocation Report
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="allocation_no" class="fw-bold text-secondary"><i class="fa fa-hashtag"></i> Select Allocation Number:</label>
+                            <select name="allocation_no" id="allocation_no" class="form-control" required>
+                                <option value="" selected disabled>-- Choose an allocation --</option>
+                                {% for allocation in allocated_allocations %}
+                                    <option value="{{ allocation.id }}">{{ allocation.allocation_no }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-block custom-btn mt-3">
+                            <i class="fa fa-file-word"></i> Download Report (.docx)
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert font-alert alert-warning text-center mt-4">
+        <strong><i class="fas fa-exclamation-triangle"></i> Attention:</strong>  
+        To generate this report correctly, please ensure you have the following fonts installed:  
+        <span style="color: #007bff;"><b>Times New Roman</b></span> (English) and  
+        <span style="color: #d63384;"><b>Nikosh</b></span> (Bengali).
+    </div>
+
+    <div class="text-center mt-2 mb-4 font-downloads">
+        <a href="{% static 'fonts/times-new-roman.ttf' %}" class="btn btn-outline-primary btn-sm mr-2" download>
+            <i class="fas fa-font"></i> Download <b>Times New Roman</b>
+        </a>
+        <a href="{% static 'fonts/Nikosh.ttf' %}" class="btn btn-outline-danger btn-sm" download>
+            <i class="fas fa-font"></i> Download <b>Nikosh</b>
+        </a>
+    </div>
+
+</div>
+{% endblock %}

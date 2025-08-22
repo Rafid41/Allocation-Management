@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Project Allocation {% endblock %}
+{% block css_block %}
+<style>
+    .allocation-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .allocation-card {
+        width: 100%;
+        max-width: 500px;
+        padding: 20px;
+        border-radius: 15px;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 15px;
+        text-decoration: none;
+        transition: all 0.25s ease-in-out;
+        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .allocation-card i {
+        font-size: 1.6rem;
+    }
+
+    .allocation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        text-decoration: none;
+        opacity: 0.95;
+    }
+
+    .card-add { background: linear-gradient(135deg, #4caf50, #2e7d32); }
+    .card-insert { background: linear-gradient(135deg, #2196f3, #1565c0); }
+    .card-allocate { background: linear-gradient(135deg, #607d8b, #455a64); }
+    .card-view { background: linear-gradient(135deg, #ff9800, #e65100); }
+    .card-report { background: linear-gradient(135deg, #673ab7, #311b92); }
+
+    @media (max-width: 500px) {
+        .allocation-card {
+            width: 100%;
+            font-size: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body_block %}
+<a href="{% url 'Project_App_Home:project_home_page' %}" class="btn btn-outline-dark mb-3">
+    <i class="fa fa-arrow-left"></i> Back
+</a>
+
+<div class="text-center mb-4">
+    <h1 class="fw-bold">📊 Project Allocation</h1>
+    <p class="text-muted">Manage allocations, reports, and PBS easily</p>
+</div>
+
+<div class="container allocation-container">
+
+    <a href="{% url 'Project_App_Allocation:view_PBS_and_addNew' %}" class="allocation-card card-add">
+        <i class="fas fa-plus-circle"></i> Add New PBS
+    </a>
+
+    <a href="{% url 'Project_App_Allocation:view_allocation_numbers_and_Add_New'%}" class="allocation-card card-insert">
+        <i class="fas fa-plus-square"></i> Insert New Allocation Number
+    </a>
+
+    <a href="{% url 'Project_App_Allocation:select_allocation_number'%}" class="allocation-card card-allocate">
+        <i class="fas fa-tasks"></i> Allocate Items to PBS
+    </a>
+
+    <a href="{% url 'Project_App_Allocation:final_allocation' %}" class="allocation-card card-view">
+        <i class="fas fa-eye"></i> View Final Allocation
+    </a>
+
+    <a href="{% url 'Project_App_Allocation:individual_final_allocation_download' %}" class="allocation-card card-report">
+        <i class="fas fa-file-word"></i> Generate Printed Report
+    </a>
+
+</div>
+{% endblock %}

@@ -24,6 +24,7 @@ urlpatterns = [
     path("admin_panel/", include("App_Admin_Panel.urls")),
     path("project/", include("Project_App_Home.urls")),
     path("project/project_entry/", include("Project_App_Entry.urls")),
+    path("project/project_allocation/", include("Project_App_Allocation.urls")),
 ]
 
 

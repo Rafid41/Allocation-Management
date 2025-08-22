@@ -112,7 +112,7 @@ a.section-link {
     {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
         <div class="row text-center">
             <div class="col-md-4 mb-4">
-                <a href="" class="section-link">
+                <a href="{% url 'Project_App_Allocation:allocation_page' %}" class="section-link">
                     <div class="section-card bg-allocation">
                         <i class="fas fa-tasks"></i>
                         <h4>Allocation</h4>

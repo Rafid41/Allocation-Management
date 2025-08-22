@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Select Allocation Number {% endblock %}
+
+{% block body_block %}
+
+<style>
+    .custom-card {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        background: #ffffff;
+    }
+
+    .custom-card h2 {
+        background: linear-gradient(90deg, #007bff, #00c6ff);
+        color: white;
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 22px;
+    }
+
+    .custom-form-group {
+        max-width: 350px;
+        margin: 20px auto;
+        text-align: left;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .custom-btn {
+        width: 220px;
+        font-size: 16px;
+        padding: 10px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .custom-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 10px rgba(0, 123, 255, 0.3);
+    }
+
+    .custom-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        border: none;
+        background: none;
+        color: red;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .custom-close:hover {
+        color: darkred;
+    }
+</style>
+
+<!-- Messages -->
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} position-relative">
+        <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+        {{ message }}
+        <button type="button" class="custom-close" data-bs-dismiss="alert" aria-label="Close">×</button>
+    </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Back Button -->
+<div class="container">
+    <a href="{% url 'Project_App_Allocation:allocation_page' %}" class="btn btn-outline-secondary mb-3">
+        <i class="fa fa-arrow-left"></i> Back
+    </a>
+</div>
+
+<!-- Main Card -->
+<div class="container">
+    <div class="card custom-card">
+        <h2 class="text-center"><i class="fas fa-list"></i> Select Allocation Number</h2>
+        
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+
+            <div class="form-group custom-form-group">
+                <label for="allocation_no" class="fw-bold mb-2">
+                    <i class="fa fa-hashtag text-primary"></i> Choose Allocation Number
+                </label>
+                <select name="allocation_no" id="allocation_no" class="form-control" required>
+                    <option value="" disabled selected>Select an allocation</option>
+                    {% for allocation in allocation_numbers %}
+                        <option value="{{ allocation.id }}">{{ allocation.allocation_no }}</option>
+                    {% empty %}
+                        <option disabled>No available allocations</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success mt-3 custom-btn mx-auto d-block">
+                <i class="fa fa-check"></i> Confirm
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

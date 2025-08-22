@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title_block %} Allocate Project Item {% endblock %}
+
+{% block body_block %}
+<div class="container mt-4">
+    <h2 class="text-primary text-center"><b>Allocate Project Item</b></h2>
+
+    <!-- Display Success & Error Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
+                <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                <label>Allocation Number:</label>
+                <input type="text" class="form-control" value="{{ allocation_no_obj.allocation_no }}" readonly>
+                <input type="hidden" name="allocation_no" value="{{ allocation_no_obj.id }}">
+            </div>
+            <div class="col-md-6">
+                <label>Item Name:</label>
+                <input type="text" class="form-control" value="{{ item.name }}" readonly>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label>PBS:</label>
+                <select name="pbs" class="form-select" required>
+                    <option value="">Select PBS</option>
+                    {% for pbs in pbss %}
+                        <option value="{{ pbs.id }}">{{ pbs.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label>Project:</label>
+                <input type="text" class="form-control" value="{{ item.project.projectId }}" readonly>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label>Warehouse:</label>
+                <input type="text" class="form-control" value="{{ item.warehouse }}" readonly>
+            </div>
+            <div class="col-md-6">
+                <label>Quantity:</label>
+                <input type="number" name="quantity" class="form-control" placeholder="Max Item: {{ item.quantity_of_item }}" required>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <label>Unit:</label>
+                <input type="text" class="form-control" value="{{ item.unit_of_item }}" readonly>
+            </div>
+            
+        </div>
+
+        <!-- Buttons (Cancel on the left and Allocate on the right) -->
+        <div class="row mt-4 d-flex justify-content-between">
+            <div class="col-md-6 text-start">
+                <a href="{% url 'Project_App_Allocation:Search_and_Select' allocation_no_obj.id  %}" class="btn btn-danger">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+            <div class="col-md-6 text-end">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Allocate
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <hr>
+
+    <h3 class="text-center text-secondary"><b>Temporary Allocated Items</b></h3>
+    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;"> 
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>PBS</th>
+                    <th>Item Name</th>
+                    <th>Project</th>
+                    <th>Warehouse</th>
+                    <th>Quantity</th>
+                    <th>Allocation Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for allocation in allocations %}
+                <tr>
+                    <td>{{ allocation.pbs.name }}</td>
+                    <td>{{ allocation.item.name }}</td>
+                    <td>{{ allocation.project.projectId }}</td>
+                    <td>{{ allocation.warehouse }}</td>
+                    <td>{{ allocation.quantity }}</td>
+                    <td>{{ allocation.created_at }}</td>
+                    <td class="text-center">
+                        <button class="btn btn-danger btn-sm delete-btn" data-toggle="modal" data-target="#deleteModal{{ allocation.id }}" style="display: none;">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <div class="modal fade" id="deleteModal{{ allocation.id }}" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title text-danger">Confirm Deletion</h5>
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to delete this allocation? This action cannot be undone.
+                                    </div>
+                                    <div class="modal-footer">
+                                        <form method="POST" action="{% url 'Project_App_Allocation:delete_allocation_in_allocate_page' allocation.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                        </form>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center text-danger">No Allocations Found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(".delete-btn").hide();  // Ensure buttons start hidden
+
+            $("tbody tr").hover(
+                function() {
+                    $(this).find(".delete-btn").stop(true, true).fadeIn(200);
+                },
+                function() {
+                    $(this).find(".delete-btn").stop(true, true).fadeOut(200);
+                }
+            );
+        });        
+    </script>
+
+    <style>
+        /* Ensure delete button is fully visible */
+        .delete-btn {
+            opacity: 1 !important;
+            visibility: visible !important;
+            color: white !important;
+        }
+
+        /* Fix for buttons not showing */
+        .delete-btn i {
+            color: white !important;
+        }
+    </style>
+</div>
+{% endblock %}

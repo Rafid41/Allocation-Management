@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     # for project
     "Project_App_Home",
     "Project_App_Entry",
+    "Project_App_Allocation",
 ]
 
 # bootstrap, bootstrap3, bootstrap4, uni-form
