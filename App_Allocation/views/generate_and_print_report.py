@@ -231,7 +231,7 @@ def individual_allocation_download(request):
                     str(entry.item),
                     str(entry.price),
                     str(entry.quantity),
-                    f"PBSF-{entry.package.packageId} Lot-1",
+                    str(entry.package.packageId),
                     str(entry.warehouse)
                 ]
 
@@ -330,11 +330,15 @@ def individual_allocation_download(request):
         messages.error(request, "Please select an allocation number.")
         return redirect("App_Allocation:individual_allocation_download")
 
+    # allocated_allocations = Allocation_Number.objects.filter(
+    #     Q(status="Allocated") | Q(status="Modified"),
+    #     allocation_no__in=Final_Allocation.objects.values_list(
+    #         "allocation_no", flat=True
+    #     ).distinct(),
+    # ).order_by("-allocation_no")
     allocated_allocations = Allocation_Number.objects.filter(
         Q(status="Allocated") | Q(status="Modified"),
-        allocation_no__in=Final_Allocation.objects.values_list(
-            "allocation_no", flat=True
-        ).distinct(),
+        id__in=Final_Allocation.objects.values_list("allocation_no_id", flat=True).distinct(),
     ).order_by("-allocation_no")
 
     return render(
