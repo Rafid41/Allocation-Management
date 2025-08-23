@@ -73,7 +73,7 @@ def add_item_to_project(request):
 
         if unit_of_item not in UNIT_CHOICES:
             messages.error(request, "Invalid unit selected.")
-            return redirect("App_Entry:add_item_to_project")
+            return redirect("Project_App_Entry:add_item_to_project")
 
         project = get_object_or_404(Project, id=project_id)
 
@@ -86,7 +86,7 @@ def add_item_to_project(request):
                     request,
                     f"Cannot update {item_name} in {warehouse} as it already exists with quantity {existing_item.quantity_of_item}.",
                 )
-                return redirect("App_Entry:add_item_to_package")
+                return redirect("Project_App_Entry:add_item_to_project")
 
         # Check if the same project and item exist with a different price
         same_project_items = Project_Item.objects.filter(name=item_name, project=project)
@@ -173,16 +173,11 @@ def edit_item(request, item_id):
                     request,
                     f"Cannot update '{item_name}' to warehouse '{warehouse}' as another entry exists with quantity {existing_item.quantity_of_item}.",
                 )
-                return redirect("App_Entry:edit_item", item_id=item.id)
+                return redirect("Project_App_Entry:edit_item", item_id=item.id)
 
-        # Check if the price has changed and update all entries with the same package and item
-        # new_price = unit_price
-        # if item.unit_price != new_price:
-        #     Item.objects.filter(package_id=package_id, name=item_name).update(unit_price=new_price)
-        #     messages.success(request, f"Price updated for all '{item_name}' in package '{package_id}'.")
 
         # Update item values
-        item.package = get_object_or_404(Project, id=project_id)
+        item.project = get_object_or_404(Project, id=project_id)
         item.name = item_name
         item.warehouse = warehouse
         item.unit_of_item = unit_of_item  # Store only key (e.g., "Nos.", "Km.", etc.)

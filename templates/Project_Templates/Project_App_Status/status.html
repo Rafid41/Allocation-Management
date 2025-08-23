@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block title_block %} Project Status {% endblock %}
+
+{% block body_block %}
+<a href="{% url 'Project_App_Home:project_home_page' %}" class="btn btn-outline-dark mb-3">
+    <i class="fa fa-arrow-left"></i> Back
+</a>
+<center><h1><b> Project Status </b></h1></center>
+<div class="container mt-4">
+    <h2>Search Items</h2>
+
+    <form method="GET" action="{% url 'Project_App_Status:status_page' %}" class="row g-3">
+        <div class="col-md-4">
+            <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
+        </div>
+
+        <div class="col-md-3">
+            <select name="filter_by" id="filterDropdown" class="form-select" onchange="toggleInputFields()">
+                <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
+                <option value="Project ID" {% if filter_by == "Project ID" %}selected{% endif %}>Project ID</option>
+                <option value="Item Name" {% if filter_by == "Item Name" %}selected{% endif %}>Item Name</option>
+                <option value="Warehouse" {% if filter_by == "Warehouse" %}selected{% endif %}>Warehouse</option>
+                <option value="Unit" {% if filter_by == "Unit" %}selected{% endif %}>Unit</option>
+                <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Entry/Update Date</option>
+            </select>
+        </div>
+
+        <div class="col-md-3" id="datePickerContainer" style="display: none;">
+            <input type="date" name="date" id="dateInput" class="form-control" value="{{ date_filter }}">
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary me-3">Search</button>
+            <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <h4>Search Results</h4>
+
+    <div id="printableArea" class="table-responsive">
+        <h3 class="text-center">Project Status</h3>
+        <br>
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark sticky-top">
+                <tr>
+                    <th>Project ID</th>
+                    <th>Item Name</th>
+                    <th>Warehouse</th>
+                    <th>Unit</th>
+                    <th>Quantity</th>
+                    <th>Entry/Update date <center>yyyy-mm-dd</center></th>
+                    <th>Comments</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if items %}
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.project.projectId }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.warehouse }}</td>
+                        <td>{{ item.unit_of_item }}</td>
+                        <td>{{ item.quantity_of_item }}</td>
+                        <td>{{ item.created_at | date:"Y-m-d" }}</td>
+
+                        <!-- Comments Column -->
+                        <td class="comments-cell text-start">
+                            {% if item.comments %}
+                                {{ item.comments|linebreaksbr }}<br>
+                            {% endif %}
+                            {% if can_edit_comments %}
+                            <button class="btn btn-sm btn-outline-primary mt-1 update-btn" onclick="showCommentInput('{{ item.id }}')">Update</button>
+                            <div id="input_comments_{{ item.id }}" style="display: none;" class="mt-1">
+                                <textarea id="text_comments_{{ item.id }}" class="form-control form-control-sm" rows="3">{{ item.comments|default_if_none:"" }}</textarea>
+                                <button class="btn btn-sm btn-success mt-1" onclick="submitComment('{{ item.id }}')">Save</button>
+                            </div>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-danger">No matching data found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .table { font-size: 14px; text-align: center; }
+    .sticky-top { position: sticky; top: 0; z-index: 1020; }
+    .table-dark th { background-color: #343a40 !important; color: white !important; }
+    .table-bordered th, .table-bordered td { border: 1px solid #ddd !important; padding: 10px; }
+    .table-hover tbody tr:hover { background-color: rgba(0, 0, 0, 0.05); }
+
+    .comments-cell button.update-btn { display: none; }
+    .comments-cell:hover button.update-btn { display: inline-block; }
+
+    @media print {
+        body * { visibility: hidden; }
+        #printableArea, #printableArea * { visibility: visible; }
+        #printableArea { position: absolute; left: 0; top: 0; width: 100%; }
+        @page { size: A4; margin: 0.5in; }
+        h1, h2 { display: none; }
+    }
+</style>
+
+<script>
+function toggleInputFields() {
+    var filterDropdown = document.getElementById("filterDropdown");
+    var searchQuery = document.getElementById("searchQuery");
+    var datePickerContainer = document.getElementById("datePickerContainer");
+
+    if (filterDropdown.value === "Entry/Update date") {
+        searchQuery.style.display = "none";
+        datePickerContainer.style.display = "block";
+    } else {
+        searchQuery.style.display = "block";
+        datePickerContainer.style.display = "none";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    toggleInputFields();
+});
+
+function printResults() {
+    window.print();
+}
+
+function showCommentInput(id) {
+    const container = document.getElementById(`input_comments_${id}`);
+    container.style.display = 'block';
+
+    const textarea = document.getElementById(`text_comments_${id}`);
+    textarea.focus();
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+}
+
+function submitComment(id) {
+    const comment = document.getElementById(`text_comments_${id}`).value;
+
+    fetch(`/project/project_status/update-comment/${id}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": '{{ csrf_token }}',
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text: comment })
+    }).then(res => {
+        if (res.ok) location.reload();
+        else res.json().then(data => alert(data.error || "Failed"));
+    });
+}
+</script>
+{% endblock %}

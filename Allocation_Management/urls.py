@@ -26,6 +26,7 @@ urlpatterns = [
     path("project/project_entry/", include("Project_App_Entry.urls")),
     path("project/project_allocation/", include("Project_App_Allocation.urls")),
     path("project/project_history/", include("Project_App_History.urls")),
+    path("project/project_status/", include("Project_App_Status.urls")),
 ]
 
 

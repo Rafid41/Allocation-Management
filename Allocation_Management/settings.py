@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "Project_App_Entry",
     "Project_App_Allocation",
     "Project_App_History",
+    "Project_App_Status",
 ]
 
 # bootstrap, bootstrap3, bootstrap4, uni-form

@@ -40,6 +40,7 @@ class Project_Item(models.Model):
         null=True,
     )
     created_at = models.DateTimeField(default=timezone.now)
+    comments = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return str(self.name)
