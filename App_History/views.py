@@ -7,6 +7,7 @@ from datetime import datetime, time
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.db.models import Q
 
 @login_required
 def history(request):
@@ -18,8 +19,20 @@ def history(request):
     results = History.objects.all().order_by('-created_at')
 
     # Non-date filters
+    
+
+    # Non-date filters
     if query and filter_by not in ["allocation_date", "cs_and_m_date", "carry_from_warehouse_date"]:
-        if filter_by == "allocation_no":
+        if filter_by == "All":
+            results = results.filter(
+                Q(allocation_no__icontains=query) |
+                Q(pbs__icontains=query) |
+                Q(package__icontains=query) |
+                Q(item__icontains=query) |
+                Q(warehouse__icontains=query) |
+                Q(status__icontains=query)
+            )
+        elif filter_by == "allocation_no":
             results = results.filter(allocation_no__icontains=query)
         elif filter_by == "pbs":
             results = results.filter(pbs__icontains=query)
@@ -31,6 +44,7 @@ def history(request):
             results = results.filter(warehouse__icontains=query)
         elif filter_by == "status":
             results = results.filter(status__icontains=query)
+
 
     # Date filters
     if filter_by == "allocation_date":
