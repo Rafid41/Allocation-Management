@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from Project_App_Allocation.models import Temporary_Allocation, Final_Allocation, Allocation_Number
 from Project_App_Entry.models import Project_Item as Item
-# from Project_App_History.models import History
+from Project_App_History.models import Project_History as History
 
 def view_confirm_allocation(request, allocation_id):
     allocation_no_obj = get_object_or_404(Allocation_Number, id=allocation_id)
@@ -71,19 +71,19 @@ def confirm_allocation(request, allocation_id):
             allocation_no_obj.save()
 
             # Create History entry
-            # History.objects.create(
-            #     allocation_no=allocation.allocation_no.allocation_no, 
-            #     pbs=allocation.pbs,
-            #     project=allocation.project.projectId,
-            #     item=allocation.item,
-            #     unit_of_item=allocation.unit_of_item,
-            #     warehouse=allocation.warehouse,
-            #     quantity=allocation.quantity,
-            #     # price=allocation.price,
-            #     created_at=dhaka_time,  
-            #     status="Allocated",
-            #     remarks="Allocated at: <b>" + dhaka_time.strftime("%Y-%m-%d %I:%M %p") + "</b>",
-            # )
+            History.objects.create(
+                allocation_no=allocation.allocation_no.allocation_no, 
+                pbs=allocation.pbs,
+                project=allocation.project.projectId,
+                item=allocation.item,
+                unit_of_item=allocation.unit_of_item,
+                warehouse=allocation.warehouse,
+                quantity=allocation.quantity,
+                # price=allocation.price,
+                created_at=dhaka_time,  
+                status="Allocated",
+                remarks="Allocated at: <b>" + dhaka_time.strftime("%Y-%m-%d %I:%M %p") + "</b>",
+            )
 
         # Delete temporary allocations
         allocations.delete()

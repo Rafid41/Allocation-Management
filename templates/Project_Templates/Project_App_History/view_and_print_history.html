@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load tz %}
+
+{% block title_block %} Project History {% endblock %}
+
+{% block body_block %}
+<a href="{% url 'Project_App_Home:project_home_page' %}" class="btn btn-outline-secondary">
+    <i class="fa fa-arrow-left"></i> Back
+</a>
+
+
+<div class="container mt-4">
+    <h2 class="text-center mb-3"><b>Project History</b></h2>
+
+    <form method="GET" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
+        </div>
+        <div class="col-md-3">
+            <select name="filter_by" id="filterDropdown" class="form-select" onchange="toggleInputFields()">
+                <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
+                <option value="allocation_no" {% if filter_by == "allocation_no" %}selected{% endif %}>Allocation No</option>
+                <option value="pbs" {% if filter_by == "pbs" %}selected{% endif %}>PBS</option>
+                <option value="package" {% if filter_by == "package" %}selected{% endif %}>Package</option>
+                <option value="item" {% if filter_by == "item" %}selected{% endif %}>Item</option>
+                <option value="warehouse" {% if filter_by == "warehouse" %}selected{% endif %}>Warehouse</option>
+                <option value="status" {% if filter_by == "status" %}selected{% endif %}>Status</option>
+                <option value="cs_and_m_date" {% if filter_by == "cs_and_m_date" %}selected{% endif %}>CS&amp;M Date</option>
+                <option value="carry_from_warehouse_date" {% if filter_by == "carry_from_warehouse_date" %}selected{% endif %}>Carry from Warehouse Date</option>
+            </select>
+        </div>
+
+        <!-- Date Status Dropdown -->
+        <div class="col-md-2" id="dateStatusContainer" style="display: none;">
+            <select name="date_status" class="form-select">
+                <option value="all" {% if date_status == "all" %}selected{% endif %}>Show All Data</option>
+                <option value="empty" {% if date_status == "empty" %}selected{% endif %}>Show Empty Cells</option>
+            </select>
+        </div>
+
+        <!-- Date Picker -->
+        <div class="col-md-3" id="datePickerContainer" style="display: none;">
+            <input type="date" name="date" class="form-control" value="{{ date_filter }}">
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">Search</button>
+            <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+        </div>
+    </form>
+
+    <!-- Printable Table -->
+    <div id="printableArea" class="table-responsive">
+        <table class="table table-bordered table-striped table-hover text-center">
+            <thead class="table-dark sticky-top">
+                <tr>
+                    <th>Allocation No</th>
+                    <th>PBS</th>
+                    <th>Package</th>
+                    <th>Item</th>
+                    <th>Unit</th>
+                    <th>Warehouse</th>
+                    <th>Quantity</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                    <th>
+                        CS&M<br>
+                        <span style="font-size: 0.75em; font-style: italic;">(dd/mm/yy)</span>
+                    </th>
+                    <th>
+                        Carry from Warehouse<br>
+                        <span style="font-size: 0.75em; font-style: italic;">(dd/mm/yy)</span>
+                    </th>
+                    <th>Comments</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if items %}
+                    {% for item in items %}
+                        <tr>
+                            <td>{{ item.allocation_no }}</td>
+                            <td>{{ item.pbs }}</td>
+                            <td>{{ item.package }}</td>
+                            <td>{{ item.item }}</td>
+                            <td>{{ item.unit_of_item }}</td>
+                            <td>{{ item.warehouse }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td class="{% if item.status == 'Allocated' %}text-success{% elif item.status == 'Cancelled' %}text-danger{% elif item.status == 'Modified' %}text-primary{% endif %}">
+                                <strong>{{ item.status }}</strong>
+                            </td>
+                            <td>{{ item.remarks|safe }}</td>
+
+                            <!-- CS&M -->
+                            <td class="date-cell">
+                                {% if item.CS_and_M %}
+                                    {{ item.CS_and_M|date:"d/m/y" }}<br>
+                                {% endif %}
+                                {% if can_edit_cs %}
+                                    <button class="btn btn-sm btn-outline-primary mt-1 update-btn" onclick="showInput('{{ item.id }}', 'cs')">Update</button>
+                                    <div id="input_cs_{{ item.id }}" style="display: none;" class="mt-1">
+                                        <input type="date"
+                                            id="date_cs_{{ item.id }}"
+                                            class="form-control form-control-sm"
+                                            {% if item.CS_and_M %}
+                                                value="{{ item.CS_and_M|date:'Y-m-d' }}"
+                                            {% endif %}>
+                                        <button class="btn btn-sm btn-success mt-1" onclick="submitDate('{{ item.id }}', 'cs')">Save</button>
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                            <!-- Carry From Warehouse -->
+                            <td class="date-cell">
+                                {% if item.carry_from_warehouse %}
+                                    {{ item.carry_from_warehouse|date:"d/m/y" }}<br>
+                                {% endif %}
+                                {% if can_edit_carry %}
+                                    <button class="btn btn-sm btn-outline-primary mt-1 update-btn" onclick="showInput('{{ item.id }}', 'carry')">Update</button>
+                                    <div id="input_carry_{{ item.id }}" style="display: none;" class="mt-1">
+                                        <input type="date"
+                                            id="date_carry_{{ item.id }}"
+                                            class="form-control form-control-sm"
+                                            {% if item.carry_from_warehouse %}
+                                                value="{{ item.carry_from_warehouse|date:'Y-m-d' }}"
+                                            {% endif %}>
+                                        <button class="btn btn-sm btn-success mt-1" onclick="submitDate('{{ item.id }}', 'carry')">Save</button>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <!-- Comments -->
+                            <td class="comments-cell text-start">
+                                {% if item.comments %}
+                                    {{ item.comments|linebreaksbr }}<br>
+                                {% endif %}
+
+                                {% if can_edit_comments %}
+                                    <button class="btn btn-sm btn-outline-primary mt-1 update-btn" onclick="showCommentInput('{{ item.id }}')">Update</button>
+                                    <div id="input_comments_{{ item.id }}" style="display: none;" class="mt-1">
+                                        <textarea id="text_comments_{{ item.id }}" class="form-control form-control-sm" rows="3">{{ item.comments|default_if_none:"" }}</textarea>
+                                        <button class="btn btn-sm btn-success mt-1" onclick="submitComment('{{ item.id }}')">Save</button>
+                                    </div>
+                                {% endif %}
+                            </td>
+
+
+
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center text-danger">No matching data found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    /* Hide the update button by default */
+    .date-cell button.update-btn {
+        display: none;
+    }
+    /* Show button when hovering over the cell */
+    .date-cell:hover button.update-btn {
+        display: inline-block;
+    }
+
+    /* Print only the table */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #printableArea, #printableArea * {
+            visibility: visible;
+        }
+        #printableArea {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+    }
+
+    .comments-cell button.update-btn {
+        display: none;
+    }
+    .comments-cell:hover button.update-btn {
+        display: inline-block;
+    }
+
+</style>
+
+<script>
+    function toggleInputFields() {
+        const filter = document.getElementById("filterDropdown").value;
+        const isDateFilter = ["allocation_date", "cs_and_m_date", "carry_from_warehouse_date"].includes(filter);
+
+        document.getElementById("datePickerContainer").style.display = isDateFilter ? "block" : "none";
+        document.getElementById("dateStatusContainer").style.display = isDateFilter ? "block" : "none";
+        document.getElementById("searchQuery").style.display = isDateFilter ? "none" : "block";
+    }
+
+    function printResults() {
+        window.print();
+    }
+
+    function showInput(id, field) {
+        document.getElementById(`input_${field}_${id}`).style.display = 'block';
+    }
+
+    function submitDate(id, field) {
+        const datetime = document.getElementById(`date_${field}_${id}`).value;
+        if (!datetime) return alert("Please select a date.");
+
+        fetch(`/project/project_history/update-date/${id}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": '{{ csrf_token }}',
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ field: field, date: datetime })
+        }).then(res => {
+            if (res.ok) location.reload();
+            else res.json().then(data => alert(data.error || "Failed"));
+        });
+    }
+
+    
+function showCommentInput(id) {
+    const container = document.getElementById(`input_comments_${id}`);
+    container.style.display = 'block';
+
+    const textarea = document.getElementById(`text_comments_${id}`);
+    // Put cursor at the end
+    textarea.focus();
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+}
+
+
+    function submitComment(id) {
+        const comment = document.getElementById(`text_comments_${id}`).value;
+
+        fetch(`/project/project_history/update-date/${id}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": '{{ csrf_token }}',
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ field: "comments", text: comment })
+        }).then(res => {
+            if (res.ok) location.reload();
+            else res.json().then(data => alert(data.error || "Failed"));
+        });
+    }
+
+
+
+    document.addEventListener("DOMContentLoaded", toggleInputFields);
+</script>
+{% endblock %}
