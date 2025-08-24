@@ -21,13 +21,13 @@
 
 /* Project Home compact button style */
 .section-card {
-    min-height: 160px;               /* smaller height */
+    min-height: 160px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 30px 25px;              /* smaller padding for pill effect */
-    border-radius: 40px;             /* pill shape */
+    padding: 30px 25px;
+    border-radius: 40px;
     color: white;
     font-weight: 600;
     text-align: center;
@@ -56,13 +56,13 @@
 }
 
 .section-card i {
-    font-size: 2.5rem;               /* smaller icon */
+    font-size: 2.5rem;
     margin-bottom: 12px;
     transition: transform 0.3s ease, color 0.3s ease;
 }
 
 .section-card h4 {
-    font-size: 1.4rem;               /* smaller font */
+    font-size: 1.4rem;
     margin: 0;
 }
 
@@ -83,6 +83,10 @@
 .bg-modify     { background: linear-gradient(135deg, #43cea2, #185a9d); }
 .bg-cancel     { background: linear-gradient(135deg, #ff416c, #ff4b2b); }
 .bg-entry      { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+
+/* 🔥 New buttons */
+.bg-balance    { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.bg-back       { background: linear-gradient(135deg, #ee0979, #ff6a00); }
 
 a.section-link {
     text-decoration: none;
@@ -159,6 +163,26 @@ a.section-link {
                     <div class="section-card bg-entry">
                         <i class="fas fa-plus-circle"></i>
                         <h4>Entry</h4>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 🔥 New Row for Extra Buttons -->
+        <div class="row text-center">
+            <div class="col-md-6 mb-4">
+                <a href="#" class="section-link">
+                    <div class="section-card bg-balance">
+                        <i class="fas fa-balance-scale"></i>
+                        <h4>Project-Wise Balance</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 mb-4">
+                <a href="{% url 'App_Home:home_page' %}" class="section-link">
+                    <div class="section-card bg-back">
+                        <i class="fas fa-arrow-circle-left"></i>
+                        <h4>Go Back to Allocation Management</h4>
                     </div>
                 </a>
             </div>
