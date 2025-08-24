@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title_block %} Add New Item to Allocation {% endblock %}
+
+{% block body_block %}
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+        <i class="fa {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %}"></i>
+        {{ message }}
+        <button type="button" class="custom-close" data-bs-dismiss="alert" aria-label="Close">X</button>
+    </div>
+    {% endfor %}
+{% endif %}
+
+<a href="{% url 'Project_App_Modification:modification_options' allocation_id %}" class="btn btn-outline-secondary">
+  <i class="fa fa-arrow-left"></i> Back
+</a>
+
+<center>
+  <h1 class="fw-bold text-primary">Add New Item to Allocation</h1>
+  {% if allocation_number %}
+    <div class="alert alert-info mt-3 w-50 mx-auto">
+      Allocation Number: <strong class="text-danger">{{ allocation_number }}</strong>
+    </div>
+  {% endif %}
+</center>
+
+<div class="container mt-4">
+  <form method="GET" action="{% url 'Project_App_Modification:search_and_select_item' allocation_id %}" class="row g-3">
+    <div class="col-md-4">
+      <input type="text" name="query" class="form-control" placeholder="Search..." value="{{ query }}">
+    </div>
+    <div class="col-md-3">
+      <select name="filter_by" class="form-select" onchange="toggleInputFields()">
+        <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
+        <option value="Project ID" {% if filter_by == "Project ID" %}selected{% endif %}>Project ID</option>
+        <option value="Item Name" {% if filter_by == "Item Name" %}selected{% endif %}>Item Name</option>
+        <option value="Warehouse" {% if filter_by == "Warehouse" %}selected{% endif %}>Warehouse</option>
+        <option value="Unit" {% if filter_by == "Unit" %}selected{% endif %}>Unit</option>
+        <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Entry/Update Date</option>
+      </select>
+    </div>
+    <div class="col-md-3" id="datePickerContainer" style="display: none;">
+      <input type="date" name="date" class="form-control" value="{{ date_filter }}">
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+    </div>
+  </form>
+
+  <hr>
+
+  <h4 class="text-secondary">Search Results</h4>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>Project ID</th>
+          <th>Item Name</th>
+          <th>Warehouse</th>
+          <th>Unit</th>
+          <th>Quantity</th>
+          {% comment %} <th>Unit Price</th> {% endcomment %}
+          <th>Created Date</th>
+          <th>Select</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if items %}
+          {% for item in items %}
+            <tr>
+              <td>{{ item.project.projectId }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.warehouse }}</td>
+              <td>{{ item.unit_of_item }}</td>
+              <td>{{ item.quantity_of_item }}</td>
+              {% comment %} <td>৳ {{ item.unit_price }}</td> {% endcomment %}
+              <td>{{ item.created_at }}</td>
+              <td>
+                <a href="{% url 'Project_App_Modification:add_item' allocation_id item.id %}" class="btn btn-success btn-sm">
+                  <i class="fas fa-plus"></i> Add
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr><td colspan="8" class="text-center text-danger">No matching items found</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  function toggleInputFields() {
+    const filterDropdown = document.querySelector("select[name='filter_by']");
+    const datePicker = document.getElementById("datePickerContainer");
+    const queryInput = document.querySelector("input[name='query']");
+
+    if (filterDropdown.value === "Entry/Update date") {
+      datePicker.style.display = "block";
+      queryInput.style.display = "none";
+    } else {
+      datePicker.style.display = "none";
+      queryInput.style.display = "block";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", toggleInputFields);
+</script>
+<style>
+    
+  .custom-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      border: none;
+      background: none;
+      color: red;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+  }
+  
+  .custom-close:hover {
+      color: darkred;
+  }
+</style>
+{% endblock %}

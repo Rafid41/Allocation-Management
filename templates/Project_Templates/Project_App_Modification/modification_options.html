@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title_block %}Project Modification Options{% endblock %}
+
+{% block body_block %}
+<div class="container mt-4">
+
+    <!-- Back Button -->
+    <a href="{% url 'Project_App_Modification:modification_menu' %}" class="btn btn-outline-secondary mb-3">
+        <i class="fa fa-arrow-left"></i> Back
+    </a>
+
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">
+            Modification Options for Allocation:
+            <span class="text-primary">{{ allocation.allocation_no }}</span>
+        </h2>
+    </div>
+
+    <!-- Options Card -->
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-body text-center p-5">
+
+                    <h4 class="mb-4 text-muted">Choose an Action</h4>
+
+                    <!-- Delete Item -->
+                    <a href="{% url 'Project_App_Modification:view_final_allocation' allocation.id %}" 
+                       class="btn btn-danger btn-lg w-100 mb-3 shadow-sm">
+                        <i class="fa fa-trash"></i> Delete Item
+                    </a>
+
+                    <!-- Add Item -->
+                    <a href="{% url 'Project_App_Modification:search_and_select_item' allocation.id %}" 
+                       class="btn btn-success btn-lg w-100 shadow-sm">
+                        <i class="fa fa-plus-circle"></i> Add Item
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
