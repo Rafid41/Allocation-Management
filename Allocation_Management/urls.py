@@ -28,6 +28,7 @@ urlpatterns = [
     path("project/project_history/", include("Project_App_History.urls")),
     path("project/project_status/", include("Project_App_Status.urls")),
     path("project/project_modification/", include("Project_App_Modification.urls")),
+    path("project/project_cancellation/", include("Project_App_Cancellation.urls")),
 ]
 
 
