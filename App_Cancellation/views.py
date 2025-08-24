@@ -77,18 +77,18 @@ def cancellation_view(request):
                     item.save()
 
 
-                History.objects.create(
-                        allocation_no=allocation.allocation_no,  # Ensure it's an integer
-                        pbs=entry.pbs,
-                        package=entry.package.packageId,  # Assuming packageId holds the value
-                        item=entry.item,
-                        warehouse=entry.warehouse,
-                        quantity=entry.quantity,
-                        price=entry.price,
-                        created_at=dhaka_time,
-                        status="Cancelled",
-                        remarks="Cancelled at: <b>" + dhaka_time.strftime("%Y-%m-%d %I:%M %p") + "</b>",  
-                    )
+                    History.objects.create(
+                            allocation_no=allocation.allocation_no,  # Ensure it's an integer
+                            pbs=entry.pbs,
+                            package=entry.package.packageId,  # Assuming packageId holds the value
+                            item=entry.item,
+                            warehouse=entry.warehouse,
+                            quantity=entry.quantity,
+                            price=entry.price,
+                            created_at=dhaka_time,
+                            status="Cancelled",
+                            remarks="Cancelled at: <b>" + dhaka_time.strftime("%Y-%m-%d %I:%M %p") + "</b>",  
+                        )
                 
 
                 allocation.status = "Cancelled"
