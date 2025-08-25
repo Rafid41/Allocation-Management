@@ -45,6 +45,7 @@ def add_item(request, allocation_id, item_id):
             allocation.pbs = get_object_or_404(PBS, id=pbs_id)
             allocation.allocation_no = allocation_no_obj
             allocation.quantity = quantity
+            allocation.unit_of_item = item.unit_of_item
 
             if item.quantity_of_item >= quantity:
                 allocation.save()
@@ -62,6 +63,7 @@ def add_item(request, allocation_id, item_id):
                     item=allocation.item.name,
                     warehouse=allocation.warehouse,
                     quantity=allocation.quantity,
+                    unit_of_item=allocation.unit_of_item,
                     # price=allocation.price,
                     created_at=dhaka_time,
                     status="Modified",
