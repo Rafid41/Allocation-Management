@@ -82,6 +82,7 @@ def cancellation_view(request):
                             pbs=entry.pbs,
                             package=entry.package.packageId,  # Assuming packageId holds the value
                             item=entry.item,
+                            unit_of_item=entry.unit_of_item,
                             warehouse=entry.warehouse,
                             quantity=entry.quantity,
                             price=entry.price,

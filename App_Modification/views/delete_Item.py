@@ -45,6 +45,7 @@ def delete_final_allocation_entry(request, allocation_id):
             pbs=allocation.pbs.name,
             package=allocation.package.packageId,
             item=allocation.item.name,
+            unit_of_item=allocation.unit_of_item,
             warehouse=allocation.warehouse,
             quantity=allocation.quantity,
             price=allocation.price,

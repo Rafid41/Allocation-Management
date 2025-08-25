@@ -1,4 +1,3 @@
-from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from App_Allocation.models import Final_Allocation, PBS, Item, Allocation_Number
@@ -46,6 +45,7 @@ def add_item(request, allocation_id, item_id):
             allocation.pbs = get_object_or_404(PBS, id=pbs_id)
             allocation.allocation_no = allocation_no_obj
             allocation.quantity = quantity
+            allocation.unit_of_item = item.unit_of_item
 
             if item.quantity_of_item >= quantity:
                 allocation.save()
@@ -61,6 +61,7 @@ def add_item(request, allocation_id, item_id):
                     pbs=allocation.pbs.name,
                     package=allocation.package.packageId,
                     item=allocation.item.name,
+                    unit_of_item=allocation.unit_of_item,
                     warehouse=allocation.warehouse,
                     quantity=allocation.quantity,
                     price=allocation.price,
