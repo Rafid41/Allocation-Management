@@ -26,7 +26,6 @@
                 <option value="item" {% if filter_by == "item" %}selected{% endif %}>Item</option>
                 <option value="warehouse" {% if filter_by == "warehouse" %}selected{% endif %}>Warehouse</option>
                 <option value="status" {% if filter_by == "status" %}selected{% endif %}>Status</option>
-                <option value="cs_and_m_date" {% if filter_by == "cs_and_m_date" %}selected{% endif %}>CS&amp;M Date</option>
                 <option value="carry_from_warehouse_date" {% if filter_by == "carry_from_warehouse_date" %}selected{% endif %}>Carry from Warehouse Date</option>
             </select>
         </div>
@@ -65,10 +64,6 @@
                     <th>Status</th>
                     <th>Remarks</th>
                     <th>
-                        CS&M<br>
-                        <span style="font-size: 0.75em; font-style: italic;">(dd/mm/yy)</span>
-                    </th>
-                    <th>
                         Carry from Warehouse<br>
                         <span style="font-size: 0.75em; font-style: italic;">(dd/mm/yy)</span>
                     </th>
@@ -91,24 +86,6 @@
                             </td>
                             <td>{{ item.remarks|safe }}</td>
 
-                            <!-- CS&M -->
-                            <td class="date-cell">
-                                {% if item.CS_and_M %}
-                                    {{ item.CS_and_M|date:"d/m/y" }}<br>
-                                {% endif %}
-                                {% if can_edit_cs %}
-                                    <button class="btn btn-sm btn-outline-primary mt-1 update-btn" onclick="showInput('{{ item.id }}', 'cs')">Update</button>
-                                    <div id="input_cs_{{ item.id }}" style="display: none;" class="mt-1">
-                                        <input type="date"
-                                            id="date_cs_{{ item.id }}"
-                                            class="form-control form-control-sm"
-                                            {% if item.CS_and_M %}
-                                                value="{{ item.CS_and_M|date:'Y-m-d' }}"
-                                            {% endif %}>
-                                        <button class="btn btn-sm btn-success mt-1" onclick="submitDate('{{ item.id }}', 'cs')">Save</button>
-                                    </div>
-                                {% endif %}
-                            </td>
 
                             <!-- Carry From Warehouse -->
                             <td class="date-cell">
@@ -195,7 +172,7 @@
 <script>
     function toggleInputFields() {
         const filter = document.getElementById("filterDropdown").value;
-        const isDateFilter = ["allocation_date", "cs_and_m_date", "carry_from_warehouse_date"].includes(filter);
+        const isDateFilter = ["allocation_date", "carry_from_warehouse_date"].includes(filter);
 
         document.getElementById("datePickerContainer").style.display = isDateFilter ? "block" : "none";
         document.getElementById("dateStatusContainer").style.display = isDateFilter ? "block" : "none";

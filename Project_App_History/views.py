@@ -20,7 +20,7 @@ def history(request):
 
 
     # Non-date filters
-    if query and filter_by not in ["allocation_date", "cs_and_m_date", "carry_from_warehouse_date"]:
+    if query and filter_by not in ["allocation_date", "carry_from_warehouse_date"]:
         if filter_by == "All":
             results = results.filter(
                 Q(allocation_no__icontains=query) |
@@ -51,12 +51,6 @@ def history(request):
         if date_status == "empty":
             results = results.filter(created_at__isnull=True)
 
-    elif filter_by == "cs_and_m_date":
-        if date_filter:
-            results = results.filter(CS_and_M__date=date_filter)
-        if date_status == "empty":
-            results = results.filter(CS_and_M__isnull=True)
-
     elif filter_by == "carry_from_warehouse_date":
         if date_filter:
             results = results.filter(carry_from_warehouse__date=date_filter)
@@ -72,7 +66,6 @@ def history(request):
         "filter_by": filter_by,
         "date_filter": date_filter,
         "date_status": date_status,  # <-- Pass to template
-        "can_edit_cs": group in ["Editor", "Only_View_History_and_Edit_CS&M_Column"],
         "can_edit_carry": group in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"],
         "can_edit_comments": group in ["Editor"],
     }
@@ -91,13 +84,13 @@ def update_date_view(request, id):
 
         user_group_type = request.user.user_group.user_group_type
 
-        if field == "cs" and user_group_type in ["Editor", "Only_View_History_and_Edit_CS&M_Column"]:
-            date_value = data.get("date")
-            parsed_date = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), time.min)
-            history.CS_and_M = make_aware(parsed_date)
-            history.save()
+        # if field == "cs" and user_group_type in ["Editor", "Only_View_History_and_Edit_CS&M_Column"]:
+        #     date_value = data.get("date")
+        #     parsed_date = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), time.min)
+        #     history.CS_and_M = make_aware(parsed_date)
+        #     history.save()
 
-        elif field == "carry" and user_group_type in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"]:
+        if field == "carry" and user_group_type in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"]:
             date_value = data.get("date")
             parsed_date = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), time.min)
             history.carry_from_warehouse = make_aware(parsed_date)

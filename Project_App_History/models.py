@@ -20,7 +20,7 @@ class Project_History(models.Model):
         max_length=100, choices=STATUS_CHOICES, default="Allocated"
     )
     remarks = models.TextField(blank=True, null=True)
-    CS_and_M = models.DateTimeField(blank=True, null=True)
+    # CS_and_M = models.DateTimeField(blank=True, null=True)
     carry_from_warehouse = models.DateTimeField(blank=True, null=True)
     comments = models.TextField(blank=True, null=True)
 
