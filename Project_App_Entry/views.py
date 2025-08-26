@@ -52,6 +52,7 @@ def view_project_and_addNew(request):
 ############################## Add New Item to a Package ##########################################
 
 from django.utils.timezone import now
+from decimal import Decimal, InvalidOperation
 
 
 @login_required
@@ -67,7 +68,7 @@ def add_item_to_project(request):
         warehouse = request.POST.get("warehouse")
         unit_of_item = request.POST.get("unit_of_item")
         # unit_price = request.POST.get("unit_price")
-        quantity_of_item = int(request.POST.get("quantity_of_item"))
+        quantity_of_item = Decimal(request.POST.get("quantity_of_item"))
         description = request.POST.get("description")
         created_at= request.POST.get("created_at")
 

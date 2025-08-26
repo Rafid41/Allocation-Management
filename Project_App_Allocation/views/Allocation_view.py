@@ -114,6 +114,8 @@ from django.contrib import messages
 from Project_App_Allocation.forms import TemporaryAllocationForm
 
 
+from decimal import Decimal, InvalidOperation
+
 @login_required
 def allocate_item(request, allocation_id, item_id):
     item = get_object_or_404(Item, id=item_id)
@@ -123,11 +125,12 @@ def allocate_item(request, allocation_id, item_id):
     if request.method == "POST":
         form = TemporaryAllocationForm(request.POST)
         pbs_id = request.POST.get("pbs")
-        quantity = request.POST.get("quantity")
+        quantity_str = request.POST.get("quantity")
 
+        # ✅ Convert safely to Decimal
         try:
-            quantity = int(quantity)
-        except (TypeError, ValueError):
+            quantity = Decimal(quantity_str)
+        except (TypeError, ValueError, InvalidOperation):
             messages.error(request, "Invalid quantity entered.")
             return redirect(
                 "Project_App_Allocation:allocate_item",
@@ -140,11 +143,11 @@ def allocate_item(request, allocation_id, item_id):
         )
         total_allocated = sum(existing.quantity for existing in existing_allocations)
 
-        # if total_allocated + quantity > item.quantity_of_item:
-        if quantity > item.quantity_of_item:
+        # ✅ Compare Decimals, not strings/ints
+        if quantity + total_allocated > item.quantity_of_item:
             messages.error(request, "Total allocated quantity exceeds available stock!")
-        elif quantity == 0:
-            messages.error(request, "Quantity cannot be zero.")
+        elif quantity <= 0:  # ✅ also catches negative values
+            messages.error(request, "Quantity must be greater than zero.")
         elif not pbs_id:
             messages.error(request, "Please select a valid PBS before submitting.")
         else:
@@ -157,11 +160,11 @@ def allocate_item(request, allocation_id, item_id):
             allocation.pbs = get_object_or_404(PBS, id=pbs_id)
             allocation.allocation_no = allocation_no_obj
             allocation.unit_of_item = item.unit_of_item
+            allocation.quantity = quantity  # ✅ store Decimal quantity
 
-            # Ensure item has enough stock before saving allocation
+            # ✅ Ensure stock is enough
             if item.quantity_of_item >= quantity:
                 allocation.save()
-                # Subtract allocated quantity from item stock
                 item.quantity_of_item -= quantity
                 item.save()
                 messages.success(request, "Item allocated successfully!")
@@ -190,6 +193,7 @@ def allocate_item(request, allocation_id, item_id):
             "allocations": allocations,
         },
     )
+
 
 
 @login_required

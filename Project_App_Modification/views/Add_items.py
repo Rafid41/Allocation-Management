@@ -5,6 +5,7 @@ from Project_App_Modification.forms import FinalAllocationForm
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from Project_App_History.models import Project_History as History
+from decimal import Decimal, InvalidOperation
 
 
 @login_required
@@ -19,7 +20,7 @@ def add_item(request, allocation_id, item_id):
         quantity = request.POST.get("quantity")
 
         try:
-            quantity = int(quantity)
+             quantity = Decimal(quantity)
         except (TypeError, ValueError):
             messages.error(request, "Invalid quantity entered.")
             return redirect("Project_App_Modification:add_item", allocation_id=allocation_id, item_id=item.id)

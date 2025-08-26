@@ -43,7 +43,7 @@ def set_table_borders(table):
 def modification_view(request):
     allocated_allocations = Allocation_Number.objects.filter(
         Q(status="Allocated") | Q(status="Modified"),
-        final_allocation__isnull=False
+        # final_allocation__isnull=False
     ).distinct()
 
     modified_allocations = Allocation_Number.objects.filter(status="Modified")

@@ -32,7 +32,11 @@ class Project_Item(models.Model):
     unit_of_item = models.CharField(
         max_length=10, choices=UNIT_CHOICES, default="Nos."
     )  # Updated field
-    quantity_of_item = models.BigIntegerField(default=0)
+    quantity_of_item = models.DecimalField(
+        max_digits=20,    
+        decimal_places=3,  
+        default=0.00
+    )
     project = models.ForeignKey(
         Project,
         on_delete=models.SET_NULL,
