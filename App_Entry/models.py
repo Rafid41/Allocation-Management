@@ -33,7 +33,12 @@ class Item(models.Model):
         max_length=10, choices=UNIT_CHOICES, default="Nos."
     )  # Updated field
     unit_price = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
-    quantity_of_item = models.BigIntegerField(default=0)
+    quantity_of_item = models.DecimalField(
+        max_digits=20,    
+        decimal_places=3,  
+        default=0.00
+    )
+
     package = models.ForeignKey(
         Package,
         on_delete=models.SET_NULL,

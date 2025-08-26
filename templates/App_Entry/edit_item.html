@@ -72,7 +72,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label><i class="fas fa-sort-numeric-up"></i> Quantity:</label>
-                                <input type="number" name="quantity_of_item" class="form-control" value="{{ item.quantity_of_item }}" required>
+                                <input type="number" name="quantity_of_item" class="form-control" step="0.001" min="0" value="{{ item.quantity_of_item }}" required>
                             </div>
                         </div>
 

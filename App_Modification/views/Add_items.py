@@ -1,3 +1,4 @@
+from decimal import Decimal, InvalidOperation
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from App_Allocation.models import Final_Allocation, PBS, Item, Allocation_Number
@@ -19,8 +20,8 @@ def add_item(request, allocation_id, item_id):
         quantity = request.POST.get("quantity")
 
         try:
-            quantity = int(quantity)
-        except (TypeError, ValueError):
+            quantity = Decimal(quantity)   # ✅ convert to Decimal
+        except (TypeError, ValueError, InvalidOperation):
             messages.error(request, "Invalid quantity entered.")
             return redirect("App_Modification:add_item", allocation_id=allocation_id, item_id=item.id)
 
@@ -44,7 +45,7 @@ def add_item(request, allocation_id, item_id):
             allocation.price = item.unit_price
             allocation.pbs = get_object_or_404(PBS, id=pbs_id)
             allocation.allocation_no = allocation_no_obj
-            allocation.quantity = quantity
+            allocation.quantity = quantity   # ✅ Decimal
             allocation.unit_of_item = item.unit_of_item
 
             if item.quantity_of_item >= quantity:
@@ -75,8 +76,6 @@ def add_item(request, allocation_id, item_id):
                 allocation_no_obj.save()
 
                 messages.success(request, "Item allocated and logged successfully!")
-
-                # ✅ Redirect to search and select page
                 return redirect("App_Modification:search_and_select_item", allocation_id=allocation_id)
             else:
                 messages.error(request, "Not enough stock available for allocation.")

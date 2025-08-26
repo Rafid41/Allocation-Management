@@ -66,7 +66,7 @@ def add_item_to_package(request):
         warehouse = request.POST.get("warehouse")
         unit_of_item = request.POST.get("unit_of_item")
         unit_price = request.POST.get("unit_price")
-        quantity_of_item = int(request.POST.get("quantity_of_item"))
+        quantity_of_item = request.POST.get("quantity_of_item")
         description = request.POST.get("description")
         created_at= request.POST.get("created_at")
 
@@ -185,7 +185,7 @@ def edit_item(request, item_id):
         item.warehouse = warehouse
         item.unit_of_item = unit_of_item  # Store only key (e.g., "Nos.", "Km.", etc.)
         item.unit_price = new_price
-        item.quantity_of_item = int(quantity_of_item)
+        item.quantity_of_item = quantity_of_item
         item.description = description
         item.created_at = created_at
 

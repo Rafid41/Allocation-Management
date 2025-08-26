@@ -8,7 +8,11 @@ class History(models.Model):
     item = models.TextField() 
     warehouse = models.CharField(max_length=50)  
     unit_of_item = models.TextField()  
-    quantity = models.IntegerField()  
+    quantity = models.DecimalField(
+        max_digits=20,    
+        decimal_places=3,  
+        default=0.00
+    )
     price = models.DecimalField(max_digits=15, decimal_places=2)  
     created_at = models.DateTimeField(auto_now=True) 
     STATUS_CHOICES = [

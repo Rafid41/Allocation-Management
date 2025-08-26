@@ -99,6 +99,7 @@ from django.contrib import messages
 from App_Allocation.models import Temporary_Allocation, Final_Allocation, PBS, Item, Allocation_Number
 from App_Allocation.forms import TemporaryAllocationForm
 from django.contrib.auth.decorators import login_required
+from decimal import Decimal, InvalidOperation
 
 
 
@@ -115,18 +116,18 @@ def allocate_item(request, allocation_id, item_id):
         quantity = request.POST.get("quantity")
 
         try:
-            quantity = int(quantity)
-        except (TypeError, ValueError):
+            quantity = Decimal(quantity)   # convert to Decimal
+        except (TypeError, ValueError, InvalidOperation):
             messages.error(request, "Invalid quantity entered.")
-            return redirect("App_Allocation:allocate_item", allocation_no=allocation_id, item_id=item.id)
+            return redirect("App_Allocation:allocate_item", allocation_id=allocation_id, item_id=item.id)
 
         existing_allocations = Temporary_Allocation.objects.filter(
             allocation_no=allocation_no_obj, item_primary_key=item.id
         )
         total_allocated = sum(existing.quantity for existing in existing_allocations)
 
-        # if total_allocated + quantity > item.quantity_of_item:
-        if quantity > item.quantity_of_item:
+        # Check stock limits
+        if quantity + total_allocated > item.quantity_of_item:
             messages.error(request, "Total allocated quantity exceeds available stock!")
         elif quantity == 0:
             messages.error(request, "Quantity cannot be zero.")
@@ -142,11 +143,11 @@ def allocate_item(request, allocation_id, item_id):
             allocation.pbs = get_object_or_404(PBS, id=pbs_id)
             allocation.allocation_no = allocation_no_obj
             allocation.unit_of_item = item.unit_of_item
+            allocation.quantity = quantity  # make sure form field aligns
 
-            # Ensure item has enough stock before saving allocation
+            # Save only if stock is enough
             if item.quantity_of_item >= quantity:
                 allocation.save()
-                # Subtract allocated quantity from item stock
                 item.quantity_of_item -= quantity
                 item.save()
                 messages.success(request, "Item allocated successfully!")
