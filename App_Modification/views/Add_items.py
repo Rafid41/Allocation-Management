@@ -6,6 +6,7 @@ from App_Modification.forms import FinalAllocationForm
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from App_History.models import History
+import uuid
 
 
 @login_required
@@ -18,12 +19,17 @@ def add_item(request, allocation_id, item_id):
         form = FinalAllocationForm(request.POST)
         pbs_id = request.POST.get("pbs")
         quantity = request.POST.get("quantity")
+        uuid_for_history = uuid.uuid4()
 
         try:
-            quantity = Decimal(quantity)   # ✅ convert to Decimal
+            quantity = Decimal(quantity)  # ✅ convert to Decimal
         except (TypeError, ValueError, InvalidOperation):
             messages.error(request, "Invalid quantity entered.")
-            return redirect("App_Modification:add_item", allocation_id=allocation_id, item_id=item.id)
+            return redirect(
+                "App_Modification:add_item",
+                allocation_id=allocation_id,
+                item_id=item.id,
+            )
 
         existing_allocations = Final_Allocation.objects.filter(
             allocation_no=allocation_no_obj, item_primary_key=item.id
@@ -45,8 +51,10 @@ def add_item(request, allocation_id, item_id):
             allocation.price = item.unit_price
             allocation.pbs = get_object_or_404(PBS, id=pbs_id)
             allocation.allocation_no = allocation_no_obj
-            allocation.quantity = quantity   # ✅ Decimal
+            allocation.quantity = quantity  # ✅ Decimal
             allocation.unit_of_item = item.unit_of_item
+            allocation.status = "Modified"
+            allocation.history_GUID = uuid_for_history
 
             if item.quantity_of_item >= quantity:
                 allocation.save()
@@ -55,9 +63,14 @@ def add_item(request, allocation_id, item_id):
 
                 # ✅ Log to History
                 dhaka_time = timezone.localtime(timezone.now())
-                remarks_text = "Added Item at: <b>" + dhaka_time.strftime("%Y-%m-%d %I:%M %p") + "</b>"
+                remarks_text = (
+                    "Added Item at: <b>"
+                    + dhaka_time.strftime("%Y-%m-%d %I:%M %p")
+                    + "</b>"
+                )
 
                 History.objects.create(
+                    GUID=uuid_for_history,
                     allocation_no=allocation_no_obj.allocation_no,
                     pbs=allocation.pbs.name,
                     package=allocation.package.packageId,
@@ -69,6 +82,7 @@ def add_item(request, allocation_id, item_id):
                     created_at=dhaka_time,
                     status="Modified",
                     remarks=remarks_text,
+                    remarks_status="Added",
                 )
 
                 # ✅ Update Allocation_Number status to "Modified"
@@ -76,16 +90,25 @@ def add_item(request, allocation_id, item_id):
                 allocation_no_obj.save()
 
                 messages.success(request, "Item allocated and logged successfully!")
-                return redirect("App_Modification:search_and_select_item", allocation_id=allocation_id)
+                return redirect(
+                    "App_Modification:search_and_select_item",
+                    allocation_id=allocation_id,
+                )
             else:
                 messages.error(request, "Not enough stock available for allocation.")
 
-            return redirect("App_Modification:add_item", allocation_id=allocation_id, item_id=item.id)
+            return redirect(
+                "App_Modification:add_item",
+                allocation_id=allocation_id,
+                item_id=item.id,
+            )
 
     else:
         form = FinalAllocationForm()
 
-    allocations = Final_Allocation.objects.filter(allocation_no=allocation_no_obj).order_by("-created_at")
+    allocations = Final_Allocation.objects.filter(
+        allocation_no=allocation_no_obj
+    ).order_by("-created_at")
 
     return render(
         request,

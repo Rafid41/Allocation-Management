@@ -1,11 +1,17 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from Project_App_Allocation.models import Final_Allocation, PBS, Project_Item as Item, Allocation_Number
+from Project_App_Allocation.models import (
+    Final_Allocation,
+    PBS,
+    Project_Item as Item,
+    Allocation_Number,
+)
 from Project_App_Modification.forms import FinalAllocationForm
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from Project_App_History.models import Project_History as History
 from decimal import Decimal, InvalidOperation
+import uuid
 
 
 @login_required
@@ -19,11 +25,17 @@ def add_item(request, allocation_id, item_id):
         pbs_id = request.POST.get("pbs")
         quantity = request.POST.get("quantity")
 
+        uuid_for_history = uuid.uuid4()
+
         try:
-             quantity = Decimal(quantity)
+            quantity = Decimal(quantity)
         except (TypeError, ValueError):
             messages.error(request, "Invalid quantity entered.")
-            return redirect("Project_App_Modification:add_item", allocation_id=allocation_id, item_id=item.id)
+            return redirect(
+                "Project_App_Modification:add_item",
+                allocation_id=allocation_id,
+                item_id=item.id,
+            )
 
         existing_allocations = Final_Allocation.objects.filter(
             allocation_no=allocation_no_obj, item_primary_key=item.id
@@ -47,6 +59,8 @@ def add_item(request, allocation_id, item_id):
             allocation.allocation_no = allocation_no_obj
             allocation.quantity = quantity
             allocation.unit_of_item = item.unit_of_item
+            allocation.status = "Modified"
+            allocation.history_GUID = uuid_for_history
 
             if item.quantity_of_item >= quantity:
                 allocation.save()
@@ -55,9 +69,14 @@ def add_item(request, allocation_id, item_id):
 
                 # ✅ Log to History
                 dhaka_time = timezone.localtime(timezone.now())
-                remarks_text = "Added Item at: <b>" + dhaka_time.strftime("%Y-%m-%d %I:%M %p") + "</b>"
+                remarks_text = (
+                    "Added Item at: <b>"
+                    + dhaka_time.strftime("%Y-%m-%d %I:%M %p")
+                    + "</b>"
+                )
 
                 History.objects.create(
+                    GUID=uuid_for_history,
                     allocation_no=allocation_no_obj.allocation_no,
                     pbs=allocation.pbs.name,
                     project=allocation.project.projectId,
@@ -69,6 +88,7 @@ def add_item(request, allocation_id, item_id):
                     created_at=dhaka_time,
                     status="Modified",
                     remarks=remarks_text,
+                    remarks_status="Added",
                 )
 
                 # ✅ Update Allocation_Number status to "Modified"
@@ -78,16 +98,25 @@ def add_item(request, allocation_id, item_id):
                 messages.success(request, "Item allocated and logged successfully!")
 
                 # ✅ Redirect to search and select page
-                return redirect("Project_App_Modification:search_and_select_item", allocation_id=allocation_id)
+                return redirect(
+                    "Project_App_Modification:search_and_select_item",
+                    allocation_id=allocation_id,
+                )
             else:
                 messages.error(request, "Not enough stock available for allocation.")
 
-            return redirect("Project_App_Modification:add_item", allocation_id=allocation_id, item_id=item.id)
+            return redirect(
+                "Project_App_Modification:add_item",
+                allocation_id=allocation_id,
+                item_id=item.id,
+            )
 
     else:
         form = FinalAllocationForm()
 
-    allocations = Final_Allocation.objects.filter(allocation_no=allocation_no_obj).order_by("-created_at")
+    allocations = Final_Allocation.objects.filter(
+        allocation_no=allocation_no_obj
+    ).order_by("-created_at")
 
     return render(
         request,

@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 class History(models.Model):
+    GUID = models.CharField(max_length=100, default="", blank=True, null=True)
     allocation_no = models.IntegerField() 
     pbs = models.TextField()  
     package = models.TextField()
@@ -25,6 +26,7 @@ class History(models.Model):
         max_length=100, choices=STATUS_CHOICES, default="Allocated"
     )
     remarks = models.TextField(blank=True, null=True)
+    remarks_status = models.CharField(max_length=100, blank=True, null=True)
     CS_and_M = models.DateTimeField(blank=True, null=True)
     carry_from_warehouse = models.DateTimeField(blank=True, null=True)
 

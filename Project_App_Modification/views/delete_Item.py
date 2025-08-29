@@ -35,8 +35,20 @@ def delete_final_allocation_entry(request, allocation_id):
         dhaka_time = timezone.localtime(timezone.now())
         remarks_text = "Deleted at: <b>" + dhaka_time.strftime("%Y-%m-%d %I:%M %p")+"</b>"
 
-        # ✅ Log only the deleted item to History
+
+
+        #  If this allocation has a GUID, check for previous History entry
+        if allocation.history_GUID:
+            old_history = History.objects.filter(
+                GUID=allocation.history_GUID,
+                status="Allocated"
+            ).first()
+            if old_history:
+                old_history.delete()  #  remove the original allocated history
+
+        #  Log only the deleted item to History
         History.objects.create(
+            GUID=allocation.history_GUID,
             allocation_no=allocation_no_str,
             pbs=allocation.pbs.name,
             project=allocation.project.projectId,
@@ -48,6 +60,7 @@ def delete_final_allocation_entry(request, allocation_id):
             created_at=dhaka_time,
             status="Modified",
             remarks=remarks_text,
+            remarks_status="Deleted"
         )
 
         # ✅ Restore deleted item's quantity

@@ -57,6 +57,8 @@ class Final_Allocation(models.Model):
         decimal_places=3,  
         default=0.00
     ) 
+    status= models.CharField(max_length=100, default="Allocated")
+    history_GUID = models.CharField(max_length=100, default="", blank=True, null=True)
     price = models.DecimalField(max_digits=15, decimal_places=2)  
     created_at = models.DateTimeField(auto_now_add=True)
 

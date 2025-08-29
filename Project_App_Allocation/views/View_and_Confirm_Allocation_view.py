@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from Project_App_Allocation.models import Temporary_Allocation, Final_Allocation, Allocation_Number
 from Project_App_Entry.models import Project_Item as Item
 from Project_App_History.models import Project_History as History
+import uuid
 
 def view_confirm_allocation(request, allocation_id):
     allocation_no_obj = get_object_or_404(Allocation_Number, id=allocation_id)
@@ -52,6 +53,8 @@ def confirm_allocation(request, allocation_id):
     if request.method == "POST":
         for allocation in allocations:
 
+            unique_id_for_History = uuid.uuid4()
+
             dhaka_time = timezone.localtime(timezone.now())
             # Create Final_Allocation entry
             Final_Allocation.objects.create(
@@ -64,6 +67,8 @@ def confirm_allocation(request, allocation_id):
                 quantity=allocation.quantity,
                 # price=allocation.price,
                 unit_of_item=allocation.unit_of_item,
+                status  = "Allocated",
+                history_GUID = unique_id_for_History
             )
 
             # Update Allocation_Number status to "Allocated"
@@ -72,6 +77,7 @@ def confirm_allocation(request, allocation_id):
 
             # Create History entry
             History.objects.create(
+                GUID = unique_id_for_History,
                 allocation_no=allocation.allocation_no.allocation_no, 
                 pbs=allocation.pbs,
                 project=allocation.project.projectId,
