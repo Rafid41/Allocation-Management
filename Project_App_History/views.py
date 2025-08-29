@@ -84,16 +84,17 @@ def update_date_view(request, id):
 
         user_group_type = request.user.user_group.user_group_type
 
-        # if field == "cs" and user_group_type in ["Editor", "Only_View_History_and_Edit_CS&M_Column"]:
-        #     date_value = data.get("date")
-        #     parsed_date = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), time.min)
-        #     history.CS_and_M = make_aware(parsed_date)
-        #     history.save()
+        # Block updates if status Cancelled or Deleted
+        if history.status == "Cancelled" or (history.remarks_status or "").strip().lower() == "deleted":
+            return JsonResponse({"error": "Modification not allowed"}, status=403)
 
         if field == "carry" and user_group_type in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"]:
-            date_value = data.get("date")
-            parsed_date = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), time.min)
-            history.carry_from_warehouse = make_aware(parsed_date)
+            if data.get("reset"):
+                history.carry_from_warehouse = None   # ✅ Reset date
+            else:
+                date_value = data.get("date")
+                parsed_date = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), time.min)
+                history.carry_from_warehouse = make_aware(parsed_date)
             history.save()
 
         elif field == "comments" and user_group_type in ["Editor"]:  

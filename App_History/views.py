@@ -94,13 +94,21 @@ def update_date_view(request, id):
         user_group_type = request.user.user_group.user_group_type
 
         if field == "cs" and user_group_type in ["Editor", "Only_View_History_and_Edit_CS&M_Column"]:
-            parsed_date = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), time.min)
-            history.CS_and_M = make_aware(parsed_date)
+            if data.get("reset"):
+                history.CS_and_M = None 
+            else:
+                parsed_date = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), time.min)
+                history.CS_and_M = make_aware(parsed_date)
             history.save()
+
         elif field == "carry" and user_group_type in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"]:
-            parsed_date = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), time.min)
-            history.carry_from_warehouse = make_aware(parsed_date)
+            if data.get("reset"):
+                history.carry_from_warehouse = None
+            else:
+                parsed_date = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), time.min)
+                history.carry_from_warehouse = make_aware(parsed_date)
             history.save()
+            
         else:
             return JsonResponse({"error": "Not allowed"}, status=403)
 

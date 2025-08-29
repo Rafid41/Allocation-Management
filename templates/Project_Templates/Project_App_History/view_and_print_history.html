@@ -89,22 +89,33 @@
 
                             <!-- Carry From Warehouse -->
                             <td class="date-cell">
-                                {% if item.carry_from_warehouse %}
-                                    {{ item.carry_from_warehouse|date:"d/m/y" }}<br>
-                                {% endif %}
-                                {% if can_edit_carry %}
-                                    <button class="btn btn-sm btn-outline-primary mt-1 update-btn" onclick="showInput('{{ item.id }}', 'carry')">Update</button>
-                                    <div id="input_carry_{{ item.id }}" style="display: none;" class="mt-1">
-                                        <input type="date"
-                                            id="date_carry_{{ item.id }}"
-                                            class="form-control form-control-sm"
-                                            {% if item.carry_from_warehouse %}
-                                                value="{{ item.carry_from_warehouse|date:'Y-m-d' }}"
-                                            {% endif %}>
-                                        <button class="btn btn-sm btn-success mt-1" onclick="submitDate('{{ item.id }}', 'carry')">Save</button>
-                                    </div>
-                                {% endif %}
-                            </td>
+                            {% if item.carry_from_warehouse %}
+                                {{ item.carry_from_warehouse|date:"d/m/y" }}<br>
+                            {% endif %}
+                            {% if can_edit_carry and item.status != 'Cancelled' and item.remarks_status != 'Deleted' %}
+                                <button class="btn btn-sm btn-outline-primary mt-1 update-btn"
+                                        onclick="showInput('{{ item.id }}', 'carry')">
+                                    Update
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger mt-1 update-btn"
+                                        data-toggle="modal" data-target="#resetModal"
+                                        onclick="setResetTarget('{{ item.id }}', 'carry')">
+                                    Reset
+                                </button>
+
+                                <div id="input_carry_{{ item.id }}" style="display: none;" class="mt-1">
+                                    <input type="date"
+                                        id="date_carry_{{ item.id }}"
+                                        class="form-control form-control-sm"
+                                        {% if item.carry_from_warehouse %}
+                                            value="{{ item.carry_from_warehouse|date:'Y-m-d' }}"
+                                        {% endif %}>
+                                    <button class="btn btn-sm btn-success mt-1"
+                                            onclick="submitDate('{{ item.id }}', 'carry')">Save</button>
+                                </div>
+                            {% endif %}
+                        </td>
+
                             <!-- Comments -->
                             <td class="comments-cell text-start">
                                 {% if item.comments %}
@@ -133,6 +144,34 @@
         </table>
     </div>
 </div>
+
+<!-- Reset Confirmation Modal -->
+<div class="modal fade" id="resetModal" tabindex="-1" role="dialog" aria-labelledby="resetModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content shadow-lg rounded">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="resetModalLabel">
+          <i class="fa fa-exclamation-triangle"></i> Confirm Reset
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to reset this date? <b>This action cannot be undone.</b>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          <i class="fa fa-times"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-danger" id="confirmResetBtn">
+          <i class="fa fa-check"></i> Yes, Reset
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <style>
     /* Hide the update button by default */
@@ -231,6 +270,35 @@ function showCommentInput(id) {
             else res.json().then(data => alert(data.error || "Failed"));
         });
     }
+
+let resetTargetId = null;
+let resetTargetField = null;
+
+// Set which row is being reset
+function setResetTarget(id, field) {
+    resetTargetId = id;
+    resetTargetField = field;
+}
+
+// Handle modal confirm
+document.getElementById("confirmResetBtn").addEventListener("click", function() {
+    if (!resetTargetId || !resetTargetField) return;
+
+    fetch(`/project/project_history/update-date/${resetTargetId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": '{{ csrf_token }}',
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ field: resetTargetField, reset: true })
+    }).then(res => {
+        if (res.ok) location.reload();
+        else res.json().then(data => alert(data.error || "Failed"));
+    });
+
+    // Close the modal
+    $('#resetModal').modal('hide');
+});
 
 
 

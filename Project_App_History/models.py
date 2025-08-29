@@ -26,7 +26,6 @@ class Project_History(models.Model):
     )
     remarks = models.TextField(blank=True, null=True)
     remarks_status = models.CharField(max_length=100, blank=True, null=True)
-    # CS_and_M = models.DateTimeField(blank=True, null=True)
     carry_from_warehouse = models.DateTimeField(blank=True, null=True)
     comments = models.TextField(blank=True, null=True)
 
