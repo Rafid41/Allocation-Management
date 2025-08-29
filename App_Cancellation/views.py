@@ -69,6 +69,7 @@ def cancellation_view(request):
             if allocation_id:
                 allocation = Allocation_Number.objects.get(id=allocation_id)
                 final_allocations = Final_Allocation.objects.filter(allocation_no=allocation)
+                History.objects.filter(allocation_no=allocation.allocation_no).delete()
 
                 # Restore item quantities
                 for entry in final_allocations:
