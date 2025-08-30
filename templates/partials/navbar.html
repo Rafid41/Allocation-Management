@@ -14,21 +14,26 @@
                             <i class="fas fa-project-diagram"></i> P_Home
                         </a>
                     </li>
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'Project_App_Allocation:allocation_page' %}">
                             <i class="fas fa-tasks"></i> P_Allocation
                         </a>
                     </li>
+                    {% endif %}
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type in "Editor View History and Status only" %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'Project_App_Status:status_page' %}">
                             <i class="fas fa-info-circle"></i> P_Status
                         </a>
                     </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'Project_App_History:history_page' %}">
                             <i class="fas fa-history"></i> P_History
                         </a>
                     </li>
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'Project_App_Modification:modification_menu' %}">
                             <i class="fas fa-edit"></i> P_Modification
@@ -49,6 +54,7 @@
                             <i class="fas fa-plus-circle"></i> P_Project-Wise Balance
                         </a>
                     </li>
+                    {% endif %}
                 {% endif %}
             </ul>
 
@@ -96,36 +102,46 @@
                             <i class="fas fa-home"></i> Home
                         </a>
                     </li>
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
                     <li class="nav-item {% if request.resolver_match.url_name == 'allocation_page' %}active{% endif %}">
                         <a class="nav-link" href="{% url 'App_Allocation:allocation_page' %}">
                             <i class="fas fa-tasks"></i> Allocation
                         </a>
                     </li>
+                    {% endif %}
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type in "Editor View History and Status only" %}
                     <li class="nav-item {% if request.resolver_match.url_name == 'status_page' %}active{% endif %}">
                         <a class="nav-link" href="{% url 'App_Status:status_page' %}">
                             <i class="fas fa-info-circle"></i> Status
                         </a>
                     </li>
+                    {% endif %}
                     <li class="nav-item {% if request.resolver_match.url_name == 'history_page' %}active{% endif %}">
                         <a class="nav-link" href="{% url 'App_History:history_page' %}">
                             <i class="fas fa-history"></i> History
                         </a>
                     </li>
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
                     <li class="nav-item {% if request.resolver_match.url_name == 'modification_menu' %}active{% endif %}">
                         <a class="nav-link" href="{% url 'App_Modification:modification_menu' %}">
                             <i class="fas fa-edit"></i> Modification
                         </a>
                     </li>
+                    {% endif %}
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
                     <li class="nav-item {% if request.resolver_match.url_name == 'cancellation' %}active{% endif %}">
                         <a class="nav-link" href="{% url 'App_Cancellation:cancellation' %}">
                             <i class="fas fa-ban"></i> Cancellation
                         </a>
                     </li>
+                    {% endif %}
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
                     <li class="nav-item {% if request.resolver_match.url_name == 'entry_page' %}active{% endif %}">
                         <a class="nav-link" href="{% url 'App_Entry:entry_page' %}">
                             <i class="fas fa-plus-circle"></i> Entry
                         </a>
                     </li>
+                    {% endif %}
                 {% endif %}
             </ul>
 
