@@ -82,6 +82,7 @@ def confirm_allocation(request, allocation_id):
                 pbs=allocation.pbs,
                 project=allocation.project.projectId,
                 item=allocation.item,
+                item_primary_key=allocation.item_primary_key,
                 unit_of_item=allocation.unit_of_item,
                 warehouse=allocation.warehouse,
                 quantity=allocation.quantity,

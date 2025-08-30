@@ -83,6 +83,7 @@ def cancellation_view(request):
                             pbs=entry.pbs,
                             project=entry.project.projectId,  # Assuming packageId holds the value
                             item=entry.item,
+                            item_primary_key=entry.item_primary_key,
                             unit_of_item=entry.unit_of_item,
                             warehouse=entry.warehouse,
                             quantity=entry.quantity,

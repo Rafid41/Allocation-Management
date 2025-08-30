@@ -81,6 +81,7 @@ def add_item(request, allocation_id, item_id):
                     pbs=allocation.pbs.name,
                     project=allocation.project.projectId,
                     item=allocation.item.name,
+                    item_primary_key=allocation.item_primary_key,
                     warehouse=allocation.warehouse,
                     quantity=allocation.quantity,
                     unit_of_item=allocation.unit_of_item,

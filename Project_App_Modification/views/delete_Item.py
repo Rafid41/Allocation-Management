@@ -53,6 +53,7 @@ def delete_final_allocation_entry(request, allocation_id):
             pbs=allocation.pbs.name,
             project=allocation.project.projectId,
             item=allocation.item.name,
+            item_primary_key=allocation.item_primary_key,
             unit_of_item=allocation.unit_of_item,
             warehouse=allocation.warehouse,
             quantity=allocation.quantity,
