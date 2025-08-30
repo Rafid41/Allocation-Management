@@ -2,8 +2,6 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from Project_App_History.models import Project_History as History
 from django.views.decorators.http import require_POST
-from django.utils.timezone import make_aware
-from datetime import datetime, time
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -73,6 +71,7 @@ def history(request):
     return render(request, "Project_Templates/Project_App_History/view_and_print_history.html", context)
 
 
+
 @login_required
 @require_POST
 @csrf_exempt
@@ -84,20 +83,19 @@ def update_date_view(request, id):
 
         user_group_type = request.user.user_group.user_group_type
 
-        # Block updates if status Cancelled or Deleted
         if history.status == "Cancelled" or (history.remarks_status or "").strip().lower() == "deleted":
             return JsonResponse({"error": "Modification not allowed"}, status=403)
 
         if field == "carry" and user_group_type in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"]:
             if data.get("reset"):
-                history.carry_from_warehouse = None   # ✅ Reset date
+                history.carry_from_warehouse = None
             else:
                 date_value = data.get("date")
-                parsed_date = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), time.min)
-                history.carry_from_warehouse = make_aware(parsed_date)
+                if date_value:
+                    history.carry_from_warehouse = date_value
             history.save()
 
-        elif field == "comments" and user_group_type in ["Editor"]:  
+        elif field == "comments" and user_group_type in ["Editor"]:
             text_value = data.get("text", "")
             history.comments = text_value
             history.save()

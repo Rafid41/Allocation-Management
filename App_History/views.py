@@ -97,16 +97,18 @@ def update_date_view(request, id):
             if data.get("reset"):
                 history.CS_and_M = None 
             else:
-                parsed_date = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), time.min)
-                history.CS_and_M = make_aware(parsed_date)
+                date_value = data.get("date")
+                if date_value:
+                    history.CS_and_M = date_value
             history.save()
 
         elif field == "carry" and user_group_type in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"]:
             if data.get("reset"):
                 history.carry_from_warehouse = None
             else:
-                parsed_date = datetime.combine(datetime.strptime(date_value, "%Y-%m-%d").date(), time.min)
-                history.carry_from_warehouse = make_aware(parsed_date)
+                date_value = data.get("date")
+                if date_value:
+                    history.carry_from_warehouse = date_value
             history.save()
             
         else:

@@ -89,7 +89,9 @@ def cancellation_view(request):
                             price=entry.price,
                             created_at=dhaka_time,
                             status="Cancelled",
-                            remarks="Cancelled at: <b>" + dhaka_time.strftime("%Y-%m-%d %I:%M %p") + "</b>",  
+                            remarks="Cancelled at: <b>" + dhaka_time.strftime("%Y-%m-%d %I:%M %p") + "</b>",
+                            carry_from_warehouse = "N/A", 
+                            CS_and_M = "N/A", 
                         )
                 
 

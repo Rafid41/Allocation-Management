@@ -29,6 +29,7 @@ urlpatterns = [
     path("project/project_status/", include("Project_App_Status.urls")),
     path("project/project_modification/", include("Project_App_Modification.urls")),
     path("project/project_cancellation/", include("Project_App_Cancellation.urls")),
+    path("project/project_wise_balance/", include("Project_App_ProjectWiseBalance.urls")),
 ]
 
 

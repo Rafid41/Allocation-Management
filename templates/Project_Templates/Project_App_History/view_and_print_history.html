@@ -89,32 +89,28 @@
 
                             <!-- Carry From Warehouse -->
                             <td class="date-cell">
-                            {% if item.carry_from_warehouse %}
-                                {{ item.carry_from_warehouse|date:"d/m/y" }}<br>
-                            {% endif %}
-                            {% if can_edit_carry and item.status != 'Cancelled' and item.remarks_status != 'Deleted' %}
-                                <button class="btn btn-sm btn-outline-primary mt-1 update-btn"
-                                        onclick="showInput('{{ item.id }}', 'carry')">
-                                    Update
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger mt-1 update-btn"
-                                        data-toggle="modal" data-target="#resetModal"
-                                        onclick="setResetTarget('{{ item.id }}', 'carry')">
-                                    Reset
-                                </button>
+                                {% if item.carry_from_warehouse == "N/A" %}
+                                    <span class="text-danger"><b>N/A</b></span><br>
+                                {% elif item.carry_from_warehouse %}
+                                    {% with day=item.carry_from_warehouse|slice:"8:10" month=item.carry_from_warehouse|slice:"5:7" year=item.carry_from_warehouse|slice:"0:4" %}
+                                        {{ day }}/{{ month }}/{{ year }}
+                                    {% endwith %}
+                                {% endif %}
 
-                                <div id="input_carry_{{ item.id }}" style="display: none;" class="mt-1">
-                                    <input type="date"
-                                        id="date_carry_{{ item.id }}"
-                                        class="form-control form-control-sm"
-                                        {% if item.carry_from_warehouse %}
-                                            value="{{ item.carry_from_warehouse|date:'Y-m-d' }}"
-                                        {% endif %}>
-                                    <button class="btn btn-sm btn-success mt-1"
-                                            onclick="submitDate('{{ item.id }}', 'carry')">Save</button>
-                                </div>
-                            {% endif %}
-                        </td>
+                                {% if can_edit_carry and item.status != 'Cancelled' and item.remarks_status != 'Deleted' %}
+                                    <button class="btn btn-sm btn-outline-primary mt-1 update-btn" onclick="showInput('{{ item.id }}', 'carry')">Update</button>
+                                    <button class="btn btn-sm btn-outline-danger mt-1 update-btn" data-toggle="modal" data-target="#resetModal" onclick="setResetTarget('{{ item.id }}', 'carry')">Reset</button>
+
+                                    <div id="input_carry_{{ item.id }}" style="display: none;" class="mt-1">
+                                        <input type="date" id="date_carry_{{ item.id }}" class="form-control form-control-sm"
+                                            {% if item.carry_from_warehouse and item.carry_from_warehouse != "N/A" %}
+                                                value="{{ item.carry_from_warehouse }}"
+                                            {% endif %}>
+                                        <button class="btn btn-sm btn-success mt-1" onclick="submitDate('{{ item.id }}', 'carry')">Save</button>
+                                    </div>
+                                {% endif %}
+                            </td>
+
 
                             <!-- Comments -->
                             <td class="comments-cell text-start">

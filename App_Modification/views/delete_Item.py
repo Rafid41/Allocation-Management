@@ -63,7 +63,9 @@ def delete_final_allocation_entry(request, allocation_id):
             created_at=dhaka_time,
             status="Modified",
             remarks=remarks_text,
-            remarks_status="Deleted"
+            remarks_status="Deleted",
+            carry_from_warehouse="N/A",
+            CS_and_M="N/A",
         )
 
         # ✅ Restore deleted item's quantity
