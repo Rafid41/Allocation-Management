@@ -27,7 +27,7 @@ class Allocation_Number(models.Model):
 
 class Temporary_Allocation(models.Model):
     allocation_no = models.ForeignKey(Allocation_Number, on_delete=models.CASCADE)  # Deletes related allocations when removed
-    item_primary_key = models.IntegerField(null=True)  
+    item_primary_key = models.BigIntegerField(null=True)  
     pbs = models.ForeignKey(PBS, on_delete=models.CASCADE)  
     package = models.ForeignKey(Package, on_delete=models.CASCADE)  
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -46,7 +46,7 @@ class Temporary_Allocation(models.Model):
 
 class Final_Allocation(models.Model):
     allocation_no = models.ForeignKey(Allocation_Number, on_delete=models.CASCADE)  # Deletes related allocations when removed
-    item_primary_key = models.IntegerField(null=True)  
+    item_primary_key = models.BigIntegerField(null=True)  
     pbs = models.ForeignKey(PBS, on_delete=models.CASCADE)  
     package = models.ForeignKey(Package, on_delete=models.CASCADE)  
     item = models.ForeignKey(Item, on_delete=models.CASCADE)  
