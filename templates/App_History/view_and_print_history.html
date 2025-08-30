@@ -79,7 +79,7 @@
             <tbody>
                 {% if items %}
                     {% for item in items %}
-                        <tr class="{% if item.remarks_status == 'Deleted' %}table-danger{% endif %}">
+                        <tr class="{% if item.remarks_status == 'Deleted' or item.status == 'Cancelled' %}table-danger{% endif %}">
                             <td>{{ item.allocation_no }}</td>
                             <td>{{ item.pbs }}</td>
                             <td>{{ item.package }}</td>
