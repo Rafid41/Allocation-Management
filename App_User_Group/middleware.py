@@ -8,6 +8,14 @@ class UserGroupAccessMiddleware:
     def __call__(self, request):
         path = request.path_info  # safer than request.path
 
+        # --- Restrict a specific path for ALL users ---
+        restricted_paths_for_all = [
+            "/allocation/final-allocation/individual-download/",
+            "/project/project_allocation/final-allocation/individual-download/", 
+        ]
+        if any(path.startswith(p) for p in restricted_paths_for_all):
+            return redirect("App_User_Group:access-denied")
+
         if request.user.is_authenticated:
             try:
                 user_group = User_Group.objects.get(user=request.user)
@@ -20,24 +28,24 @@ class UserGroupAccessMiddleware:
                 "/home/",
                 "/history/",
                 "/user_group/access-denied/",
-                "/accounts/logout/"
+                "/accounts/logout/",
+                # Project-related paths
+                "/project/",
+                "/project/project_history/"
             ]
 
             path_for_View_History_and_Status_only = [
                 "/status/",
-            ]+ common_allowed_paths
+                "/project/project_status/",
+            ] + common_allowed_paths
 
-
-            # Restriction logic
+            # Restriction logic per user group
             if group_type == "View History and Status only":
                 if not any(path.startswith(p) for p in path_for_View_History_and_Status_only):
                     return redirect("App_User_Group:access-denied")
 
-            elif group_type == "Only_View_History_and_Edit_CS&M_Column":
-                if not any(path.startswith(p) for p in common_allowed_paths):
-                    return redirect("App_User_Group:access-denied")
-
-            elif group_type == "Only_View_History_and_Edit_Carry_From_Warehouse_Column":
+            elif group_type in ["Only_View_History_and_Edit_CS&M_Column",
+                                "Only_View_History_and_Edit_Carry_From_Warehouse_Column"]:
                 if not any(path.startswith(p) for p in common_allowed_paths):
                     return redirect("App_User_Group:access-denied")
 

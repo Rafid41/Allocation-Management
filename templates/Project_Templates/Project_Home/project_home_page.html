@@ -113,7 +113,7 @@ a.section-link {
         <h1><i class="fa fa-project-diagram"></i> Project Home Page</h1>
     </div>
 
-    {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
+    
         <div class="row text-center">
             <div class="col-md-4 mb-4">
                 <a href="{% url 'Project_App_Allocation:allocation_page' %}" class="section-link">
@@ -187,6 +187,6 @@ a.section-link {
                 </a>
             </div>
         </div>
-    {% endif %}
+   
 </div>
 {% endblock %}
