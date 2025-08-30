@@ -58,7 +58,7 @@ def add_item_to_package(request):
     packages = Package.objects.all().order_by("packageId")
     items = Item.objects.all().order_by("package__packageId")
 
-    UNIT_CHOICES = ["Nos.", "Mtr.", "Km.", "Set.", "Pair."]
+    UNIT_CHOICES =  [choice[0] for choice in Item.UNIT_CHOICES]
 
     if request.method == "POST":
         package_id = request.POST.get("package")

@@ -60,7 +60,7 @@ def add_item_to_project(request):
     projects = Project.objects.all().order_by("projectId")
     items = Project_Item.objects.all().order_by("project__projectId")
 
-    UNIT_CHOICES = ["Nos.", "Mtr.", "Km.", "Set.", "Pair."]
+    UNIT_CHOICES = [choice[0] for choice in Project_Item.UNIT_CHOICES]
 
     if request.method == "POST":
         project_id = request.POST.get("project")
