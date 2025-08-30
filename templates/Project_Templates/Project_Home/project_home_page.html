@@ -19,7 +19,6 @@
     text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
 }
 
-/* Project Home compact button style */
 .section-card {
     min-height: 160px;
     display: flex;
@@ -38,7 +37,6 @@
     position: relative;
     overflow: hidden;
 }
-
 .section-card::after {
     content: "";
     position: absolute;
@@ -50,59 +48,28 @@
     transform: skewX(-20deg);
     transition: all 0.5s ease;
 }
+.section-card:hover::after { left: 100%; }
+.section-card i { font-size: 2.5rem; margin-bottom: 12px; transition: transform 0.3s ease, color 0.3s ease; }
+.section-card h4 { font-size: 1.4rem; margin: 0; }
+.section-card:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 12px 20px rgba(0,0,0,0.25); }
+.section-card:hover i { transform: rotate(10deg) scale(1.1); color: #fffacd; }
 
-.section-card:hover::after {
-    left: 100%;
-}
-
-.section-card i {
-    font-size: 2.5rem;
-    margin-bottom: 12px;
-    transition: transform 0.3s ease, color 0.3s ease;
-}
-
-.section-card h4 {
-    font-size: 1.4rem;
-    margin: 0;
-}
-
-.section-card:hover {
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 12px 20px rgba(0,0,0,0.25);
-}
-
-.section-card:hover i {
-    transform: rotate(10deg) scale(1.1);
-    color: #fffacd;
-}
-
-/* Unique gradient colors */
+/* Gradient colors */
 .bg-allocation { background: linear-gradient(135deg, #1abc9c, #16a085); }
 .bg-status     { background: linear-gradient(135deg, #6a11cb, #2575fc); }
 .bg-history    { background: linear-gradient(135deg, #f7971e, #ffd200); }
 .bg-modify     { background: linear-gradient(135deg, #43cea2, #185a9d); }
 .bg-cancel     { background: linear-gradient(135deg, #ff416c, #ff4b2b); }
 .bg-entry      { background: linear-gradient(135deg, #00c6ff, #0072ff); }
-
-/* 🔥 New buttons */
 .bg-balance    { background: linear-gradient(135deg, #11998e, #38ef7d); }
 .bg-back       { background: linear-gradient(135deg, #ee0979, #ff6a00); }
 
-a.section-link {
-    text-decoration: none;
-}
+a.section-link { text-decoration: none; }
 
 @media (max-width: 768px) {
-    .section-card {
-        padding: 25px 20px;
-        min-height: 140px;
-    }
-    .section-card h4 {
-        font-size: 1.2rem;
-    }
-    .section-card i {
-        font-size: 2rem;
-    }
+    .section-card { padding: 25px 20px; min-height: 140px; }
+    .section-card h4 { font-size: 1.2rem; }
+    .section-card i { font-size: 2rem; }
 }
 </style>
 {% endblock %}
@@ -113,80 +80,84 @@ a.section-link {
         <h1><i class="fa fa-project-diagram"></i> Project Home Page</h1>
     </div>
 
-    
-        <div class="row text-center">
-            <div class="col-md-4 mb-4">
-                <a href="{% url 'Project_App_Allocation:allocation_page' %}" class="section-link">
-                    <div class="section-card bg-allocation">
-                        <i class="fas fa-tasks"></i>
-                        <h4>Allocation</h4>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-4 mb-4">
-                <a href="{% url 'Project_App_Status:status_page' %}" class="section-link">
-                    <div class="section-card bg-status">
-                        <i class="fas fa-info-circle"></i>
-                        <h4>Status</h4>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-4 mb-4">
-                <a href="{% url 'Project_App_History:history_page' %}" class="section-link">
-                    <div class="section-card bg-history">
-                        <i class="fas fa-history"></i>
-                        <h4>History</h4>
-                    </div>
-                </a>
-            </div>
+    <div class="row text-center">
+        {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{% url 'Project_App_Allocation:allocation_page' %}" class="section-link">
+                <div class="section-card bg-allocation">
+                    <i class="fas fa-tasks"></i>
+                    <h4>Allocation</h4>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+
+        {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" or request.user.user_group.user_group_type == "View History and Status only" %}
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{% url 'Project_App_Status:status_page' %}" class="section-link">
+                <div class="section-card bg-status">
+                    <i class="fas fa-info-circle"></i>
+                    <h4>Status</h4>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{% url 'Project_App_History:history_page' %}" class="section-link">
+                <div class="section-card bg-history">
+                    <i class="fas fa-history"></i>
+                    <h4>History</h4>
+                </div>
+            </a>
         </div>
 
-        <div class="row text-center">
-            <div class="col-md-4 mb-4">
-                <a href="{% url 'Project_App_Modification:modification_menu' %}" class="section-link">
-                    <div class="section-card bg-modify">
-                        <i class="fas fa-edit"></i>
-                        <h4>Modification</h4>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-4 mb-4">
-                <a href="{% url 'Project_App_Cancellation:cancellation' %}" class="section-link">
-                    <div class="section-card bg-cancel">
-                        <i class="fas fa-ban"></i>
-                        <h4>Cancellation</h4>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-4 mb-4">
-                <a href="{% url 'Project_App_Entry:entry_page' %}" class="section-link">
-                    <div class="section-card bg-entry">
-                        <i class="fas fa-plus-circle"></i>
-                        <h4>Entry</h4>
-                    </div>
-                </a>
-            </div>
+        {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{% url 'Project_App_Modification:modification_menu' %}" class="section-link">
+                <div class="section-card bg-modify">
+                    <i class="fas fa-edit"></i>
+                    <h4>Modification</h4>
+                </div>
+            </a>
         </div>
 
-        <!-- 🔥 New Row for Extra Buttons -->
-        <div class="row text-center">
-            <div class="col-md-6 mb-4">
-                <a href="{% url 'Project_App_ProjectWiseBalance:project_list' %}" class="section-link">
-                    <div class="section-card bg-balance">
-                        <i class="fas fa-balance-scale"></i>
-                        <h4>Project-Wise Balance</h4>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-6 mb-4">
-                <a href="{% url 'App_Home:home_page' %}" class="section-link">
-                    <div class="section-card bg-back">
-                        <i class="fas fa-arrow-circle-left"></i>
-                        <h4>Go Back to Allocation Management</h4>
-                    </div>
-                </a>
-            </div>
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{% url 'Project_App_Cancellation:cancellation' %}" class="section-link">
+                <div class="section-card bg-cancel">
+                    <i class="fas fa-ban"></i>
+                    <h4>Cancellation</h4>
+                </div>
+            </a>
         </div>
-   
+
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{% url 'Project_App_Entry:entry_page' %}" class="section-link">
+                <div class="section-card bg-entry">
+                    <i class="fas fa-plus-circle"></i>
+                    <h4>Entry</h4>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{% url 'Project_App_ProjectWiseBalance:project_list' %}" class="section-link">
+                <div class="section-card bg-balance">
+                    <i class="fas fa-balance-scale"></i>
+                    <h4>Project-Wise Balance</h4>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{% url 'App_Home:home_page' %}" class="section-link">
+                <div class="section-card bg-back">
+                    <i class="fas fa-arrow-circle-left"></i>
+                    <h4>Go Back to Main Website</h4>
+                </div>
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock %}

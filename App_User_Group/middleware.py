@@ -31,21 +31,41 @@ class UserGroupAccessMiddleware:
                 "/accounts/logout/",
                 # Project-related paths
                 "/project/",
-                "/project/project_history/"
             ]
 
             path_for_View_History_and_Status_only = [
                 "/status/",
-                "/project/project_status/",
             ] + common_allowed_paths
 
             # Restriction logic per user group
             if group_type == "View History and Status only":
+                restricted_subpaths = [               
+                    "/project/project_allocation/",
+                    "/project/project_modification/",
+                    "/project/project_cancellation/",
+                    "/project/project_entry/",
+                    "/project/project_wise_balance/projects/"
+                ]
+                # If restricted path matches, block immediately
+                if any(path.startswith(p) for p in restricted_subpaths):
+                    return redirect("App_User_Group:access-denied")
                 if not any(path.startswith(p) for p in path_for_View_History_and_Status_only):
                     return redirect("App_User_Group:access-denied")
 
             elif group_type in ["Only_View_History_and_Edit_CS&M_Column",
                                 "Only_View_History_and_Edit_Carry_From_Warehouse_Column"]:
+                restricted_subpaths = [               
+                    "/project/project_allocation/",
+                    "/project/project_status/",
+                    "/project/project_modification/",
+                    "/project/project_cancellation/",
+                    "/project/project_entry/",
+                    "/project/project_wise_balance/projects/"
+                ]
+                # If restricted path matches, block immediately
+                if any(path.startswith(p) for p in restricted_subpaths):
+                    return redirect("App_User_Group:access-denied")
+                
                 if not any(path.startswith(p) for p in common_allowed_paths):
                     return redirect("App_User_Group:access-denied")
 
