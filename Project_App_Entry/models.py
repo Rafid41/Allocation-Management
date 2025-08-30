@@ -45,6 +45,7 @@ class Project_Item(models.Model):
     )
     created_at = models.DateTimeField(default=timezone.now)
     comments = models.TextField(blank=True, null=True)
+    remarks_for_projectWiseBalance = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return str(self.name)
