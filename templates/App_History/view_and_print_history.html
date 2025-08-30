@@ -71,6 +71,9 @@
                         Carry from Warehouse<br>
                         <span style="font-size: 0.75em; font-style: italic;">(dd/mm/yyyy)</span>
                     </th>
+                    <th>
+                        Comments<br>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -146,6 +149,23 @@
                                     </div>
                                 {% endif %}
                             </td>
+
+                            <!-- Comments -->
+                            <td class="comments-cell text-start">
+                                {% if item.comments %}
+                                    {{ item.comments|linebreaksbr }}<br>
+                                {% endif %}
+
+                                {% if can_edit_comments %}
+                                    <button class="btn btn-sm btn-outline-primary mt-1 update-btn" onclick="showCommentInput('{{ item.id }}')">Update</button>
+                                    <div id="input_comments_{{ item.id }}" style="display: none;" class="mt-1">
+                                        <textarea id="text_comments_{{ item.id }}" class="form-control form-control-sm" rows="3">{{ item.comments|default_if_none:"" }}</textarea>
+                                        <button class="btn btn-sm btn-success mt-1" onclick="submitComment('{{ item.id }}')">Save</button>
+                                    </div>
+                                {% endif %}
+                            </td>
+
+
                         </tr>
                     {% endfor %}
                 {% else %}
@@ -188,6 +208,13 @@
 <style>
     .date-cell button.update-btn { display: none; }
     .date-cell:hover button.update-btn { display: inline-block; }
+
+    .comments-cell button.update-btn {
+        display: none;
+    }
+    .comments-cell:hover button.update-btn {
+        display: inline-block;
+    }
 
     @media print {
         body * { visibility: hidden; }
@@ -233,6 +260,34 @@
             else res.json().then(data => alert(data.error || "Failed"));
         });
     }
+
+    function showCommentInput(id) {
+    const container = document.getElementById(`input_comments_${id}`);
+    container.style.display = 'block';
+
+    const textarea = document.getElementById(`text_comments_${id}`);
+    // Put cursor at the end
+    textarea.focus();
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+}
+
+
+    function submitComment(id) {
+        const comment = document.getElementById(`text_comments_${id}`).value;
+
+        fetch(`/history/update-date/${id}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": '{{ csrf_token }}',
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ field: "comments", text: comment })
+        }).then(res => {
+            if (res.ok) location.reload();
+            else res.json().then(data => alert(data.error || "Failed"));
+        });
+    }
+
 
     let resetTargetId = null;
     let resetTargetField = null;

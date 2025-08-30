@@ -29,6 +29,7 @@ class History(models.Model):
     remarks_status = models.CharField(max_length=100, blank=True, null=True)
     CS_and_M = models.CharField(max_length=100, blank=True, null=True)
     carry_from_warehouse = models.CharField(max_length=100, blank=True, null=True)
+    comments = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return str(self.allocation_no)

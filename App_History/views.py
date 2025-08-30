@@ -30,7 +30,8 @@ def history(request):
                 Q(package__icontains=query) |
                 Q(item__icontains=query) |
                 Q(warehouse__icontains=query) |
-                Q(status__icontains=query)
+                Q(status__icontains=query) |
+                Q(comments__icontains=query)
             )
         elif filter_by == "allocation_no":
             results = results.filter(allocation_no__icontains=query)
@@ -75,7 +76,8 @@ def history(request):
         "date_filter": date_filter,
         "date_status": date_status,  # <-- Pass to template
         "can_edit_cs": group in ["Editor", "Only_View_History_and_Edit_CS&M_Column"],
-        "can_edit_carry": group in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"]
+        "can_edit_carry": group in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"],
+        "can_edit_comments": group in ["Editor"],
     }
 
     return render(request, "App_History/view_and_print_history.html", context)
@@ -109,6 +111,11 @@ def update_date_view(request, id):
                 date_value = data.get("date")
                 if date_value:
                     history.carry_from_warehouse = date_value
+            history.save()
+        
+        elif field == "comments" and user_group_type in ["Editor"]:
+            text_value = data.get("text", "")
+            history.comments = text_value
             history.save()
             
         else:
