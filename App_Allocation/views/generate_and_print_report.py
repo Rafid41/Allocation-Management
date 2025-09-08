@@ -186,7 +186,7 @@ def individual_allocation_download(request):
             # doc.add_paragraph()
 
             # Create table
-            table = doc.add_table(rows=1, cols=7)
+            table = doc.add_table(rows=1, cols=8)
             table.style = "Table Grid"
 
             # Set column headers
@@ -196,6 +196,7 @@ def individual_allocation_download(request):
                 "আইটেম নং",
                 "একক মূল্য\n(টাকা)",
                 "পরিমাণ\n(টি)",
+                "একক",
                 "বরাদ্দকৃত প্রকল্প ও প্যাকেজ/ সাব-প্যাকেজ নং",
                 "পণ্যাগারের নাম",
                 "বরাদ্দের ধরণ ও স্টোর",
@@ -206,7 +207,7 @@ def individual_allocation_download(request):
                 hdr_cells[i].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
                 para = hdr_cells[i].paragraphs[0]
-                para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER  # ✅ center align the paragraph
+                para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER 
 
                 for run in para.runs:
                     run.font.size = Pt(12)
@@ -220,17 +221,26 @@ def individual_allocation_download(request):
             # Widen column 5
             hdr_cells[4].width = Inches(2.5)
 
-            first_col7_cell = None
+            first_col8_cell = None
 
             for idx, entry in enumerate(entries):
                 row_cells = table.add_row().cells
-                row_cells[4].width = Inches(2.0)
+
+                row_cells[0].width = Inches(3.0)
+                row_cells[1].width = Inches(4.0)
+                row_cells[2].width = Inches(3.0)
+                row_cells[3].width = Inches(1.5)
+                row_cells[4].width = Inches(1.5)
+                row_cells[5].width = Inches(6.0)
+                row_cells[6].width = Inches(2.0)
+                row_cells[7].width = Inches(1.5)
 
                 values = [
                     str(entry.pbs.name),
                     str(entry.item),
                     str(entry.price),
                     str(entry.quantity),
+                    str(entry.unit_of_item),
                     str(entry.package.packageId),
                     str(entry.warehouse)
                 ]
@@ -247,16 +257,16 @@ def individual_allocation_download(request):
                         rFonts.set(qn("w:cs"), "Times New Roman")
 
                 if idx == 0:
-                    first_col7_cell = row_cells[6]
+                    first_col8_cell = row_cells[7]
                 else:
-                    first_col7_cell.merge(row_cells[6])
+                    first_col8_cell.merge(row_cells[7])
 
-            
-            # Set value and formatting for the merged column 7 cell
-            first_col7_cell.text = "On Payment O&M Store"
-            first_col7_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
-            para = first_col7_cell.paragraphs[0]
+            # Set value and formatting for the merged column 8 cell
+            first_col8_cell.text = "On Payment O&M Store"
+            first_col8_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
+            para = first_col8_cell.paragraphs[0]
             para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
             # Ensure the paragraph has text and formatting

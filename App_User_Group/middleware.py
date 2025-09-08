@@ -10,7 +10,6 @@ class UserGroupAccessMiddleware:
 
         # --- Restrict a specific path for ALL users ---
         restricted_paths_for_all = [
-            "/allocation/final-allocation/individual-download/",
             "/project/project_allocation/final-allocation/individual-download/", 
         ]
         if any(path.startswith(p) for p in restricted_paths_for_all):
