@@ -311,7 +311,7 @@ def individual_allocation_download(request):
                     str(entry.quantity),
                     str(entry.unit_of_item),
                     str(entry.package.packageId),
-                    str(entry.warehouse)
+                    "CWH, " + str(entry.warehouse)
                 ]
 
                 for i, value in enumerate(values):
