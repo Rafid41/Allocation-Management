@@ -10,7 +10,9 @@ from docx import Document
 from docx.shared import Pt, Inches
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.enum.table import WD_ALIGN_VERTICAL
-from docx.oxml.ns import qn
+from docx.oxml.ns import qn, nsdecls
+from docx.oxml import parse_xml
+from docx.oxml.shared import OxmlElement
 
 import datetime
 import pytz
@@ -111,12 +113,70 @@ def individual_allocation_download(request):
             # doc.add_paragraph()
 
             # Allocation No
-            alloc_para = doc.add_paragraph(f"Allocation No: {allocation.allocation_no}")
+            from PIL import ImageFont, ImageDraw, Image
+            from docx.oxml import parse_xml
+
+            # --- Text setup ---
+            alloc_text = f"Allocation No: {allocation.allocation_no}"
+            font_size_pt = 12
+            dpi = 96
+            font_px = int(font_size_pt * dpi / 72)
+
+            # Load font (update path as needed for your server)
+            try:
+                ttf_path = "C:\\Windows\\Fonts\\times.ttf"
+                pil_font = ImageFont.truetype(ttf_path, font_px)
+            except Exception:
+                pil_font = ImageFont.load_default()
+
+            # Measure text using Pillow (new Pillow >=10 syntax)
+            img = Image.new("RGB", (2000, 2000), (255, 255, 255))
+            draw = ImageDraw.Draw(img)
+            bbox = draw.textbbox((0, 0), alloc_text, font=pil_font)
+            text_width_px = bbox[2] - bbox[0]
+            text_height_px = bbox[3] - bbox[1]
+
+            # Convert to inches → points (Word uses points)
+            inches_w = text_width_px / dpi
+            inches_h = text_height_px / dpi
+            pad_x_in = 0.12
+            pad_y_in = 0.06
+            width_pt = (inches_w + 2 * pad_x_in) * 72
+            height_pt = (inches_h + 2 * pad_y_in) * 72
+
+            # --- Create paragraph (keep right aligned for fallback) ---
+            alloc_para = doc.add_paragraph()
             alloc_para.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
-            for run in alloc_para.runs:
-                run.font.size = Pt(12)
-                set_font(run, "Times New Roman")
-                run.bold = True
+            run = alloc_para.add_run()
+
+            # --- Create right-aligned tight rectangle ---
+            textbox_xml = f"""
+            <w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+                xmlns:v="urn:schemas-microsoft-com:vml"
+                xmlns:w10="urn:schemas-microsoft-com:office:word">
+            <w:pict>
+                <v:shape id="AllocationBox" type="#_x0000_t202" strokecolor="black" strokeweight="1pt" fillcolor="white"
+                        style="width:{width_pt}pt;height:{height_pt}pt;position:absolute;right:0pt;margin-right:0pt;white-space:nowrap;mso-position-horizontal:right;">
+                <v:textbox inset="2pt,2pt,2pt,2pt">
+                    <w:txbxContent>
+                    <w:p>
+                        <w:r>
+                        <w:t xml:space="preserve">{alloc_text}</w:t>
+                        </w:r>
+                    </w:p>
+                    </w:txbxContent>
+                </v:textbox>
+                </v:shape>
+            </w:pict>
+            </w:r>
+            """
+
+            # Append the shape XML to the run
+            run._r.append(parse_xml(textbox_xml))
+
+            # Optional spacing
+            alloc_para.paragraph_format.space_after = Pt(6)
+
 
             # doc.add_paragraph()
 
