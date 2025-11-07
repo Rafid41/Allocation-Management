@@ -395,6 +395,8 @@ def individual_allocation_download(request):
 
                 for run in p.runs:
                     set_font(run, font_name="Nikosh")
+                    if sig["text"] == "অনুলিপি:":
+                        run.underline = True
 
             response = HttpResponse(
                 content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
