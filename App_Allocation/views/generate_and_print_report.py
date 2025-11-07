@@ -75,8 +75,9 @@ def individual_allocation_download(request):
                 # run.bold = True
 
             header_email = [
-                "E-mail: mpssreb@yahoo.com",
+                "E-mail: mpssbreb@gmail.com",
             ]
+            
 
             for line in header_email:
                 p = doc.add_paragraph()
@@ -86,6 +87,7 @@ def individual_allocation_download(request):
                 run = p.add_run(line)
                 run.font.size = Pt(14)
                 set_font(run, "Times New Roman")  # Set eNGLISH font for email
+            p.paragraph_format.space_after = Pt(6)
 
             # Get current year and convert to Bengali last two digits
             current_year = datetime.datetime.now().year
