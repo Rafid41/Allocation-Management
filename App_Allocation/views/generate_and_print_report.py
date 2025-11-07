@@ -67,6 +67,8 @@ def individual_allocation_download(request):
             for line in header_lines:
                 p = doc.add_paragraph()
                 p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                p.paragraph_format.space_after = Pt(0)
+                p.paragraph_format.space_before = Pt(0)
                 run = p.add_run(line)
                 run.font.size = Pt(12)
                 set_font(run, "Nikosh")  # Set Bengali font for header
@@ -79,6 +81,8 @@ def individual_allocation_download(request):
             for line in header_email:
                 p = doc.add_paragraph()
                 p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                p.paragraph_format.space_after = Pt(0)
+                p.paragraph_format.space_before = Pt(0)
                 run = p.add_run(line)
                 run.font.size = Pt(14)
                 set_font(run, "Times New Roman")  # Set eNGLISH font for email
@@ -189,10 +193,13 @@ def individual_allocation_download(request):
             for recipient in recipients:
                 p = doc.add_paragraph(recipient)
                 p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+                p.paragraph_format.space_after = Pt(0)
+                p.paragraph_format.space_before = Pt(0)
                 for run in p.runs:
                     run.font.size = Pt(12)
                     set_font(run, "Nikosh")
                     # run.bold = True
+            p.paragraph_format.space_after = Pt(6)
 
             # doc.add_paragraph()
 
