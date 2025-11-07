@@ -255,7 +255,7 @@ def individual_allocation_download(request):
             # doc.add_paragraph()
 
             # Create table
-            table = doc.add_table(rows=1, cols=8)
+            table = doc.add_table(rows=1, cols=7)
             table.style = "Table Grid"
 
             # Set column headers
@@ -263,12 +263,11 @@ def individual_allocation_download(request):
             headers = [
                 "গ্রহণকারী সমিতির নাম",
                 "আইটেম নং",
-                "একক মূল্য\n(টাকা)",
                 "পরিমাণ\n(টি)",
                 "একক",
+                "একক মূল্য\n(টাকা)",
                 "বরাদ্দকৃত প্রকল্প ও প্যাকেজ/ সাব-প্যাকেজ নং",
                 "পণ্যাগারের নাম",
-                "বরাদ্দের ধরণ ও স্টোর",
             ]
 
             for i, text in enumerate(headers):
@@ -290,26 +289,25 @@ def individual_allocation_download(request):
             # Widen column 5
             hdr_cells[4].width = Inches(2.5)
 
-            first_col8_cell = None
+            # first_col8_cell = None
 
             for idx, entry in enumerate(entries):
                 row_cells = table.add_row().cells
 
                 row_cells[0].width = Inches(3.0)
                 row_cells[1].width = Inches(4.0)
-                row_cells[2].width = Inches(3.0)
-                row_cells[3].width = Inches(1.5)
-                row_cells[4].width = Inches(1.5)
-                row_cells[5].width = Inches(6.0)
-                row_cells[6].width = Inches(2.0)
-                row_cells[7].width = Inches(1.5)
+                row_cells[2].width = Inches(1.5) # Quantity
+                row_cells[3].width = Inches(1.5) # Unit
+                row_cells[4].width = Inches(3.0) # Price
+                row_cells[5].width = Inches(7.0) # Package
+                row_cells[6].width = Inches(2.5) # Warehouse
 
                 values = [
                     str(entry.pbs.name),
                     str(entry.item),
-                    str(entry.price),
                     str(entry.quantity),
                     str(entry.unit_of_item),
+                    str(entry.price),
                     str(entry.package.packageId),
                     "CWH, " + str(entry.warehouse)
                 ]
@@ -325,30 +323,30 @@ def individual_allocation_download(request):
                         rFonts = run._element.rPr.get_or_add_rFonts()
                         rFonts.set(qn("w:cs"), "Times New Roman")
 
-                if idx == 0:
-                    first_col8_cell = row_cells[7]
-                else:
-                    first_col8_cell.merge(row_cells[7])
+                # if idx == 0:
+                #     first_col8_cell = row_cells[7]
+                # else:
+                #     first_col8_cell.merge(row_cells[7])
 
 
             # Set value and formatting for the merged column 8 cell
-            first_col8_cell.text = "On Payment O&M Store"
-            first_col8_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+            # first_col8_cell.text = "On Payment O&M Store"
+            # first_col8_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
 
-            para = first_col8_cell.paragraphs[0]
-            para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            # para = first_col8_cell.paragraphs[0]
+            # para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
-            # Ensure the paragraph has text and formatting
-            if not para.runs:
-                run = para.add_run("On Payment O&M Store")
-            else:
-                para.runs[0].text = "On Payment O&M Store"
-                run = para.runs[0]
+            # # Ensure the paragraph has text and formatting
+            # if not para.runs:
+            #     run = para.add_run("On Payment O&M Store")
+            # else:
+            #     para.runs[0].text = "On Payment O&M Store"
+            #     run = para.runs[0]
 
-            run.font.size = Pt(11)
-            run.font.name = "Times New Roman"
-            rFonts = run._element.rPr.get_or_add_rFonts()
-            rFonts.set(qn("w:cs"), "Times New Roman")
+            # run.font.size = Pt(11)
+            # run.font.name = "Times New Roman"
+            # rFonts = run._element.rPr.get_or_add_rFonts()
+            # rFonts.set(qn("w:cs"), "Times New Roman")
 
 
             # doc.add_paragraph()
