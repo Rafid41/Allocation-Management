@@ -183,7 +183,7 @@ def edit_item(request, item_id):
         item.warehouse = warehouse
         item.unit_of_item = unit_of_item  # Store only key (e.g., "Nos.", "Km.", etc.)
         # item.unit_price = new_price
-        item.quantity_of_item = int(quantity_of_item)
+        item.quantity_of_item = quantity_of_item
         item.description = description
         item.created_at = created_at
 
