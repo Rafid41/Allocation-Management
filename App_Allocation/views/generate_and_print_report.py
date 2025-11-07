@@ -28,6 +28,13 @@ def set_font(run, font_name):
     rFonts.set(qn("w:cs"), font_name)
 
 
+def format_quantity(quantity):
+    if quantity == int(quantity):
+        return str(int(quantity))
+    else:
+        return str(quantity)
+
+
 # Mapping for English to Bengali digits
 def convert_to_bengali_digits(number):
     en_to_bn_digits = str.maketrans("0123456789", "০১২৩৪৫৬৭৮৯")
@@ -305,7 +312,7 @@ def individual_allocation_download(request):
                 values = [
                     str(entry.pbs.name),
                     str(entry.item),
-                    str(entry.quantity),
+                    format_quantity(entry.quantity),
                     str(entry.unit_of_item),
                     str(entry.price),
                     str(entry.package.packageId),
