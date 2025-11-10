@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 {% load static %}
+{% load custom_filters %}
 
 {% block title_block %} Status {% endblock %}
 
@@ -12,34 +13,16 @@
 <div class="container mt-4">
     <h2>Search Items</h2>
 
-    <form method="GET" action="{% url 'App_Status:status_page' %}" class="row g-3">
-        <div class="col-md-4">
-            <!-- This input field will turn into a date picker if "Entry/Update date" is selected -->
-            <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
+    <form method="GET" action="{% url 'App_Status:status_page' %}" class="row g-3" id="searchForm">
+        <div id="filter-container">
+            <!-- Filter rows will be added here by JavaScript -->
         </div>
-
-        <div class="col-md-3">
-            <select name="filter_by" id="filterDropdown" class="form-select" onchange="toggleInputFields()">
-                <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
-                <option value="Package ID" {% if filter_by == "Package ID" %}selected{% endif %}>Package ID</option>
-                <option value="Item Name" {% if filter_by == "Item Name" %}selected{% endif %}>Item Name</option>
-                <option value="Warehouse" {% if filter_by == "Warehouse" %}selected{% endif %}>Warehouse</option>
-                <option value="Unit" {% if filter_by == "Unit" %}selected{% endif %}>Unit</option>
-                <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Entry/Update Date</option>
-            </select>
-        </div>
-
-        <div class="col-md-3" id="datePickerContainer" style="display: none;">
-            <input type="date" name="date" id="dateInput" class="form-control" value="{{ date_filter }}">
-        </div>
-
-        <div class="col-md-2">
+        <div class="col-12 mt-3">
             <button type="submit" class="btn btn-primary me-3">Search</button>
             <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+            <button type="button" class="btn btn-info" id="addFilterBtn" style="display: none;">Add Filter</button>
         </div>
     </form>
-
-    <hr>
 
     <h4>Search Results</h4>
 
@@ -148,24 +131,238 @@
 </style>
 
 <script>
-    function toggleInputFields() {
-        var filterDropdown = document.getElementById("filterDropdown");
-        var searchQuery = document.getElementById("searchQuery");
-        var datePickerContainer = document.getElementById("datePickerContainer");
+    const filterOptions = [
+        "No Condition",
+        "Package ID",
+        "Item Name",
+        "Warehouse",
+        "Unit",
+        "Entry/Update date"
+    ];
 
-        // If "Entry/Update date" is selected, show the date picker and hide the search input
-        if (filterDropdown.value === "Entry/Update date") {
-            searchQuery.style.display = "none";
-            datePickerContainer.style.display = "block";
-        } else {
-            searchQuery.style.display = "block";
-            datePickerContainer.style.display = "none";
+    // Helper to get option properties from its value
+    function getFilterOptionProperties(value) {
+        switch (value) {
+            case "No Condition": return { hasInput: false };
+            case "Package ID": return { hasInput: true, inputType: "text" };
+            case "Item Name": return { hasInput: true, inputType: "text" };
+            case "Warehouse": return { hasInput: true, inputType: "text" };
+            case "Unit": return { hasInput: true, inputType: "text" };
+            case "Entry/Update date": return { hasInput: true, inputType: "date" };
+            default: return { hasInput: false };
         }
     }
 
-    // Ensure the correct visibility on page load
+    let activeFilterRowCount = 0;
+    const maxFilterRows = 5; // Maximum 5 filter rows with input fields
+
+    function createFilterRow(index, initialFilterBy = "No Condition", initialQuery = "") {
+        const filterContainer = document.getElementById("filter-container");
+        const rowId = `filter-row-${index}`;
+
+        const rowDiv = document.createElement("div");
+        rowDiv.className = "row g-3 mb-2 align-items-center";
+        rowDiv.id = rowId;
+
+        rowDiv.innerHTML = `
+            <div class="col-md-3">
+                <select name="filter_by_${index}" id="filterDropdown_${index}" class="form-select filter-dropdown">
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="text" name="query_${index}" id="searchQuery_${index}" class="form-control search-query" placeholder="Search..." value="${initialQuery}">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-danger remove-filter-btn" data-index="${index}" style="display: none;">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        `;
+        filterContainer.appendChild(rowDiv);
+        activeFilterRowCount++; // Increment active count
+
+        const dropdown = document.getElementById(`filterDropdown_${index}`);
+        if (!dropdown) {
+            console.error(`Dropdown element with ID filterDropdown_${index} not found.`);
+            return; // Exit if dropdown not found
+        }
+        const inputField = document.getElementById(`searchQuery_${index}`);
+        const removeBtn = rowDiv.querySelector(".remove-filter-btn");
+
+        // Populate dropdown options
+        updateDropdownOptions(dropdown, index);
+
+        // Set initial selected value
+        dropdown.value = initialFilterBy;
+
+        // Handle initial input field visibility and type
+        const selectedOptionProps = getFilterOptionProperties(initialFilterBy);
+        if (selectedOptionProps.hasInput) {
+            inputField.style.display = "block";
+            inputField.type = selectedOptionProps.inputType;
+        } else {
+            inputField.style.display = "none";
+        }
+
+        // Event listener for dropdown change
+        dropdown.addEventListener("change", function() {
+            const selectedOptionProps = getFilterOptionProperties(this.value);
+            if (selectedOptionProps.hasInput) {
+                inputField.style.display = "block";
+                inputField.type = selectedOptionProps.inputType;
+                inputField.value = ""; // Clear value on type change
+            } else {
+                inputField.style.display = "none";
+                inputField.value = ""; // Clear value if no input is needed
+            }
+
+            // Update options for all subsequent dropdowns
+            document.querySelectorAll('.filter-dropdown').forEach((otherDropdown) => {
+                updateDropdownOptions(otherDropdown, parseInt(otherDropdown.id.split('_')[1]));
+            });
+
+            // Show next filter row if a condition is selected and not maxed out
+            if (this.value !== "No Condition" && index === (activeFilterRowCount - 1) && activeFilterRowCount < maxFilterRows) {
+                createFilterRow(activeFilterRowCount); // Use activeFilterRowCount as the new index
+                document.getElementById(`filter-row-${activeFilterRowCount - 1}`).style.display = "flex"; // Display the newly created row
+                document.getElementById("addFilterBtn").style.display = "block";
+            } else if (this.value === "No Condition" && index < (activeFilterRowCount - 1)) {
+                // If a middle dropdown is set to "No Condition", remove subsequent rows
+                removeFilterRow(index + 1);
+            }
+            updateRemoveButtons();
+        });
+
+        // Event listener for remove button
+        removeBtn.addEventListener("click", function() {
+            const idxToRemove = parseInt(this.dataset.index);
+            removeFilterRow(idxToRemove);
+            updateRemoveButtons();
+            // Update options for all dropdowns after removal
+            document.querySelectorAll('.filter-dropdown').forEach((otherDropdown) => {
+                updateDropdownOptions(otherDropdown, parseInt(otherDropdown.id.split('_')[1]));
+            });
+        });
+
+        updateRemoveButtons();
+        updateAddFilterButton();
+    }
+
+    function updateDropdownOptions(dropdownElement, currentIndex) {
+        const selectedValues = new Set();
+        // Collect all selected values from other dropdowns
+        document.querySelectorAll('.filter-dropdown').forEach((otherDropdown) => {
+            if (otherDropdown.id !== dropdownElement.id && otherDropdown.value !== "No Condition") {
+                selectedValues.add(otherDropdown.value);
+            }
+        });
+
+        const currentSelectedValue = dropdownElement.value; // Store current selection
+
+        // Clear existing options
+        dropdownElement.innerHTML = "";
+
+        // Add "No Condition" first
+        const noConditionOption = document.createElement("option");
+        noConditionOption.value = "No Condition";
+        noConditionOption.textContent = "No Condition";
+        dropdownElement.appendChild(noConditionOption);
+
+        // Add other options, excluding already selected ones
+        filterOptions.forEach(optionValue => {
+            if (optionValue !== "No Condition" && !selectedValues.has(optionValue)) {
+                const opt = document.createElement("option");
+                opt.value = optionValue;
+                opt.textContent = optionValue; // Text content is the same as value for now
+                dropdownElement.appendChild(opt);
+            }
+        });
+
+        // Restore previous selection if it's still a valid option, otherwise default to "No Condition"
+        if (Array.from(dropdownElement.options).some(opt => opt.value === currentSelectedValue)) {
+            dropdownElement.value = currentSelectedValue;
+        } else {
+            dropdownElement.value = "No Condition";
+        }
+    }
+
+    function removeFilterRow(startIndex) {
+        for (let i = startIndex; i < activeFilterRowCount; i++) {
+            const row = document.getElementById(`filter-row-${i}`);
+            if (row) {
+                row.remove();
+            }
+        }
+        activeFilterRowCount = startIndex; // Set active count to the start index
+        if (activeFilterRowCount < 0) activeFilterRowCount = 0; // Ensure it doesn't go below 0
+        updateAddFilterButton();
+        updateRemoveButtons();
+    }
+
+    function updateRemoveButtons() {
+        document.querySelectorAll(".remove-filter-btn").forEach(btn => {
+            btn.style.display = "none";
+        });
+        if (activeFilterRowCount > 0) {
+            // Only show remove button for the last active filter row
+            const lastRowIndex = activeFilterRowCount - 1;
+            const lastRow = document.getElementById(`filter-row-${lastRowIndex}`);
+            if (lastRow) {
+                lastRow.querySelector(".remove-filter-btn").style.display = "block";
+            }
+        }
+    }
+
+    function updateAddFilterButton() {
+        const addFilterBtn = document.getElementById("addFilterBtn");
+        // Only show add button if the last active filter has a condition selected and we haven't reached max rows
+        if (activeFilterRowCount < maxFilterRows) {
+            const lastDropdown = document.getElementById(`filterDropdown_${activeFilterRowCount - 1}`);
+            if (lastDropdown && lastDropdown.value !== "No Condition") {
+                addFilterBtn.style.display = "block";
+            }
+        } else {
+            addFilterBtn.style.display = "none";
+        }
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
-        toggleInputFields();
+        // Initialize the first filter row
+        createFilterRow(0, "{{ filter_by_0|default:'No Condition' }}", "{{ query_0|default:'' }}");
+
+        // Re-create rows based on existing query parameters if page reloads with filters
+        let initialActiveRows = 0;
+        {% for i in "1234" %} {# Loop for up to 4 additional filters #}
+            {% with filter_by_key="filter_by_"|add:i|stringformat:"s" query_key="query_"|add:i|stringformat:"s" %}
+                {% if request.GET|get_item:filter_by_key %}
+                    createFilterRow({{ i }}, "{{ request.GET|get_item:filter_by_key }}", "{{ request.GET|get_item:query_key }}");
+                    document.getElementById(`filter-row-{{ i }}`).style.display = "flex";
+                    initialActiveRows = {{ i }} + 1;
+                {% endif %}
+            {% endwith %}
+        {% endfor %}
+
+        // Ensure activeFilterRowCount reflects the number of rows created during initialization
+        activeFilterRowCount = initialActiveRows > 0 ? initialActiveRows : 1; // At least one row is always active
+
+        // If the first row is "No Condition" and no other filters, hide add button
+        const firstDropdown = document.getElementById(`filterDropdown_0`);
+        if (firstDropdown && firstDropdown.value === "No Condition" && activeFilterRowCount === 1) {
+            document.getElementById("addFilterBtn").style.display = "none";
+        }
+
+
+        updateRemoveButtons();
+        updateAddFilterButton();
+
+        document.getElementById("addFilterBtn").addEventListener("click", function() {
+            if (activeFilterRowCount < maxFilterRows) {
+                createFilterRow(activeFilterRowCount); // Use current active count as new index
+                document.getElementById(`filter-row-${activeFilterRowCount - 1}`).style.display = "flex";
+                updateAddFilterButton();
+                updateRemoveButtons();
+            }
+        });
     });
 
     function printResults() {
