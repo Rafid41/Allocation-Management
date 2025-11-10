@@ -29,11 +29,11 @@ def status_page(request):
             
             if query: # Only apply query if there's a value
                 if filter_by == "Package ID":
-                    combined_q &= Q(package__packageId__icontains=query)
+                    combined_q &= Q(package__packageId__iexact=query)
                 elif filter_by == "Item Name":
-                    combined_q &= Q(name__icontains=query)
+                    combined_q &= Q(name__iexact=query)
                 elif filter_by == "Warehouse":
-                    combined_q &= Q(warehouse__icontains=query)
+                    combined_q &= Q(warehouse__iexact=query)
                 elif filter_by == "Unit":
                     combined_q &= Q(unit_of_item__icontains=query)
                 elif filter_by == "Entry/Update date":
@@ -51,8 +51,12 @@ def status_page(request):
     # Order the results by Item Name
     all_items = all_items.order_by("name")
 
+    # Get unit choices from the Item model
+    all_possible_units = [choice[0] for choice in Item.UNIT_CHOICES]
+
     context = {
         "items": all_items,
+        "unique_units": all_possible_units, # Pass the choices from the model
     }
     context.update(active_filters) # Add active filters back to context for template
 

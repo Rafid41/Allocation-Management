@@ -147,7 +147,7 @@
             case "Package ID": return { hasInput: true, inputType: "text" };
             case "Item Name": return { hasInput: true, inputType: "text" };
             case "Warehouse": return { hasInput: true, inputType: "text" };
-            case "Unit": return { hasInput: true, inputType: "text" };
+            case "Unit": return { hasInput: true, inputType: "select" }; // Changed to 'select'
             case "Entry/Update date": return { hasInput: true, inputType: "date" };
             default: return { hasInput: false };
         }
@@ -164,13 +164,22 @@
         rowDiv.className = "row g-3 mb-2 align-items-center";
         rowDiv.id = rowId;
 
+        const inputFieldHtml = (initialFilterBy === "Unit") ?
+            `<select name="query_${index}" id="searchQuery_${index}" class="form-select search-query">
+                <option value="">Select Unit</option>
+                {% for unit in unique_units %}
+                    <option value="{{ unit }}" {% if unit == initialQuery %}selected{% endif %}>{{ unit }}</option>
+                {% endfor %}
+            </select>` :
+            `<input type="text" name="query_${index}" id="searchQuery_${index}" class="form-control search-query" placeholder="Search..." value="${initialQuery}">`;
+
         rowDiv.innerHTML = `
             <div class="col-md-3">
                 <select name="filter_by_${index}" id="filterDropdown_${index}" class="form-select filter-dropdown">
                 </select>
             </div>
             <div class="col-md-3">
-                <input type="text" name="query_${index}" id="searchQuery_${index}" class="form-control search-query" placeholder="Search..." value="${initialQuery}">
+                ${inputFieldHtml}
             </div>
             <div class="col-md-1">
                 <button type="button" class="btn btn-danger remove-filter-btn" data-index="${index}" style="display: none;">
@@ -186,7 +195,7 @@
             console.error(`Dropdown element with ID filterDropdown_${index} not found.`);
             return; // Exit if dropdown not found
         }
-        const inputField = document.getElementById(`searchQuery_${index}`);
+        const inputField = document.getElementById(`searchQuery_${index}`); // This will now be the select or input
         const removeBtn = rowDiv.querySelector(".remove-filter-btn");
 
         // Populate dropdown options
@@ -199,7 +208,9 @@
         const selectedOptionProps = getFilterOptionProperties(initialFilterBy);
         if (selectedOptionProps.hasInput) {
             inputField.style.display = "block";
-            inputField.type = selectedOptionProps.inputType;
+            if (selectedOptionProps.inputType !== "select") { // Only set type if not a select
+                inputField.type = selectedOptionProps.inputType;
+            }
         } else {
             inputField.style.display = "none";
         }
@@ -207,17 +218,35 @@
         // Event listener for dropdown change
         dropdown.addEventListener("change", function() {
             const selectedOptionProps = getFilterOptionProperties(this.value);
-            if (selectedOptionProps.hasInput) {
-                inputField.style.display = "block";
-                inputField.type = selectedOptionProps.inputType;
-                inputField.value = ""; // Clear value on type change
+            const currentInputField = document.getElementById(`searchQuery_${index}`); // Get current input field
+
+            // Recreate input field based on new selection
+            let newInputFieldHtml;
+            if (this.value === "Unit") {
+                newInputFieldHtml = `<select name="query_${index}" id="searchQuery_${index}" class="form-select search-query">
+                    <option value="">Select Unit</option>
+                    {% for unit in unique_units %}
+                        <option value="{{ unit }}">{{ unit }}</option>
+                    {% endfor %}
+                </select>`;
+            } else if (selectedOptionProps.hasInput) {
+                newInputFieldHtml = `<input type="${selectedOptionProps.inputType}" name="query_${index}" id="searchQuery_${index}" class="form-control search-query" placeholder="Search...">`;
             } else {
-                inputField.style.display = "none";
-                inputField.value = ""; // Clear value if no input is needed
+                newInputFieldHtml = `<input type="hidden" name="query_${index}" id="searchQuery_${index}" class="form-control search-query">`; // Hidden input for no condition
             }
 
+            // Replace the old input field with the new one
+            currentInputField.outerHTML = newInputFieldHtml;
+            const updatedInputField = document.getElementById(`searchQuery_${index}`);
+            if (selectedOptionProps.hasInput) {
+                updatedInputField.style.display = "block";
+            } else {
+                updatedInputField.style.display = "none";
+            }
+            updatedInputField.value = ""; // Clear value on type change
+
             // Update options for all subsequent dropdowns
-            document.querySelectorAll('.filter-dropdown').forEach((otherDropdown) => {
+            document.querySelectorAll('.filter-dropdown').forEach((otherDropdown, idx) => {
                 updateDropdownOptions(otherDropdown, parseInt(otherDropdown.id.split('_')[1]));
             });
 
@@ -239,7 +268,7 @@
             removeFilterRow(idxToRemove);
             updateRemoveButtons();
             // Update options for all dropdowns after removal
-            document.querySelectorAll('.filter-dropdown').forEach((otherDropdown) => {
+            document.querySelectorAll('.filter-dropdown').forEach((otherDropdown, idx) => {
                 updateDropdownOptions(otherDropdown, parseInt(otherDropdown.id.split('_')[1]));
             });
         });
