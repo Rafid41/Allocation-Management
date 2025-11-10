@@ -38,8 +38,8 @@ def status_page(request):
         except ValueError:
             pass  # If the date format is invalid, ignore the filter
 
-    # Order the results by package ID
-    items = items.order_by("package__packageId")
+    # Order the results by Item Name
+    items = items.order_by("name")
 
     return render(
         request,
