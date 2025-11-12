@@ -356,14 +356,16 @@
 
     function updateRemoveButtons() {
         document.querySelectorAll(".remove-filter-btn").forEach(btn => {
-            btn.style.display = "none";
+            btn.style.display = "none"; // Hide all by default
         });
-        if (activeFilterRowCount > 0) {
-            // Only show remove button for the last active filter row
-            const lastRowIndex = activeFilterRowCount - 1;
-            const lastRow = document.getElementById(`filter-row-${lastRowIndex}`);
-            if (lastRow) {
-                lastRow.querySelector(".remove-filter-btn").style.display = "block";
+
+        // Show remove button for all rows except the first one, if there's more than one active filter row
+        if (activeFilterRowCount > 1) { // Only show remove buttons if there's more than one filter row
+            for (let i = 1; i < activeFilterRowCount; i++) { // Start from the second row (index 1)
+                const row = document.getElementById(`filter-row-${i}`);
+                if (row) {
+                    row.querySelector(".remove-filter-btn").style.display = "block";
+                }
             }
         }
     }
