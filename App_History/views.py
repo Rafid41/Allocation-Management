@@ -21,7 +21,8 @@ def history(request):
         if filter_value:
             filter_value = filter_value.strip()
 
-        if not filter_type or filter_type == "no_condition":
+        # Skip empty or no-condition filters (show all data)
+        if not filter_type or filter_type == "no_condition" or (not filter_value and filter_type not in ["cs_and_m_date", "carry_from_warehouse_date"]):
             continue
 
         applied_filters.append({
@@ -48,27 +49,25 @@ def history(request):
         elif filter_type in ["cs_and_m_date", "carry_from_warehouse_date"]:
             field_name = "CS_and_M" if filter_type == "cs_and_m_date" else "carry_from_warehouse"
 
-            # Condition set
+            # Case 1: No date selected
             if not filter_value:
-                # Case 1: No date selected
                 if date_status == "empty":
-                    # 1b. Show Empty Cells
+                    # Show only empty cells
                     results = results.filter(Q(**{f"{field_name}__isnull": True}) | Q(**{f"{field_name}__exact": ''}))
                 else:
-                    # 1a. Show All Data → No filter (skip)
+                    # Show all (skip filter)
                     pass
             else:
                 # Case 2: Date is selected
                 if date_status == "empty":
-                    # 2b. Show records with the selected date AND also empty (which will yield nothing normally)
-                    # But to strictly follow your logic: filter both equal and empty
+                    # Show selected date + empty cells
                     results = results.filter(
                         Q(**{f"{field_name}__iexact": filter_value}) |
                         Q(**{f"{field_name}__isnull": True}) |
                         Q(**{f"{field_name}__exact": ''})
                     )
                 else:
-                    # 2a. Show only selected date
+                    # Show only selected date
                     results = results.filter(**{f"{field_name}__iexact": filter_value})
 
     # Determine group permissions
@@ -83,6 +82,7 @@ def history(request):
     }
 
     return render(request, "App_History/view_and_print_history.html", context)
+
 
 
 @login_required
