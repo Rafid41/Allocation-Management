@@ -4,17 +4,14 @@ never touch zz.output.txt
 
 in App_History
 in current filter add this filter
-when user selects CS&M or carry_from_warehouse_date
-in CS&M date and carry_from_warehouse_date, , problems are=>
-    1. if i dont input any date, the "Show empty cells" doesnt work
-    2. if i put a date and select show empty cells , it shows empty cells, but not in selected date but other dates. but it should
+if any filter other than no condition is selected, the next filter will appear auto(default as no condition as now)
 
-    let me explain (only for this query, let's assume just this filters are applied)
-    1. if date is not selected ,
-        a. if "Show All data" is selected=> u should query "select * from History" 
-        b. if "Show Empty Cells" is selected=> u should query "select * from History where carry/CS&M =trim('')" //trim('')means empty
+filter button only need when user deletes the last filter
 
-    2. 1. if date is selected ,
-        a. if "Show All data" is selected=> u should query "select * from History where carry/CS&M= <selected date>" 
-        b. if "Show Empty Cells" is selected=> "select * from History where carry/CS&M= <selected date> and carry/CS&M =trim('')" 
 
+dont change other things
+
+
+files
+
+template file: templates\App_History\view_and_print_history.html
