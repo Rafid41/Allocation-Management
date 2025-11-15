@@ -1,28 +1,7 @@
 update:
-templates\Project_Templates\Project_App_Status\status.html
- 
-in excel file:
-    in F column
-    the header is "Entry/Update Dateyyyy-mm-dd"
+templates\Project_Templates\Project_App_ProjectWiseBalance\project_details.html
 
-    it shuld be "Entry/Update Date(yyyy-mm-dd)"
-
-    also the data format is dd-mm-yyyy
-
-    
-    so, make the header text "Entry/Update Date(dd-mm-yyyy)"
-
-
-
-
-previous command:
- view: Project_App_ProjectWiseBalance\views\project_details.py
- template file: templates\Project_Templates\Project_App_ProjectWiseBalance\project_details.html
-
- read these files, there is an export to excel is implemented here. dont change these files (.xlsx cdn is already in base.html file)
-
-
-implement "Export to Excel" button and funtion in templates\Project_Templates\Project_App_Status\status.html
-filename: Project Status
+can u make the excel cells as all borders 
+0.5 px black solid
 
 
