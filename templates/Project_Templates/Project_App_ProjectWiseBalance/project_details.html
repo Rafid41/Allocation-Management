@@ -17,13 +17,16 @@
         <div class="row mt-3">
             <div class="col-md-12">
                 <button type="submit" class="btn btn-primary me-2">Search</button>
-                <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+                <button type="button" class="btn btn-secondary me-2" onclick="printResults()">Print</button>
+                <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                    <i class="fa fa-file-excel-o"></i> Export to Excel (.xlsx)
+                </button>
             </div>
         </div>
     </form>
 
     <div id="printableDataTable" class="table-responsive" style="max-height: 600px; overflow-y: auto;">
-        <table class="table table-bordered table-striped table-hover">
+        <table class="table table-bordered table-striped table-hover" id="projectDetailsTable">
             <thead class="thead-dark">
                 <tr>
                     <th>Item Name</th>
@@ -53,7 +56,6 @@
                     <td class="remarks-cell position-relative">
                         <span id="remarks_display_{{ row.id }}" class="remarks-display">{{ row.remarks|default_if_none:"" }}</span>
 
-
                         {% if request.user.user_group.user_group_type == "Editor" %}
                         <button class="btn btn-sm btn-outline-primary update-btn"
                                 onclick="showRemarksEdit({{ row.id }})">Update</button>
@@ -82,6 +84,7 @@
         </table>
     </div>
 </div>
+
 <style>
 /* Update button only visible on hover */
 .remarks-cell {
@@ -122,6 +125,12 @@
         overflow: visible !important;
         max-height: none !important;
     }
+    .remarks-cell .update-btn { /* Hide update button in remarks column for print */
+        display: none !important;
+    }
+    .remarks-cell .remarks-edit { /* Hide edit box in remarks column for print */
+        display: none !important;
+    }
 }
 </style>
 
@@ -148,6 +157,7 @@ function showRemarksEdit(itemId) {
     const textarea = document.querySelector(`#remarks_text_${itemId}`);
     const displaySpan = document.querySelector(`#remarks_display_${itemId}`);
 
+    if (!editBox) return;
     editBox.style.display = 'block';
     textarea.focus();
     textarea.selectionStart = textarea.value.length;
@@ -161,12 +171,15 @@ function showRemarksEdit(itemId) {
 }
 
 function cancelEdit(itemId) {
-    document.querySelector(`#edit_remarks_${itemId}`).style.display = 'none';
-    document.querySelector(`#remarks_display_${itemId}`).style.display = 'inline';
+    const editBox = document.querySelector(`#edit_remarks_${itemId}`);
+    const displaySpan = document.querySelector(`#remarks_display_${itemId}`);
+    if (editBox) editBox.style.display = 'none';
+    if (displaySpan) displaySpan.style.display = 'inline';
 }
 
 function saveRemarks(itemId) {
     const textarea = document.querySelector(`#remarks_text_${itemId}`);
+    if (!textarea) return;
     const newRemarks = textarea.value;
 
     fetch(`/project/project_wise_balance/projects/project_details/update-remarks/${itemId}/`, {
@@ -180,15 +193,15 @@ function saveRemarks(itemId) {
         if (res.ok) {
             document.querySelector(`#edit_remarks_${itemId}`).style.display = "none";
             const displaySpan = document.querySelector(`#remarks_display_${itemId}`);
-            displaySpan.textContent = newRemarks || "-";
+            displaySpan.textContent = newRemarks || "";
             displaySpan.style.display = "inline";
         } else {
-            res.json().then(data => alert(data.error || "Failed"));
+            res.json().then(data => alert(data.error || "Failed to save remarks"));
         }
     }).catch(err => alert("Error: " + err));
 }
 
-// --- Filter Logic ---
+// --- Filter Logic (unchanged) ---
 const WAREHOUSE_CHOICES = JSON.parse('{{ warehouse_choices_json|escapejs }}');
 const UNIT_CHOICES = JSON.parse('{{ unit_choices_json|escapejs }}');
 const APPLIED_FILTERS = JSON.parse('{{ applied_filters_json|escapejs }}');
@@ -313,7 +326,6 @@ function addFilterRow(initialType = "no_condition", initialValue = "", initialDa
     dateStatusElement.value = initialDateStatus;
   }
 
-
   row.querySelector(".add-filter-row-btn").addEventListener("click", () => addFilterRow());
   updateAddRemoveButtonVisibility();
 }
@@ -368,14 +380,214 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function printResults() {
     var originalContents = document.body.innerHTML;
-    var printContents = document.getElementById('printableDataTable').innerHTML;
-    document.body.innerHTML = printContents;
+    var printContentsElement = document.getElementById('printableDataTable');
+
+    // Clone the printable area to manipulate it without affecting the live DOM
+    var clonedPrintContents = printContentsElement.cloneNode(true);
+
+    // Find and remove update buttons and edit boxes from the cloned content
+    clonedPrintContents.querySelectorAll('.update-btn, .remarks-edit').forEach(el => {
+        el.remove();
+    });
+
+    document.body.innerHTML = clonedPrintContents.innerHTML;
     window.print();
     document.body.innerHTML = originalContents;
     location.reload(); // Reload to restore full page functionality and event listeners
 }
+
+/* -------------------------
+   Export to .xlsx:
+   - prefer ExcelJS if loaded (reliable bold headers)
+   - fallback to SheetJS (XLSX) using rich-text trick
+   - only export .remarks-display text
+   - numeric columns exported as numbers
+------------------------- */
+async function exportToExcel() {
+    try {
+        const table = document.getElementById('projectDetailsTable');
+        if (!table) return alert('Table not found');
+
+        // Helper to read rows into a simple array-of-arrays (aoa)
+        const buildAOA = () => {
+            const aoa = [];
+            const headers = [
+                'Item Name',
+                'Warehouse',
+                'Unit',
+                'Quantity',
+                'Allocated',
+                'Carried',
+                'Uncarried',
+                'Balance with Uncarried',
+                'Entry Updated (dd/mm/yyyy)',
+                'Remarks'
+            ];
+            aoa.push(headers);
+
+            const tbody = table.querySelector('tbody');
+            const trs = Array.from(tbody.querySelectorAll('tr'));
+            trs.forEach(tr => {
+                const tds = Array.from(tr.querySelectorAll('td'));
+                if (!tds || tds.length === 0) return;
+
+                // Extract visible text values; for remarks prefer .remarks-display
+                const itemName = tds[0].innerText.trim();
+                const warehouse = tds[1].innerText.trim();
+                const unit = tds[2].innerText.trim();
+
+                const parseNum = txt => {
+                    if (!txt) return null;
+                    const n = parseFloat(txt.replace(/,/g, ''));
+                    return Number.isFinite(n) ? n : null;
+                };
+
+                const quantity = parseNum(tds[3].innerText.trim());
+                const allocated = parseNum(tds[4].innerText.trim());
+                const carried = parseNum(tds[5].innerText.trim());
+                const uncarried = parseNum(tds[6].innerText.trim());
+                const balance = parseNum(tds[7].innerText.trim());
+                const entryUpdated = tds[8].innerText.trim();
+
+                const remarksEl = tds[9].querySelector('.remarks-display');
+                const remarks = remarksEl ? remarksEl.innerText.trim() : tds[9].innerText.trim();
+
+                aoa.push([
+                    itemName || '',
+                    warehouse || '',
+                    unit || '',
+                    quantity !== null ? quantity : (tds[3].innerText.trim() || ''),
+                    allocated !== null ? allocated : (tds[4].innerText.trim() || ''),
+                    carried !== null ? carried : (tds[5].innerText.trim() || ''),
+                    uncarried !== null ? uncarried : (tds[6].innerText.trim() || ''),
+                    balance !== null ? balance : (tds[7].innerText.trim() || ''),
+                    entryUpdated || '',
+                    remarks || ''
+                ]);
+            });
+
+            return aoa;
+        };
+
+        // Prefer ExcelJS (recommended) if available
+        if (typeof ExcelJS !== 'undefined') {
+            const aoa = buildAOA();
+            const wb = new ExcelJS.Workbook();
+            const ws = wb.addWorksheet('Project Details');
+
+            // Header row (bold)
+            const headers = aoa[0];
+            const headerRow = ws.addRow(headers);
+            headerRow.eachCell(cell => {
+                cell.font = { bold: true };
+                cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+            });
+            ws.views = [{ state: 'frozen', ySplit: 1 }];
+
+            // column widths
+            ws.columns = [
+                { key: 'name', width: 30 },
+                { key: 'warehouse', width: 18 },
+                { key: 'unit', width: 10 },
+                { key: 'quantity', width: 12 },
+                { key: 'allocated', width: 12 },
+                { key: 'carried', width: 12 },
+                { key: 'uncarried', width: 12 },
+                { key: 'balance', width: 16 },
+                { key: 'entry_updated', width: 18 },
+                { key: 'remarks', width: 40 }
+            ];
+
+            // Add data rows
+            for (let i = 1; i < aoa.length; i++) {
+                const row = aoa[i];
+                const newRow = ws.addRow(row);
+                // apply numeric formats for quantity/allocated/carried/uncarried/balance (cols 4..8)
+                const numFmt = '#,##0.000';
+                [4,5,6,7,8].forEach(ci => {
+                    const cell = newRow.getCell(ci);
+                    if (typeof cell.value === 'number') {
+                        cell.numFmt = numFmt;
+                        cell.alignment = { vertical: 'top', horizontal: 'right' };
+                    } else {
+                        cell.alignment = { vertical: 'top', horizontal: 'left' };
+                    }
+                });
+                // remarks wrap
+                newRow.getCell(10).alignment = { wrapText: true, vertical: 'top' };
+            }
+
+            // autofilter
+            ws.autoFilter = {
+                from: { row: 1, column: 1 },
+                to: { row: 1 + aoa.length - 1, column: aoa[0].length }
+            };
+
+            // export
+            const buf = await wb.xlsx.writeBuffer();
+            const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const safeProjectId = String('{{ project.projectId }}').replace(/[^a-zA-Z0-9-_ ]/g, '');
+            const filename = `ProjectWiseBalance Details for Project-${safeProjectId}.xlsx`;
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            return;
+        }
+
+        // Fallback: use SheetJS (XLSX) if available
+        if (typeof XLSX !== 'undefined') {
+            const aoa = buildAOA();
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+            // Try to force bold headers via rich text runs (works in many OSS builds)
+            const headerLen = aoa[0].length;
+            for (let c = 0; c < headerLen; c++) {
+                const addr = XLSX.utils.encode_cell({ r: 0, c: c });
+                // set rich text run
+                ws[addr] = {
+                    t: 's',
+                    v: aoa[0][c],
+                    r: [{ t: 's', v: aoa[0][c], s: { bold: true } }]
+                };
+            }
+
+            // set column widths (wch)
+            ws['!cols'] = [
+                { wch: 30 },
+                { wch: 18 },
+                { wch: 10 },
+                { wch: 12 },
+                { wch: 12 },
+                { wch: 12 },
+                { wch: 12 },
+                { wch: 16 },
+                { wch: 18 },
+                { wch: 40 },
+            ];
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Project Details');
+
+            const safeProjectId = String('{{ project.projectId }}').replace(/[^a-zA-Z0-9-_ ]/g, '');
+            const filename = `ProjectWiseBalance Details for Project-${safeProjectId}.xlsx`;
+
+            XLSX.writeFile(wb, filename);
+            return;
+        }
+
+        // If neither library available
+        alert('No Excel library found. Please include ExcelJS (preferred) or SheetJS (XLSX) in base.html.');
+    } catch (err) {
+        console.error('Export error', err);
+        alert('Export failed: ' + (err && err.message ? err.message : err));
+    }
+}
 </script>
 
-
 {% endblock %}
-

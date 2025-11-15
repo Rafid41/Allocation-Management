@@ -2,11 +2,11 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Sum, Q
 from django.db.models.functions import Length
 from Project_App_Entry.models import Project, Project_Item
-from Project_App_History.models import  Project_History
-from Project_App_Allocation.models import Final_Allocation  # assuming this is where Final_Allocation is
+from Project_App_History.models import Project_History
+from Project_App_Allocation.models import Final_Allocation
 from decimal import Decimal, ROUND_HALF_UP
 from django.contrib.auth.decorators import login_required
-import json # Import json
+import json
 
 @login_required
 def project_details(request, project_id):
@@ -18,7 +18,7 @@ def project_details(request, project_id):
     for i in range(1, 6):  # Supports up to 5 filters
         filter_type = request.GET.get(f"filter_type_{i}")
         filter_value = request.GET.get(f"filter_value_{i}")
-        date_status = request.GET.get(f"date_status_{i}") # For date fields
+        date_status = request.GET.get(f"date_status_{i}")  # For date fields
 
         if filter_value:
             filter_value = filter_value.strip()
@@ -38,13 +38,13 @@ def project_details(request, project_id):
         elif filter_type == "warehouse":
             items = items.filter(warehouse__iexact=filter_value)
         elif filter_type == "entry_update_date":
-            if filter_value: # Only filter if a date is provided
+            if filter_value:  # Only filter if a date is provided
                 items = items.filter(created_at__date__iexact=filter_value)
 
     item_data = []
 
     for item in items:
-        # --- 5. Allocated ---
+        # Allocated
         allocated_sum = (
             Final_Allocation.objects.filter(project=project, item=item)
             .aggregate(total=Sum("quantity"))["total"]
@@ -52,7 +52,7 @@ def project_details(request, project_id):
         )
         allocated_sum = Decimal(allocated_sum).quantize(Decimal("0.000"), rounding=ROUND_HALF_UP)
 
-        # --- 6. Carried ---
+        # Carried
         carried_sum = (
             Project_History.objects.filter(
                 project=str(project.projectId),
@@ -68,13 +68,13 @@ def project_details(request, project_id):
         )
         carried_sum = Decimal(carried_sum).quantize(Decimal("0.000"), rounding=ROUND_HALF_UP)
 
-        # --- 7. Uncarried ---
+        # Uncarried
         uncarried = Decimal(allocated_sum - carried_sum).quantize(Decimal("0.000"), rounding=ROUND_HALF_UP)
 
-        # --- 8. Balance with Uncarried ---
+        # Balance with Uncarried
         balance_with_uncarried = Decimal(item.quantity_of_item + uncarried).quantize(Decimal("0.000"), rounding=ROUND_HALF_UP)
 
-        # --- 10. Remarks ---
+        # Remarks
         remarks = item.remarks_for_projectWiseBalance or ""
 
         item_data.append({
@@ -106,10 +106,8 @@ def project_details(request, project_id):
     )
 
 
-
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
-import json
 
 @login_required
 @require_POST
@@ -128,4 +126,3 @@ def update_remarks(request, item_id):
         return JsonResponse({"success": True, "remarks": remarks})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
-        
