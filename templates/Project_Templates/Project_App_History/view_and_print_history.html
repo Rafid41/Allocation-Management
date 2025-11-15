@@ -9,43 +9,19 @@
     <i class="fa fa-arrow-left"></i> Back
 </a>
 
-
 <div class="container mt-4">
     <h2 class="text-center mb-3"><b>Project History</b></h2>
 
-    <form method="GET" class="row g-3 mb-4">
-        <div class="col-md-4">
-            <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
-        </div>
-        <div class="col-md-3">
-            <select name="filter_by" id="filterDropdown" class="form-select" onchange="toggleInputFields()">
-                <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
-                <option value="allocation_no" {% if filter_by == "allocation_no" %}selected{% endif %}>Allocation No</option>
-                <option value="pbs" {% if filter_by == "pbs" %}selected{% endif %}>PBS</option>
-                <option value="project" {% if filter_by == "project" %}selected{% endif %}>Project</option>
-                <option value="item" {% if filter_by == "item" %}selected{% endif %}>Item</option>
-                <option value="warehouse" {% if filter_by == "warehouse" %}selected{% endif %}>Warehouse</option>
-                <option value="status" {% if filter_by == "status" %}selected{% endif %}>Status</option>
-                <option value="carry_from_warehouse_date" {% if filter_by == "carry_from_warehouse_date" %}selected{% endif %}>Carry from Warehouse Date</option>
-            </select>
+    <form method="GET" class="mb-4" id="dynamicSearchForm">
+        <div id="filterRowsContainer">
+            <!-- JS will inject filter rows -->
         </div>
 
-        <!-- Date Status Dropdown -->
-        <div class="col-md-2" id="dateStatusContainer" style="display: none;">
-            <select name="date_status" class="form-select">
-                <option value="all" {% if date_status == "all" %}selected{% endif %}>Show All Data</option>
-                <option value="empty" {% if date_status == "empty" %}selected{% endif %}>Show Empty Cells</option>
-            </select>
-        </div>
-
-        <!-- Date Picker -->
-        <div class="col-md-3" id="datePickerContainer" style="display: none;">
-            <input type="date" name="date" class="form-control" value="{{ date_filter }}">
-        </div>
-
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary">Search</button>
-            <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary me-2">Search</button>
+                <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+            </div>
         </div>
     </form>
 
@@ -65,7 +41,7 @@
                     <th>Remarks</th>
                     <th>
                         Carry from Warehouse<br>
-                        <span style="font-size: 0.75em; font-style: italic;">(dd/mm/yy)</span>
+                        <span style="font-size: 0.75em; font-style: italic;">(dd/mm/yyyy)</span>
                     </th>
                     <th>Comments</th>
                 </tr>
@@ -85,7 +61,6 @@
                                 <strong>{{ item.status }}</strong>
                             </td>
                             <td>{{ item.remarks|safe }}</td>
-
 
                             <!-- Carry From Warehouse -->
                             <td class="date-cell">
@@ -111,7 +86,6 @@
                                 {% endif %}
                             </td>
 
-
                             <!-- Comments -->
                             <td class="comments-cell text-start">
                                 {% if item.comments %}
@@ -126,14 +100,11 @@
                                     </div>
                                 {% endif %}
                             </td>
-
-
-
                         </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="10" class="text-center text-danger">No matching data found</td>
+                        <td colspan="11" class="text-center text-danger">No matching data found</td>
                     </tr>
                 {% endif %}
             </tbody>
@@ -168,25 +139,16 @@
   </div>
 </div>
 
-
 <style>
-    /* Hide the update button by default */
-    .date-cell button.update-btn {
-        display: none;
-    }
-    /* Show button when hovering over the cell */
-    .date-cell:hover button.update-btn {
-        display: inline-block;
-    }
+    .date-cell button.update-btn { display: none; }
+    .date-cell:hover button.update-btn { display: inline-block; }
 
-    /* Print only the table */
+    .comments-cell button.update-btn { display: none; }
+    .comments-cell:hover button.update-btn { display: inline-block; }
+
     @media print {
-        body * {
-            visibility: hidden;
-        }
-        #printableArea, #printableArea * {
-            visibility: visible;
-        }
+        body * { visibility: hidden; }
+        #printableArea, #printableArea * { visibility: visible; }
         #printableArea {
             position: absolute;
             left: 0;
@@ -194,89 +156,265 @@
             width: 100%;
         }
     }
-
-    .comments-cell button.update-btn {
-        display: none;
-    }
-    .comments-cell:hover button.update-btn {
-        display: inline-block;
-    }
-
 </style>
 
 <script>
-    function toggleInputFields() {
-        const filter = document.getElementById("filterDropdown").value;
-        const isDateFilter = ["allocation_date", "carry_from_warehouse_date"].includes(filter);
+const ALL_FILTER_OPTIONS = [
+  { value: "no_condition", text: "No Condition", type: "none" },
+  { value: "allocation_no", text: "Allocation No", type: "text" },
+  { value: "pbs", text: "PBS", type: "text" },
+  { value: "project", text: "Project", type: "text" },
+  { value: "item", text: "Item", type: "text" },
+  { value: "warehouse", text: "Warehouse", type: "text" },
+  { value: "status", text: "Status", type: "status_dropdown" },
+  { value: "carry_from_warehouse_date", text: "Carry from Warehouse Date", type: "date" }
+];
 
-        document.getElementById("datePickerContainer").style.display = isDateFilter ? "block" : "none";
-        document.getElementById("dateStatusContainer").style.display = isDateFilter ? "block" : "none";
-        document.getElementById("searchQuery").style.display = isDateFilter ? "none" : "block";
+const STATUS_CHOICES = JSON.parse('{{ status_choices_json|escapejs }}');
+let filterRowCount = 0;
+const maxFilterRows = 9;
+let suppressAutoAdd = false;
+let lastRowManuallyCreated = false;
+
+function getSelectedFilterValues() {
+  const selected = [];
+  document.querySelectorAll('.filter-select').forEach(sel => {
+    if (sel.value !== "no_condition") selected.push(sel.value);
+  });
+  return selected;
+}
+
+function updateAvailableFilters() {
+  const selected = getSelectedFilterValues();
+  document.querySelectorAll('.filter-select').forEach(sel => {
+    const curVal = sel.value;
+    sel.innerHTML = "";
+    ALL_FILTER_OPTIONS.forEach(opt => {
+      if (opt.value === "no_condition" || opt.value === curVal || !selected.includes(opt.value)) {
+        const o = document.createElement("option");
+        o.value = opt.value;
+        o.textContent = opt.text;
+        sel.appendChild(o);
+      }
+    });
+    sel.value = curVal;
+  });
+}
+
+function updateFilterRow(select) {
+  const row = select.closest(".filter-row");
+  const type = select.value;
+  const input = row.querySelector(".input-container");
+  input.innerHTML = "";
+  const opt = ALL_FILTER_OPTIONS.find(o => o.value === type);
+  const idx = row.dataset.filterIndex;
+
+  if (opt && opt.type === "text") {
+    input.innerHTML = `<input type="text" name="filter_value_${idx}" class="form-control" placeholder="${opt.text}">`;
+  } else if (opt && opt.type === "date") {
+    // carry_from_warehouse_date gets the extra dropdown
+    input.innerHTML = `
+      <input type="date" name="filter_value_${idx}" class="form-control mb-2">
+      <select name="date_status_${idx}" class="form-select">
+        <option value="all">Show All Data</option>
+        <option value="empty">Show Empty Cells</option>
+      </select>
+    `;
+  } else if (opt && opt.type === "status_dropdown") {
+    let opts = "";
+    STATUS_CHOICES.forEach(c => { opts += `<option value="${c[0]}">${c[1]}</option>`; });
+    input.innerHTML = `<select name="filter_value_${idx}" class="form-select">${opts}</select>`;
+  }
+
+  updateAvailableFilters();
+
+  const lastRow = document.querySelector(".filter-row:last-child");
+  const prevVal = select.dataset.prevValue ?? "no_condition";
+
+  // Only auto-add when last row changed from no_condition -> something
+  if (
+    !suppressAutoAdd &&
+    lastRow === row &&
+    type !== "no_condition" &&
+    prevVal === "no_condition" &&
+    filterRowCount < maxFilterRows
+  ) {
+    addFilterRow();
+  }
+
+  select.dataset.prevValue = type;
+  updateAddRemoveButtonVisibility();
+}
+
+function addFilterRow(initial = "no_condition", val = "") {
+  if (filterRowCount >= maxFilterRows) return;
+  filterRowCount++;
+  const idx = filterRowCount;
+  const cont = document.getElementById("filterRowsContainer");
+
+  const row = document.createElement("div");
+  row.classList.add("row", "g-3", "mb-3", "filter-row");
+  row.dataset.filterIndex = idx;
+  row.innerHTML = `
+    <div class="col-md-4">
+      <select name="filter_type_${idx}" class="form-select filter-select"></select>
+    </div>
+    <div class="col-md-6 input-container"></div>
+    <div class="col-md-2 d-flex justify-content-end">
+      <button type="button" class="btn btn-danger remove-filter-row me-1" onclick="removeFilterRow(this)">
+        <i class="fa fa-times"></i>
+      </button>
+      <button type="button" class="btn btn-info add-filter-row-btn" style="display:none;">
+        <i class="fa fa-plus"></i> Add
+      </button>
+    </div>
+  `;
+  cont.appendChild(row);
+
+  const select = row.querySelector(".filter-select");
+  updateAvailableFilters();
+  select.value = initial;
+  select.addEventListener("focus", () => select.dataset.prevValue = select.value);
+  select.addEventListener("pointerdown", () => select.dataset.prevValue = select.value);
+  select.addEventListener("change", () => updateFilterRow(select));
+  updateFilterRow(select);
+
+  if (val) {
+    const input = row.querySelector(`[name="filter_value_${idx}"]`);
+    if (input) input.value = val;
+    const dsElem = row.querySelector(`[name="date_status_${idx}"]`);
+    if (dsElem) {
+      // If a date_status param exists in URL, previously we set it in init block
     }
+  }
 
-    function printResults() {
-        window.print();
+  row.querySelector(".add-filter-row-btn").addEventListener("click", () => {
+    lastRowManuallyCreated = true;
+    addFilterRow();
+  });
+  updateAddRemoveButtonVisibility();
+}
+
+function removeFilterRow(btn) {
+  const row = btn.closest(".filter-row");
+  const all = Array.from(document.querySelectorAll(".filter-row"));
+  const isLast = all.length && all[all.length - 1] === row;
+  row.remove();
+  filterRowCount = document.querySelectorAll(".filter-row").length;
+
+  // If last was deleted → next last gets manual Add visibility
+  lastRowManuallyCreated = isLast;
+  updateAvailableFilters();
+  updateAddRemoveButtonVisibility();
+}
+
+function updateAddRemoveButtonVisibility() {
+  const rows = document.querySelectorAll(".filter-row");
+  rows.forEach((row, i) => {
+    const rm = row.querySelector(".remove-filter-row");
+    const add = row.querySelector(".add-filter-row-btn");
+    const sel = row.querySelector(".filter-select");
+
+    rm.style.display = (rows.length > 1) ? "inline-block" : "none";
+    add.style.display = "none";
+
+    // Show add button logic
+    if (i === rows.length - 1) {
+      if (lastRowManuallyCreated) {
+        add.style.display = (filterRowCount < maxFilterRows) ? "inline-block" : "none";
+      } else if (sel.value === "no_condition" && filterRowCount < maxFilterRows) {
+        add.style.display = "inline-block";
+      }
     }
+  });
+}
 
-    function showInput(id, field) {
-        document.getElementById(`input_${field}_${id}`).style.display = 'block';
-    }
+// Initialization: read URL params and pre-populate rows when present
+document.addEventListener("DOMContentLoaded", () => {
+  suppressAutoAdd = true;
+  const urlParams = new URLSearchParams(window.location.search);
+  const existing = [];
+  for (let i = 1; i <= maxFilterRows; i++) {
+    const ft = urlParams.get(`filter_type_${i}`);
+    const fv = urlParams.get(`filter_value_${i}`);
+    const ds = urlParams.get(`date_status_${i}`);
+    if (ft && ft !== "no_condition") existing.push({ type: ft, value: fv || "", date_status: ds || "all" });
+  }
 
-    function submitDate(id, field) {
-        const datetime = document.getElementById(`date_${field}_${id}`).value;
-        if (!datetime) return alert("Please select a date.");
+  if (existing.length) {
+    existing.forEach((f, idx) => {
+      addFilterRow(f.type, f.value);
+      // Only set date_status for carry_from_warehouse_date
+      const i = idx + 1;
+      if (f.type === "carry_from_warehouse_date") {
+        const dsElem = document.querySelector(`[name="date_status_${i}"]`);
+        if (dsElem && f.date_status) dsElem.value = f.date_status;
+      }
+    });
+    if (filterRowCount < maxFilterRows) addFilterRow();
+  } else {
+    addFilterRow();
+  }
 
-        fetch(`/project/project_history/update-date/${id}/`, {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": '{{ csrf_token }}',
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ field: field, date: datetime })
-        }).then(res => {
-            if (res.ok) location.reload();
-            else res.json().then(data => alert(data.error || "Failed"));
-        });
-    }
+  document.querySelectorAll(".filter-select").forEach(sel => sel.dataset.prevValue = sel.value);
+  suppressAutoAdd = false;
+  updateAddRemoveButtonVisibility();
+  updateAvailableFilters();
+});
 
-    
+function printResults() { window.print(); }
+
+function showInput(id, field) {
+    document.getElementById(`input_${field}_${id}`).style.display = 'block';
+}
+
+function submitDate(id, field) {
+    const datetime = document.getElementById(`date_${field}_${id}`).value;
+    if (!datetime) return alert("Please select a date.");
+
+    fetch(`/project/project_history/update-date/${id}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": '{{ csrf_token }}',
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ field: field, date: datetime })
+    }).then(res => {
+        if (res.ok) location.reload();
+        else res.json().then(data => alert(data.error || "Failed"));
+    });
+}
+
 function showCommentInput(id) {
     const container = document.getElementById(`input_comments_${id}`);
     container.style.display = 'block';
-
     const textarea = document.getElementById(`text_comments_${id}`);
-    // Put cursor at the end
     textarea.focus();
     textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
 }
 
+function submitComment(id) {
+    const comment = document.getElementById(`text_comments_${id}`).value;
 
-    function submitComment(id) {
-        const comment = document.getElementById(`text_comments_${id}`).value;
-
-        fetch(`/project/project_history/update-date/${id}/`, {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": '{{ csrf_token }}',
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ field: "comments", text: comment })
-        }).then(res => {
-            if (res.ok) location.reload();
-            else res.json().then(data => alert(data.error || "Failed"));
-        });
-    }
+    fetch(`/project/project_history/update-date/${id}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": '{{ csrf_token }}',
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ field: "comments", text: comment })
+    }).then(res => {
+        if (res.ok) location.reload();
+        else res.json().then(data => alert(data.error || "Failed"));
+    });
+}
 
 let resetTargetId = null;
 let resetTargetField = null;
-
-// Set which row is being reset
 function setResetTarget(id, field) {
     resetTargetId = id;
     resetTargetField = field;
 }
-
-// Handle modal confirm
 document.getElementById("confirmResetBtn").addEventListener("click", function() {
     if (!resetTargetId || !resetTargetField) return;
 
@@ -292,12 +430,8 @@ document.getElementById("confirmResetBtn").addEventListener("click", function() 
         else res.json().then(data => alert(data.error || "Failed"));
     });
 
-    // Close the modal
+    // Close modal (Bootstrap 4)
     $('#resetModal').modal('hide');
 });
-
-
-
-    document.addEventListener("DOMContentLoaded", toggleInputFields);
 </script>
 {% endblock %}

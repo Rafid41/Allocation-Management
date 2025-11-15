@@ -9,61 +9,87 @@ from django.db.models import Q
 
 @login_required
 def history(request):
-    query = request.GET.get("query", "")
-    filter_by = request.GET.get("filter_by", "All")
-    date_filter = request.GET.get("date", "")
-    date_status = request.GET.get("date_status", "all")  # <-- NEW
-
+    """
+    Multi-filter history view (supports up to 9 filters).
+    Text searches are exact, case-insensitive (__iexact).
+    Date filters:
+      - carry_from_warehouse_date: date picker + 'show empty cells' dropdown
+    Note: allocation_date has been removed from the filter system.
+    """
     results = History.objects.all().order_by('-created_at')
+    applied_filters = []
 
+    for i in range(1, 10):  # support up to 9 filters
+        filter_type = request.GET.get(f"filter_type_{i}")
+        filter_value = request.GET.get(f"filter_value_{i}")
+        date_status = request.GET.get(f"date_status_{i}")
 
-    # Non-date filters
-    if query and filter_by not in ["allocation_date", "carry_from_warehouse_date"]:
-        if filter_by == "All":
-            results = results.filter(
-                Q(allocation_no__icontains=query) |
-                Q(pbs__icontains=query) |
-                Q(project__icontains=query) |
-                Q(item__icontains=query) |
-                Q(warehouse__icontains=query) |
-                Q(status__icontains=query) |
-                Q(comments__icontains=query)
-            )
-        elif filter_by == "allocation_no":
-            results = results.filter(allocation_no__icontains=query)
-        elif filter_by == "pbs":
-            results = results.filter(pbs__icontains=query)
-        elif filter_by == "project":
-            results = results.filter(project__icontains=query)
-        elif filter_by == "item":
-            results = results.filter(item__icontains=query)
-        elif filter_by == "warehouse":
-            results = results.filter(warehouse__icontains=query)
-        elif filter_by == "status":
-            results = results.filter(status__icontains=query)
+        if filter_value:
+            filter_value = filter_value.strip()
 
-    # Date filters
-    if filter_by == "allocation_date":
-        if date_filter:
-            results = results.filter(created_at__date=date_filter)
-        if date_status == "empty":
-            results = results.filter(created_at__isnull=True)
+        # Skip empty / no condition filters
+        if not filter_type or filter_type == "no_condition" or (not filter_value and filter_type not in ["carry_from_warehouse_date"]):
+            continue
 
-    elif filter_by == "carry_from_warehouse_date":
-        if date_filter:
-            results = results.filter(carry_from_warehouse__date=date_filter)
-        if date_status == "empty":
-            results = results.filter(carry_from_warehouse__isnull=True)
+        applied_filters.append({
+            "type": filter_type,
+            "value": filter_value,
+            "date_status": date_status
+        })
+
+        # TEXT filters (exact, case-insensitive)
+        if filter_type == "allocation_no":
+            results = results.filter(allocation_no__iexact=filter_value)
+        elif filter_type == "pbs":
+            results = results.filter(pbs__iexact=filter_value)
+        elif filter_type == "project":
+            results = results.filter(project__iexact=filter_value)
+        elif filter_type == "item":
+            results = results.filter(item__iexact=filter_value)
+        elif filter_type == "warehouse":
+            results = results.filter(warehouse__iexact=filter_value)
+        elif filter_type == "status":
+            results = results.filter(status__iexact=filter_value)
+        elif filter_type == "comments":
+            results = results.filter(comments__iexact=filter_value)
+
+        # DATE filters: carry_from_warehouse_date only (allocation_date removed)
+        elif filter_type == "carry_from_warehouse_date":
+            field_name = "carry_from_warehouse"
+
+            # carry_from_warehouse_date logic (keeps date_status behavior)
+            if not filter_value:
+                if date_status == "empty":
+                    results = results.filter(Q(**{f"{field_name}__isnull": True}) | Q(**{f"{field_name}__exact": ""}))
+                else:
+                    pass
+            else:
+                # Date selected
+                try:
+                    if date_status == "empty":
+                        results = results.filter(
+                            Q(**{f"{field_name}__date": filter_value}) |
+                            Q(**{f"{field_name}__isnull": True}) |
+                            Q(**{f"{field_name}__exact": ""})
+                        )
+                    else:
+                        results = results.filter(**{f"{field_name}__date": filter_value})
+                except Exception:
+                    if date_status == "empty":
+                        results = results.filter(
+                            Q(**{f"{field_name}__iexact": filter_value}) |
+                            Q(**{f"{field_name}__isnull": True}) |
+                            Q(**{f"{field_name}__exact": ""})
+                        )
+                    else:
+                        results = results.filter(**{f"{field_name}__iexact": filter_value})
 
     # Determine group permission
     group = request.user.user_group.user_group_type if hasattr(request.user, "user_group") else ""
 
     context = {
         "items": results,
-        "query": query,
-        "filter_by": filter_by,
-        "date_filter": date_filter,
-        "date_status": date_status,  # <-- Pass to template
+        "status_choices_json": json.dumps(History.STATUS_CHOICES),
         "can_edit_carry": group in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"],
         "can_edit_comments": group in ["Editor"],
     }
@@ -71,11 +97,15 @@ def history(request):
     return render(request, "Project_Templates/Project_App_History/view_and_print_history.html", context)
 
 
-
 @login_required
 @require_POST
 @csrf_exempt
 def update_date_view(request, id):
+    """
+    Update carry_from_warehouse date or comments.
+    Permissions enforced by user's group.
+    Disallow modification when status == 'Cancelled' or remarks_status == 'Deleted'.
+    """
     try:
         data = json.loads(request.body)
         field = data.get("field")
@@ -83,9 +113,11 @@ def update_date_view(request, id):
 
         user_group_type = request.user.user_group.user_group_type
 
+        # Prevent modifications on cancelled/deleted rows
         if history.status == "Cancelled" or (history.remarks_status or "").strip().lower() == "deleted":
             return JsonResponse({"error": "Modification not allowed"}, status=403)
 
+        # Handle Carry updates
         if field == "carry" and user_group_type in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"]:
             if data.get("reset"):
                 history.carry_from_warehouse = None
@@ -94,15 +126,17 @@ def update_date_view(request, id):
                 if date_value:
                     history.carry_from_warehouse = date_value
             history.save()
+            return JsonResponse({"success": True})
 
+        # Handle Comments updates
         elif field == "comments" and user_group_type in ["Editor"]:
             text_value = data.get("text", "")
             history.comments = text_value
             history.save()
+            return JsonResponse({"success": True})
 
         else:
             return JsonResponse({"error": "Not allowed"}, status=403)
 
-        return JsonResponse({"success": True})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
