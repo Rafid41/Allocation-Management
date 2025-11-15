@@ -6,85 +6,82 @@
     <a href="{% url 'Project_App_ProjectWiseBalance:project_list' %}" class="btn btn-outline-secondary back-btn">
         <i class="fa fa-arrow-left"></i> Back
     </a>
-    <center>
-        <h3 class="mb-3 text-primary">
-            <i class="fa fa-folder-open"></i> <b>Project: <span class="text-success">{{ project.projectId }}</span></b>
-        </h3>
+    <h3 class="mb-3 text-primary text-center">
+        <i class="fa fa-folder-open"></i> <b>Project: <span class="text-success">{{ project.projectId }}</span></b>
+    </h3>
 
-        <form method="GET" class="mb-4" id="dynamicSearchForm">
-            <div id="filterRowsContainer">
-                <!-- Initial filter row will be added here by JavaScript -->
-            </div>
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <button type="submit" class="btn btn-primary me-2">Search</button>
-                    <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
-                </div>
-            </div>
-        </form>
-
-        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
-            <table class="table table-bordered table-striped table-hover">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Item Name</th>
-                        <th>Warehouse</th>
-                        <th>Unit</th>
-                        <th>Quantity</th>
-                        <th>Allocated</th>
-                        <th>Carried</th>
-                        <th>Uncarried</th>
-                        <th>Balance with Uncarried</th>
-                        <th>Entry Updated<br><span style="font-size: 0.75em; font-style: italic;">(dd/mm/yyyy)</span></th>
-                        <th>Remarks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in item_data %}
-                    <tr>
-                        <td>{{ row.name }}</td>
-                        <td>{{ row.warehouse }}</td>
-                        <td>{{ row.unit }}</td>
-                        <td>{{ row.quantity|floatformat:3 }}</td>
-                        <td class="text-info font-weight-bold">{{ row.allocated|floatformat:3 }}</td>
-                        <td class="text-success font-weight-bold">{{ row.carried|floatformat:3 }}</td>
-                        <td class="text-warning font-weight-bold">{{ row.uncarried|floatformat:3 }}</td>
-                        <td class="text-danger font-weight-bold">{{ row.balance|floatformat:3 }}</td>
-                        <td>{{ row.created_at|date:"d/m/Y" }}</td>
-                        <td class="remarks-cell position-relative">
-                            <span id="remarks_display_{{ row.id }}" class="remarks-display">{{ row.remarks|default_if_none:"" }}</span>
-
-
-                            {% if request.user.user_group.user_group_type == "Editor" %}
-                            <button class="btn btn-sm btn-outline-primary update-btn"
-                                    onclick="showRemarksEdit({{ row.id }})">Update</button>
-
-                            <div class="remarks-edit" id="edit_remarks_{{ row.id }}" style="display:none;">
-                                <textarea id="remarks_text_{{ row.id }}" class="form-control form-control-sm" rows="2">{{ row.remarks|default_if_none:"" }}</textarea>
-                                <button class="btn btn-sm btn-success mt-1" onclick="saveRemarks({{ row.id }})">
-                                    <i class="fa fa-check"></i> Save
-                                </button>
-                                <button class="btn btn-sm btn-secondary mt-1" onclick="cancelEdit({{ row.id }})">
-                                    <i class="fa fa-times"></i> Cancel
-                                </button>
-                            </div>
-                            {% endif %}
-                        </td>
-
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="10" class="text-center text-danger font-weight-bold">
-                            No items found for this project.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <form method="GET" class="mb-4" id="dynamicSearchForm">
+        <div id="filterRowsContainer">
+            <!-- Initial filter row will be added here by JavaScript -->
         </div>
-    </center> 
-</div>
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary me-2">Search</button>
+                <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+            </div>
+        </div>
+    </form>
 
+    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Item Name</th>
+                    <th>Warehouse</th>
+                    <th>Unit</th>
+                    <th>Quantity</th>
+                    <th>Allocated</th>
+                    <th>Carried</th>
+                    <th>Uncarried</th>
+                    <th>Balance with Uncarried</th>
+                    <th>Entry Updated<br><span style="font-size: 0.75em; font-style: italic;">(dd/mm/yyyy)</span></th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in item_data %}
+                <tr>
+                    <td>{{ row.name }}</td>
+                    <td>{{ row.warehouse }}</td>
+                    <td>{{ row.unit }}</td>
+                    <td>{{ row.quantity|floatformat:3 }}</td>
+                    <td class="text-info font-weight-bold">{{ row.allocated|floatformat:3 }}</td>
+                    <td class="text-success font-weight-bold">{{ row.carried|floatformat:3 }}</td>
+                    <td class="text-warning font-weight-bold">{{ row.uncarried|floatformat:3 }}</td>
+                    <td class="text-danger font-weight-bold">{{ row.balance|floatformat:3 }}</td>
+                    <td>{{ row.created_at|date:"d/m/Y" }}</td>
+                    <td class="remarks-cell position-relative">
+                        <span id="remarks_display_{{ row.id }}" class="remarks-display">{{ row.remarks|default_if_none:"" }}</span>
+
+
+                        {% if request.user.user_group.user_group_type == "Editor" %}
+                        <button class="btn btn-sm btn-outline-primary update-btn"
+                                onclick="showRemarksEdit({{ row.id }})">Update</button>
+
+                        <div class="remarks-edit" id="edit_remarks_{{ row.id }}" style="display:none;">
+                            <textarea id="remarks_text_{{ row.id }}" class="form-control form-control-sm" rows="2">{{ row.remarks|default_if_none:"" }}</textarea>
+                            <button class="btn btn-sm btn-success mt-1" onclick="saveRemarks({{ row.id }})">
+                                <i class="fa fa-check"></i> Save
+                            </button>
+                            <button class="btn btn-sm btn-secondary mt-1" onclick="cancelEdit({{ row.id }})">
+                                <i class="fa fa-times"></i> Cancel
+                            </button>
+                        </div>
+                        {% endif %}
+                    </td>
+
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" class="text-center text-danger font-weight-bold">
+                        No items found for this project.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 <style>
 /* Update button only visible on hover */
 .remarks-cell {
