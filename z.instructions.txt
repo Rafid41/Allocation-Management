@@ -1,7 +1,11 @@
-update:
+see this files, there is a export to excel  button and system implemented here
+example files
+templates\Project_Templates\Project_App_Status\status.html
 templates\Project_Templates\Project_App_ProjectWiseBalance\project_details.html
 
-can u make the excel cells as all borders 
-0.5 px black solid
 
+copy this technique and implement same system in this page: templates\Project_Templates\Project_App_History\view_and_print_history.html
+
+SEE THE cell width of  example files, try to keep same widths of same fields
+ no button will which is inside the dataGridView will be shown in excel
 

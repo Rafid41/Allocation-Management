@@ -20,14 +20,17 @@
         <div class="row mt-3">
             <div class="col-md-12">
                 <button type="submit" class="btn btn-primary me-2">Search</button>
-                <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+                <button type="button" class="btn btn-secondary me-2" onclick="printResults()">Print</button>
+                <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                    <i class="fa fa-file-excel-o"></i> Export to Excel (.xlsx)
+                </button>
             </div>
         </div>
     </form>
 
     <!-- Printable Table -->
     <div id="printableArea" class="table-responsive">
-        <table class="table table-bordered table-striped table-hover text-center">
+        <table class="table table-bordered table-striped table-hover text-center" id="historyTable">
             <thead class="table-dark sticky-top">
                 <tr>
                     <th>Allocation No</th>
@@ -433,5 +436,114 @@ document.getElementById("confirmResetBtn").addEventListener("click", function() 
     // Close modal (Bootstrap 4)
     $('#resetModal').modal('hide');
 });
+
+function exportToExcel() {
+    try {
+        if (typeof XLSX === 'undefined') {
+            alert('SheetJS (XLSX) library not loaded. Make sure you included it in base.html.');
+            return;
+        }
+
+        const originalTable = document.getElementById('historyTable');
+        
+        // Create a new table in memory
+        const newTable = document.createElement('table');
+        
+        // Create and append the header
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        const headers = [
+            'Allocation No',
+            'PBS',
+            'Project',
+            'Item',
+            'Unit',
+            'Warehouse',
+            'Quantity',
+            'Status',
+            'Remarks',
+            'Carry from Warehouse (dd/mm/yyyy)',
+            'Comments'
+        ];
+        headers.forEach(headerText => {
+            const newTh = document.createElement('th');
+            const b = document.createElement('b');
+            b.innerText = headerText;
+            newTh.appendChild(b);
+            headerRow.appendChild(newTh);
+        });
+        thead.appendChild(headerRow);
+        newTable.appendChild(thead);
+
+        // Clone and append the body, cleaning up interactive elements
+        const tbody = document.createElement('tbody');
+        originalTable.querySelectorAll('tbody tr').forEach(originalTr => {
+            const newTr = document.createElement('tr');
+            originalTr.querySelectorAll('td').forEach((originalTd, index) => {
+                const newTd = document.createElement('td');
+                if (index === 9) { // Carry from Warehouse column
+                    // Extract only the date text, ignoring buttons and input divs
+                    const dateText = originalTd.querySelector('.date-cell') ? originalTd.querySelector('.date-cell').innerText.split('\n')[0].trim() : originalTd.innerText.trim();
+                    newTd.innerText = dateText;
+                } else if (index === 10) { // Comments column
+                    // Extract only the comments text, ignoring buttons and input divs
+                    const commentsText = originalTd.querySelector('.comments-cell') ? originalTd.querySelector('.comments-cell').innerText.split('\n')[0].trim() : originalTd.innerText.trim();
+                    newTd.innerText = commentsText;
+                } else {
+                    newTd.innerText = originalTd.innerText.trim();
+                }
+                newTr.appendChild(newTd);
+            });
+            tbody.appendChild(newTr);
+        });
+        newTable.appendChild(tbody);
+
+        // Convert the new table to a worksheet
+        const ws = XLSX.utils.table_to_sheet(newTable);
+
+        // Apply borders to all cells
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cell_address = { c: C, r: R };
+                const cell_ref = XLSX.utils.encode_cell(cell_address);
+                if (!ws[cell_ref]) continue;
+                if (!ws[cell_ref].s) ws[cell_ref].s = {};
+                ws[cell_ref].s.border = {
+                    top: { style: "thin", color: { rgb: "000000" } },
+                    bottom: { style: "thin", color: { rgb: "000000" } },
+                    left: { style: "thin", color: { rgb: "000000" } },
+                    right: { style: "thin", color: { rgb: "000000" } }
+                };
+            }
+        }
+
+        // Set column widths
+        ws['!cols'] = [
+            { wch: 11 }, // Allocation No
+            { wch: 10 }, // PBS
+            { wch: 15 }, // Project
+            { wch: 25 }, // Item
+            { wch: 05 }, // Unit
+            { wch: 12 }, // Warehouse
+            { wch: 12 }, // Quantity
+            { wch: 15 }, // Status
+            { wch: 30 }, // Remarks
+            { wch: 20 }, // Carry from Warehouse
+            { wch: 40 }  // Comments
+        ];
+
+        // Make workbook and append sheet
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Project History');
+
+        const filename = `Project History.xlsx`;
+
+        XLSX.writeFile(wb, filename);
+    } catch (err) {
+        console.error(err);
+        alert('Export failed: ' + (err && err.message ? err.message : err));
+    }
+}
 </script>
 {% endblock %}
