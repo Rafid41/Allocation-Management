@@ -37,8 +37,6 @@ def project_details(request, project_id):
             items = items.filter(name__iexact=filter_value)
         elif filter_type == "warehouse":
             items = items.filter(warehouse__iexact=filter_value)
-        elif filter_type == "unit":
-            items = items.filter(unit_of_item__iexact=filter_value)
         elif filter_type == "entry_update_date":
             if filter_value: # Only filter if a date is provided
                 items = items.filter(created_at__date__iexact=filter_value)
