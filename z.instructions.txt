@@ -1,12 +1,15 @@
-see this files, there is a export to excel  button and system implemented here
-example files (dont edit these files)
+templates\App_Status\status.html
+templates\App_History\view_and_print_history.html
+
 templates\Project_Templates\Project_App_Status\status.html
+templates\Project_Templates\Project_App_History\view_and_print_history.html
+
 templates\Project_Templates\Project_App_ProjectWiseBalance\project_details.html
 
+in above files, there is a dataGridView table
+your task is to increase font size(current size +2) to every font of the table
 
+only fontsize
 
-copy this technique and implement same system in this page: templates\App_Status\status.html
-
-SEE THE cell width of  example files, try to keep same widths of same fields
-
-
+not out side the table
+dont chnage other sections
