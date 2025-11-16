@@ -396,11 +396,20 @@ document.addEventListener("DOMContentLoaded", () => {
   for (let i = 1; i <= maxFilterRows; i++) {
     const ft = urlParams.get(`filter_type_${i}`);
     const fv = urlParams.get(`filter_value_${i}`);
-    if (ft && ft !== "no_condition") existing.push({ type: ft, value: fv });
+    const ds = urlParams.get(`date_status_${i}`);
+    if (ft && ft !== "no_condition") existing.push({ type: ft, value: fv || "", date_status: ds || "all" });
   }
 
   if (existing.length) {
-    existing.forEach(f => addFilterRow(f.type, f.value));
+    existing.forEach((f, idx) => {
+      addFilterRow(f.type, f.value);
+      // Only set date_status for carry_from_warehouse_date
+      const i = idx + 1;
+      if (f.type === "carry_from_warehouse_date") {
+        const dsElem = document.querySelector(`[name="date_status_${i}"]`);
+        if (dsElem && f.date_status) dsElem.value = f.date_status;
+      }
+    });
     if (filterRowCount < maxFilterRows) addFilterRow();
   } else {
     addFilterRow();
@@ -410,7 +419,69 @@ document.addEventListener("DOMContentLoaded", () => {
   suppressAutoAdd = false;
   updateAddRemoveButtonVisibility();
   updateAvailableFilters();
+
+  // Attach reset confirm handler safely after DOM ready
+  const confirmBtn = document.getElementById("confirmResetBtn");
+  if (confirmBtn) {
+      confirmBtn.addEventListener("click", function() {
+          if (!resetTargetId || !resetTargetField) return;
+          // Build App_History URL using Django reverse placeholder
+          const urlTemplate = "{% url 'App_History:update_date' 0 %}";
+          const url = urlTemplate.replace('/0/', `/${resetTargetId}/`);
+
+          fetch(url, {
+              method: "POST",
+              headers: {
+                  "X-CSRFToken": csrftoken,
+                  "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ field: resetTargetField, reset: true })
+          }).then(res => {
+              if (res.ok) location.reload();
+              else return res.json().then(data => { throw new Error(data.error || "Failed"); });
+          }).catch(err => alert(err.message || "Reset failed"));
+
+          // Close modal (Bootstrap 4/5 compatibility)
+          if (typeof $ !== 'undefined') {
+              $('#resetModal').modal('hide');
+          }
+      });
+  }
 });
+
+function printResults() { window.print(); }
+
+function showInput(id, field) {
+    document.getElementById(`input_${field}_${id}`).style.display = 'block';
+}
+
+function submitDate(id, field) {
+    const datetimeEl = document.getElementById(`date_${field}_${id}`);
+    if (!datetimeEl) return alert("Date input not found");
+    const datetime = datetimeEl.value;
+    if (!datetime) return alert("Please select a date.");
+
+    // Build URL using App_History reverse (0 placeholder replaced by id)
+    const urlTemplate = "{% url 'App_History:update_date' 0 %}";
+    const url = urlTemplate.replace('/0/', `/${id}/`);
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ field: field, date: datetime })
+    }).then(res => {
+        if (res.ok) {
+            // success: reload or update UI
+            location.reload();
+        } else {
+            return res.json().then(data => { throw new Error(data.error || "Failed"); });
+        }
+    }).catch(err => alert(err.message || "Failed to save date"));
+}
+
 function showCommentInput(id) {
     const inputDiv = document.getElementById(`input_comments_${id}`);
     const textarea = document.getElementById(`text_comments_${id}`);
@@ -460,8 +531,9 @@ function submitComment(id) {
 
     const text = textarea.value;
 
-    // adjust URL to match your Django URL if needed
-    const url = `/history/update-date/${id}/`;
+    // Build URL using App_History reverse (0 placeholder replaced by id)
+    const urlTemplate = "{% url 'App_History:update_date' 0 %}";
+    const url = urlTemplate.replace('/0/', `/${id}/`);
 
     fetch(url, {
         method: "POST",
