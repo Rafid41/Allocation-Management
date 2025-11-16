@@ -19,14 +19,17 @@
         <div class="row mt-3">
             <div class="col-md-12">
                 <button type="submit" class="btn btn-primary me-2">Search</button>
-                <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+                <button type="button" class="btn btn-secondary me-2" onclick="printResults()">Print</button>
+                <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                    <i class="fa fa-file-excel-o"></i> Export to Excel (.xlsx)
+                </button>
             </div>
         </div>
     </form>
 
     <!-- Printable Table -->
     <div id="printableArea" class="table-responsive">
-        <table class="table table-bordered table-striped table-hover text-center">
+        <table class="table table-bordered table-striped table-hover text-center" id="historyTable">
             <thead class="table-dark sticky-top">
                 <tr>
                     <th>Allocation No</th>
@@ -127,9 +130,11 @@
 
                             <!-- Comments -->
                             <td class="comments-cell text-start">
-                                {% if item.comments %}
-                                    {{ item.comments|linebreaksbr }}<br>
-                                {% endif %}
+                                {# WRAPPED the visible comments in a span with id so JS can update after saving #}
+                                <span id="remarks_display_{{ item.id }}">
+                                    {% if item.comments %}{{ item.comments|linebreaksbr }}{% endif %}
+                                </span>
+                                <br>
 
                                 {% if can_edit_comments %}
                                     <button class="btn btn-sm btn-outline-primary mt-1 update-btn" onclick="showCommentInput('{{ item.id }}')">Update</button>
@@ -184,12 +189,9 @@
     .date-cell button.update-btn { display: none; }
     .date-cell:hover button.update-btn { display: inline-block; }
 
-    .comments-cell button.update-btn {
-        display: none;
-    }
-    .comments-cell:hover button.update-btn {
-        display: inline-block;
-    }
+    /* <- CHANGED: hide comments update button by default, show on hover */
+    .comments-cell .update-btn { display: none; }
+    .comments-cell:hover .update-btn { display: inline-block; }
 
     @media print {
         body * { visibility: hidden; }
@@ -203,6 +205,24 @@
     }
 </style>
 <script>
+/* ========== CSRF helper (ADDED previously) ========== */
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+/* ========================================== */
+
 const ALL_FILTER_OPTIONS = [
   { value: "no_condition", text: "No Condition", type: "none" },
   { value: "allocation_no", text: "Allocation No", type: "text" },
@@ -391,8 +411,198 @@ document.addEventListener("DOMContentLoaded", () => {
   updateAddRemoveButtonVisibility();
   updateAvailableFilters();
 });
+function showCommentInput(id) {
+    const inputDiv = document.getElementById(`input_comments_${id}`);
+    const textarea = document.getElementById(`text_comments_${id}`);
+    const displaySpan = document.getElementById(`remarks_display_${id}`);
+
+    if (!inputDiv || !textarea || !displaySpan) {
+        console.warn("Missing elements for comment edit:", id);
+        return;
+    }
+
+    // STEP 1: read raw HTML of displayed comment
+    let html = displaySpan.innerHTML || "";
+
+    // STEP 2: convert <br> to newlines
+    html = html.replace(/<br\s*\/?>/gi, "\n");
+
+    // STEP 3: strip all other HTML (safety)
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    let plain = tmp.textContent || tmp.innerText || "";
+
+    // STEP 4: remove leading/trailing blank lines
+    plain = plain.replace(/^\s+/, "");  // remove leading whitespace/newlines  
+    plain = plain.replace(/\s+$/, "");  // remove trailing whitespace/newlines  
+
+    // STEP 5: assign cleaned text
+    textarea.value = plain;
+
+    // STEP 6: show and focus
+    inputDiv.style.display = "block";
+    textarea.focus();
+    textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+
+    // Resize textarea nicely
+    textarea.style.height = "auto";
+    textarea.style.height = Math.max(60, textarea.scrollHeight) + "px";
+}
+
+function submitComment(id) {
+    const textarea = document.getElementById(`text_comments_${id}`);
+    const inputDiv = document.getElementById(`input_comments_${id}`);
+    const displaySpan = document.getElementById(`remarks_display_${id}`);
+
+    if (!textarea) {
+        return alert("Comment textarea not found");
+    }
+
+    const text = textarea.value;
+
+    // adjust URL to match your Django URL if needed
+    const url = `/history/update-date/${id}/`;
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ field: "comments", text: text })
+    })
+    .then(res => {
+        if (res.ok) return res.json().catch(()=>({})); // swallow non-json ok responses
+        return res.json().then(d => { throw new Error(d.error || "Save failed"); });
+    })
+    .then(_data => {
+        // Update UI: hide edit box and update visible span (convert newlines -> <br>)
+        if (inputDiv) inputDiv.style.display = 'none';
+        if (displaySpan) {
+            displaySpan.innerHTML = (text && text.length) ? text.replace(/\n/g, "<br>") : "";
+        }
+    })
+    .catch(err => {
+        console.error("Failed to save comment:", err);
+        alert("Failed to save comment: " + (err.message || err));
+    });
+}
+/* ========================================= */
+
+function exportToExcel() {
+    try {
+        if (typeof XLSX === 'undefined') {
+            alert('SheetJS (XLSX) library not loaded. Make sure you included it in base.html.');
+            return;
+        }
+
+        const originalTable = document.getElementById('historyTable');
+        
+        // Create a new table in memory for export
+        const newTable = document.createElement('table');
+        
+        // Clone and append the header from the original table
+        const thead = originalTable.querySelector('thead').cloneNode(true);
+        // Remove <br> and <span> from header text for cleaner export
+        thead.querySelectorAll('th').forEach(th => {
+            th.querySelectorAll('br, span').forEach(el => el.remove());
+        });
+        newTable.appendChild(thead);
+
+        // Clone and append the body, cleaning up interactive elements
+        const tbody = document.createElement('tbody');
+        originalTable.querySelectorAll('tbody tr').forEach(originalTr => {
+            const newTr = document.createElement('tr');
+            originalTr.querySelectorAll('td').forEach((originalTd, index) => {
+                const newTd = document.createElement('td');
+                // For date and comments cells, extract only the visible text, removing buttons and input divs
+                // CS&M is index 9, Carry from Warehouse is index 10, Comments is index 11
+                if (index === 9 || index === 10 || index === 11) { 
+                    // Clone the cell content to manipulate without affecting the original DOM
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = originalTd.innerHTML;
+                    tempDiv.querySelectorAll('.update-btn, div[id^="input_"], div[id^="text_"], div[id^="date_"]').forEach(el => el.remove());
+                    newTd.innerText = tempDiv.innerText.trim();
+                } else {
+                    newTd.innerText = originalTd.innerText.trim();
+                }
+                newTr.appendChild(newTd);
+            });
+            tbody.appendChild(newTr);
+        });
+        newTable.appendChild(tbody);
+
+        // Convert the new table to a worksheet
+        const ws = XLSX.utils.table_to_sheet(newTable);
+
+        // Apply borders to all cells
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cell_address = { c: C, r: R };
+                const cell_ref = XLSX.utils.encode_cell(cell_address);
+                if (!ws[cell_ref]) continue;
+                if (!ws[cell_ref].s) ws[cell_ref].s = {};
+                ws[cell_ref].s.border = {
+                    top: { style: "thin", color: { rgb: "000000" } },
+                    bottom: { style: "thin", color: { rgb: "000000" } },
+                    left: { style: "thin", color: { rgb: "000000" } },
+                    right: { style: "thin", color: { rgb: "000000" } }
+                };
+            }
+        }
+
+        // Try to force bold headers via rich text runs (works in many OSS builds)
+        const headerRow = newTable.querySelector('thead tr');
+        const headerCells = headerRow.querySelectorAll('th');
+        for (let c = 0; c < headerCells.length; c++) {
+            const addr = XLSX.utils.encode_cell({ r: 0, c: c });
+            let headerText = headerCells[c].innerText.trim();
+            
+            // Rename specific headers
+            if (c === 9) { // CS&M column
+                headerText = "CS&M (dd/mm/yyyy)";
+            } else if (c === 10) { // Carry from Warehouse column
+                headerText = "Carry From Warehouse (dd/mm/yyyy)";
+            }
+
+            // set rich text run
+            ws[addr] = {
+                t: 's',
+                v: headerText,
+                r: [{ t: 's', v: headerText, s: { bold: true } }]
+            };
+        }
+
+        // Set column widths
+        ws['!cols'] = [
+            { wch: 12 }, // Allocation No
+            { wch: 10 }, // PBS
+            { wch: 20 }, // Package
+            { wch: 30 }, // Item
+            { wch: 5 },  // Unit
+            { wch: 15 }, // Warehouse
+            { wch: 12 }, // Quantity
+            { wch: 10 }, // Status
+            { wch: 35 }, // Remarks
+            { wch: 17 }, // CS&M (dd/mm/yyyy)
+            { wch: 30 }, // Carry From Warehouse (dd/mm/yyyy)
+            { wch: 40 }  // Comments
+        ];
+
+        // Make workbook and append sheet
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'History');
+
+        const filename = `History.xlsx`;
+
+        XLSX.writeFile(wb, filename);
+    } catch (err) {
+        console.error(err);
+        alert('Export failed: ' + (err && err.message ? err.message : err));
+    }
+}
+
 </script>
-
-
 
 {% endblock %}
