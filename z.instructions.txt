@@ -1,5 +1,9 @@
+templates\partials\navbar.html
+there is a id dropdown in navbar @idname
 
-
+there is if else part in nav
+Linen Beige — #F3E0C7 ----- In ELSE PART ID  color
+Light Salmon — #FFA07A --- if(project) part id color
 
 
 
