@@ -1,11 +1,12 @@
 see this files, there is a export to excel  button and system implemented here
-example files
+example files (dont edit these files)
 templates\Project_Templates\Project_App_Status\status.html
 templates\Project_Templates\Project_App_ProjectWiseBalance\project_details.html
 
 
-copy this technique and implement same system in this page: templates\Project_Templates\Project_App_History\view_and_print_history.html
+
+copy this technique and implement same system in this page: templates\App_Status\status.html
 
 SEE THE cell width of  example files, try to keep same widths of same fields
- no button will which is inside the dataGridView will be shown in excel
+
 

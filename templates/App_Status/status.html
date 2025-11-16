@@ -19,7 +19,10 @@
         </div>
         <div class="col-12 mt-3">
             <button type="submit" class="btn btn-primary me-3">Search</button>
-            <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+            <button type="button" class="btn btn-secondary me-2" onclick="printResults()">Print</button>
+            <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                <i class="fa fa-file-excel-o"></i> Export to Excel (.xlsx)
+            </button>
         </div>
     </form>
 
@@ -28,7 +31,7 @@
     <div id="printableArea" class="table-responsive">
         <h3 class="text-center">Status</h3>
         <br>
-        <table class="table table-bordered table-striped table-hover">
+        <table class="table table-bordered table-striped table-hover" id="statusTable">
             <thead class="table-dark sticky-top">
                 <tr>
                     <th>Package ID</th>
@@ -319,7 +322,7 @@
 
         // Add "No Condition" first
         const noConditionOption = document.createElement("option");
-        noConditionOption.value = "No Condition";
+                noConditionOption.value = "No Condition";
         noConditionOption.textContent = "No Condition";
         dropdownElement.appendChild(noConditionOption);
 
@@ -419,6 +422,113 @@
 
     function printResults() {
         window.print();
+    }
+
+    async function exportToExcel() {
+        try {
+            const table = document.getElementById('statusTable');
+            if (!table) return alert('Table not found');
+
+            const buildAOA = () => {
+                const aoa = [];
+                const headers = [
+                    'Package ID',
+                    'Item Name',
+                    'Warehouse',
+                    'Unit',
+                    'Quantity',
+                    'Entry/Update date (yyyy-mm-dd)'
+                ];
+                aoa.push(headers);
+
+                const tbody = table.querySelector('tbody');
+                const trs = Array.from(tbody.querySelectorAll('tr'));
+                trs.forEach(tr => {
+                    const tds = Array.from(tr.querySelectorAll('td'));
+                    if (!tds || tds.length === 0) return;
+
+                    const packageId = tds[0].innerText.trim();
+                    const itemName = tds[1].innerText.trim();
+                    const warehouse = tds[2].innerText.trim();
+                    const unit = tds[3].innerText.trim();
+
+                    const parseNum = txt => {
+                        if (!txt) return null;
+                        const n = parseFloat(txt.replace(/,/g, ''));
+                        return Number.isFinite(n) ? n : null;
+                    };
+
+                    const quantity = parseNum(tds[4].innerText.trim());
+                    const entryUpdateDate = tds[5].innerText.trim();
+
+                    aoa.push([
+                        packageId || '',
+                        itemName || '',
+                        warehouse || '',
+                        unit || '',
+                        quantity !== null ? quantity : (tds[4].innerText.trim() || ''),
+                        entryUpdateDate || ''
+                    ]);
+                });
+                return aoa;
+            };
+
+            if (typeof XLSX === 'undefined') {
+                alert('SheetJS (XLSX) library not loaded. Make sure you included it in base.html.');
+                return;
+            }
+
+            const aoa = buildAOA();
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+            // Apply borders to all cells
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let R = range.s.r; R <= range.e.r; ++R) {
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    const cell_address = { c: C, r: R };
+                    const cell_ref = XLSX.utils.encode_cell(cell_address);
+                    if (!ws[cell_ref]) continue;
+                    if (!ws[cell_ref].s) ws[cell_ref].s = {};
+                    ws[cell_ref].s.border = {
+                        top: { style: "thin", color: { rgb: "000000" } },
+                        bottom: { style: "thin", color: { rgb: "000000" } },
+                        left: { style: "thin", color: { rgb: "000000" } },
+                        right: { style: "thin", color: { rgb: "000000" } }
+                    };
+                }
+            }
+
+            // Try to force bold headers via rich text runs
+            const headerLen = aoa[0].length;
+            for (let c = 0; c < headerLen; c++) {
+                const addr = XLSX.utils.encode_cell({ r: 0, c: c });
+                ws[addr] = {
+                    t: 's',
+                    v: aoa[0][c],
+                    r: [{ t: 's', v: aoa[0][c], s: { bold: true } }]
+                };
+            }
+
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 15 }, // Package ID
+                { wch: 30 }, // Item Name
+                { wch: 15 }, // Warehouse
+                { wch: 10 }, // Unit
+                { wch: 15 }, // Quantity
+                { wch: 25 }  // Entry/Update date
+            ];
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Status Report');
+
+            const filename = `Status Report.xlsx`;
+            XLSX.writeFile(wb, filename);
+
+        } catch (err) {
+            console.error('Export error', err);
+            alert('Export failed: ' + (err && err.message ? err.message : err));
+        }
     }
 </script>
 {% endblock %}
