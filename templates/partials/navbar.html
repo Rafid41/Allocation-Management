@@ -1,4 +1,10 @@
 <!-- templates/partials/navbar.html -->
+{% load static %}
+{% load nav_CDB_links_loader %}
+
+{% external_link_from_static "Central_Database_Gateway.txt" as central_database_gateway_link %}
+
+
 {% if request.path|slice:":9" == "/project/" %}
     <!-- 🔹 Project Navbar (Deep Ash) -->
     <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #2f1658ff;">
@@ -9,12 +15,11 @@
         <div class="collapse navbar-collapse" id="navbarProject">
             <ul class="navbar-nav mr-auto">
                 {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'Project_App_Home:project_home_page' %}">
-                            <i class="fas fa-project-diagram"></i> P_Home
-                        </a>
-                    </li>
-                    {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'Project_App_Home:project_home_page' %}">
+                                        <i class="fas fa-project-diagram"></i> P_Home
+                                    </a>
+                                </li>                    {% if request.user.is_superuser or request.user.user_group.user_group_type == "Editor" %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'Project_App_Allocation:allocation_page' %}">
                             <i class="fas fa-tasks"></i> P_Allocation
@@ -60,6 +65,10 @@
 
             <!-- 🔹 Same User Dropdown -->
             <ul class="navbar-nav">
+                <li class="nav-item">
+                    {# If file read fails, central_database_gateway_link is empty string -> use "#" to avoid broken href #}
+                    <a class="nav-link text-warning" href="{{ central_database_gateway_link|default:'#' }}" target="_blank" rel="noopener noreferrer">Central_Database_Gateway</a>
+                </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
@@ -147,6 +156,9 @@
 
             <!-- 🔸 Same User Dropdown -->
             <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link text-warning" href="{{ central_database_gateway_link|default:'#' }}" target="_blank" rel="noopener noreferrer">Central_Database_Gateway</a>
+                </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
