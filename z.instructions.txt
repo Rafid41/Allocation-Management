@@ -1,15 +1,18 @@
 in navbar
-clicking "Central_Database_Gateway"  isnt redirecting to the link, hovering mouse show the link before text is \home\ url
 
 
-previous command
+just color update:
 there are two navs separeted by if else
 
-in both navbar
+in if part:(/project/)
+Rich Teal Green — #005F5B ------as Nav bar background
+Light Aqua Glow — #C4FFF9 ---- as FOnt color
+Pale Gold — #FFE9A8 ------ Central_Database_Gateway" ....
 
-create a Link named "Central_Database_Gateway" 
-link is an externa link, that will be taken from file:static\links\Central_Database_Gateway.txt
-full file contains one link, trim it and use it. 
-use the file, not direct hardcoded link. cz link may change. user will
 
-the external link must open in new tab, not current tab
+
+
+
+
+
+
