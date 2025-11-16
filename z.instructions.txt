@@ -1,13 +1,3 @@
-in navbar
-
-
-just color update:
-there are two navs separeted by if else
-
-in if part:(/project/)
-Rich Teal Green — #005F5B ------as Nav bar background
-Light Aqua Glow — #C4FFF9 ---- as FOnt color
-Pale Gold — #FFE9A8 ------ Central_Database_Gateway" ....
 
 
 
