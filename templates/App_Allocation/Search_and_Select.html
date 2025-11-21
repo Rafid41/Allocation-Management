@@ -140,10 +140,11 @@
         const selectedOptionProps = getFilterOptionProperties(initialFilterBy);
 
         if (initialFilterBy === "Warehouse") {
+            // NOTE: removed server-side selected logic here; selection is applied via JS below
             inputFieldHtml = `<select name="query_${index}" id="searchQuery_${index}" class="form-select search-query">
                 <option value="">Select Warehouse</option>
                 {% for warehouse in unique_warehouses %}
-                    <option value="{{ warehouse }}" {% if warehouse == initialQuery %}selected{% endif %}>{{ warehouse }}</option>
+                    <option value="{{ warehouse }}">{{ warehouse }}</option>
                 {% endfor %}
             </select>`;
         } else if (selectedOptionProps.hasInput) {
@@ -185,6 +186,23 @@
         updateDropdownOptions(dropdown, index);
 
         dropdown.value = initialFilterBy;
+
+        // --- FIX: ensure warehouse select shows initialQuery after search ---
+        if (initialFilterBy === "Warehouse" && initialQuery) {
+            const sel = document.getElementById(`searchQuery_${index}`);
+            const trimmedInitial = initialQuery.trim();
+            // small timeout to ensure select options are rendered
+            setTimeout(() => {
+                if (sel) {
+                    for (let i = 0; i < sel.options.length; i++) {
+                        if (sel.options[i].value === trimmedInitial) {
+                            sel.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }, 10);
+        }
 
         if (selectedOptionProps.hasInput) {
             inputField.style.display = "block";
