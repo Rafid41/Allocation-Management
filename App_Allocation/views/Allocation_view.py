@@ -34,40 +34,51 @@ def select_allocation_number(request):
 @login_required
 def Search_and_Select(request, allocation_id=None):
     """Renders the package and item entry page with search functionality and shows the allocation number if provided."""
-    query = request.GET.get("query", "").strip()  
-    filter_by = request.GET.get("filter_by", "All")
-    date_filter = request.GET.get("date", "")
+    
+    all_items = Item.objects.all()
+    
+    # Store active filters and queries to pass back to the template
+    active_filters = {}
+    
+    # Start with an empty Q object for dynamic filtering
+    combined_q = Q()
+    
+    # Loop through potential filter parameters (up to 5, as per JS maxFilterRows)
+    for i in range(5): 
+        filter_by_key = f"filter_by_{i}"
+        query_key = f"query_{i}"
+        
+        filter_by = request.GET.get(filter_by_key, "").strip()
+        query = request.GET.get(query_key, "").strip()
+        
+        if filter_by and filter_by != "No Condition":
+            active_filters[filter_by_key] = filter_by
+            active_filters[query_key] = query
+            
+            if query: # Only apply query if there's a value
+                if filter_by == "Package ID":
+                    combined_q &= Q(package__packageId__iexact=query)
+                elif filter_by == "Item Name":
+                    combined_q &= Q(name__iexact=query)
+                elif filter_by == "Warehouse":
+                    combined_q &= Q(warehouse__iexact=query)
+                elif filter_by == "Entry/Update Date": # Changed from "Entry/Update date" to match instructions
+                    try:
+                        date_obj = datetime.strptime(query, "%Y-%m-%d")
+                        combined_q &= Q(created_at__date=date_obj.date())
+                    except ValueError:
+                        # If date format is invalid, the filter for this date is ignored
+                        pass
+    
+    # Apply the combined filters to the queryset
+    if combined_q:
+        all_items = all_items.filter(combined_q)
 
-    items = Item.objects.all()
+    # Order the results by Item Name
+    all_items = all_items.order_by("name")
 
-    # Apply query filter based on the selected 'filter_by' option
-    if query:
-        if filter_by == "All":
-            items = items.filter(
-                Q(name__icontains=query)
-                | Q(package__packageId__icontains=query)
-                | Q(warehouse__icontains=query)
-                | Q(unit_of_item__icontains=query)
-            )
-        elif filter_by == "Package ID":
-            items = items.filter(package__packageId__icontains=query)
-        elif filter_by == "Item Name":
-            items = items.filter(name__icontains=query)
-        elif filter_by == "Warehouse":
-            items = items.filter(warehouse__icontains=query)
-        elif filter_by == "Unit":
-            items = items.filter(unit_of_item__icontains=query)
-
-    # Apply date filter only if "Entry/Update date" is selected
-    if filter_by == "Entry/Update date" and date_filter:
-        try:
-            date_obj = datetime.strptime(date_filter, "%Y-%m-%d")
-            items = items.filter(created_at__date=date_obj.date())
-        except ValueError:
-            pass  
-
-    # Order the results by package ID
-    items = items.order_by("package__packageId")
+    # Get warehouse choices from the Item model
+    all_possible_warehouses = [choice[0] for choice in Item.WAREHOUSE_CHOICES]
 
     # Fetch Allocation Number if provided
     allocation_number = None
@@ -78,17 +89,18 @@ def Search_and_Select(request, allocation_id=None):
         except Allocation_Number.DoesNotExist:
             messages.error(request, "Invalid Allocation Number.")
 
+    context = {
+        "items": all_items,
+        "allocation_number": allocation_number,
+        "allocation_id": allocation_id,
+        "unique_warehouses": all_possible_warehouses,
+    }
+    context.update(active_filters) # Add active filters back to context for template
+
     return render(
         request,
         "App_Allocation/Search_and_Select.html",
-        {
-            "items": items,
-            "query": query,
-            "filter_by": filter_by,
-            "date_filter": date_filter,
-            "allocation_number": allocation_number,
-            "allocation_id": allocation_id,
-        },
+        context,
     )
 
 
