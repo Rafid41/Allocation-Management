@@ -2,13 +2,19 @@
 {% load crispy_forms_tags %}
 {% load static %}
 
-{% block title_block %} Project Final Allocation {% endblock %}
+{% block title_block %} Project Temporary Allocation {% endblock %}
+
+{% comment %} 
+#####################################################################
+### VVI: This now shows Temporay_Allocation, not Final_Allocation ###
+#####################################################################
+{% endcomment %}
 
 {% block body_block %}
 <a href="{% url 'Project_App_Allocation:allocation_page' %}" class="btn btn-outline-secondary">
     <i class="fa fa-arrow-left"></i> Back
 </a>
-<center><h1><b>Project Final Allocation</b></h1></center>
+<center><h1><b>Project Allocations Pending Confirmation</b></h1></center>
 <div class="container mt-4">
     <h2>Search Allocations</h2>
 
@@ -44,7 +50,6 @@
     <h4>Search Results</h4>
 
     <div id="printableArea" class="table-responsive">
-        <h3 class="text-center">Final Allocation Data</h3>
         <br>
         <table class="table table-bordered table-striped table-hover">
             <thead class="table-dark sticky-top">
