@@ -13,6 +13,8 @@ from docx.enum.table import WD_ALIGN_VERTICAL
 from docx.oxml.ns import qn, nsdecls
 from docx.oxml import parse_xml
 from docx.oxml.shared import OxmlElement
+from PIL import ImageFont, ImageDraw, Image
+from docx.oxml import parse_xml
 
 import datetime
 import pytz
@@ -68,6 +70,7 @@ def individual_allocation_download(request):
 
             # Header lines
             header_lines = [
+                "বাংলাদেশ পল্লী বিদ্যুতায়ন বোর্ড",
                 "এমপিএসএস পরিদপ্তর",
                 "সদর দপ্তর ভবন, নিকুঞ্জ-২, ঢাকা।",
             ]
@@ -126,8 +129,8 @@ def individual_allocation_download(request):
             # doc.add_paragraph()
 
             # Allocation No
-            from PIL import ImageFont, ImageDraw, Image
-            from docx.oxml import parse_xml
+
+
 
             # --- Text setup ---
             alloc_text = f"Allocation No: {allocation.allocation_no}"
@@ -270,7 +273,7 @@ def individual_allocation_download(request):
             headers = [
                 "গ্রহণকারী সমিতির নাম",
                 "আইটেম নং",
-                "পরিমাণ\n(টি)",
+                "পরিমাণ",
                 "একক",
                 "একক মূল্য\n(টাকা)",
                 "বরাদ্দকৃত প্রকল্প ও প্যাকেজ/ সাব-প্যাকেজ নং",
