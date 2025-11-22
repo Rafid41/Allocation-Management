@@ -106,6 +106,9 @@ def individual_allocation_download(request):
             # Reference number and current date (in Bengali) on the same line
             ref_date_para = doc.add_paragraph()
             ref_date_para.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+            # reduce spacing to sit closer to the allocation box
+            ref_date_para.paragraph_format.space_before = Pt(0)
+            ref_date_para.paragraph_format.space_after = Pt(0)
 
             # Set a right-aligned tab stop (6.5 inches ~ A4 width)
             ref_date_para.paragraph_format.tab_stops.add_tab_stop(
@@ -176,6 +179,9 @@ def individual_allocation_download(request):
             # Anchor paragraph for right alignment (keeps table anchored to this point)
             anchor_para = doc.add_paragraph()
             anchor_para.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+            # reduce spacing so it sits close to above line
+            anchor_para.paragraph_format.space_before = Pt(0)
+            anchor_para.paragraph_format.space_after = Pt(0)
 
             # Create a single-cell table to act as the box
             table = doc.add_table(rows=1, cols=1)
@@ -217,8 +223,10 @@ def individual_allocation_download(request):
             cell = table.rows[0].cells[0]
             cell_para = cell.paragraphs[0]
             cell_para.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+            # reduce spacing inside the cell paragraph
             cell_para.paragraph_format.space_before = Pt(0)
             cell_para.paragraph_format.space_after = Pt(0)
+            cell_para.paragraph_format.line_spacing = 1.0
 
             run = cell_para.add_run(alloc_text)
             run.bold = True
@@ -231,10 +239,11 @@ def individual_allocation_download(request):
             except Exception:
                 pass
 
-            # Small spacing after the box
+            # Small spacing after the box (reduced to 2pt to tighten)
             try:
                 spacer = doc.add_paragraph()
-                spacer.paragraph_format.space_after = Pt(6)
+                spacer.paragraph_format.space_after = Pt(2)
+                spacer.paragraph_format.space_before = Pt(0)
             except Exception:
                 pass
 
