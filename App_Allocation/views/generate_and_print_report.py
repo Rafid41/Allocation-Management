@@ -9,8 +9,8 @@ from App_Allocation.models import Allocation_Number, Final_Allocation
 from docx import Document
 from docx.shared import Pt, Inches
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from docx.enum.table import WD_ALIGN_VERTICAL
-from docx.oxml.ns import qn, nsdecls
+from docx.enum.table import WD_ALIGN_VERTICAL, WD_TABLE_ALIGNMENT
+from docx.oxml.ns import qn
 from docx.oxml import parse_xml
 from docx.oxml.shared import OxmlElement
 from PIL import ImageFont, ImageDraw, Image
@@ -129,73 +129,116 @@ def individual_allocation_download(request):
             # doc.add_paragraph()
 
             # Allocation No
-
-
-
-            # --- Text setup ---
+            # ---------------------------
+            # Use a right-aligned 1x1 table with autofit disabled and width computed from actual text
             alloc_text = f"Allocation No: {allocation.allocation_no}"
-            font_size_pt = 12
+
+            # Increase font size by 2 points as requested (original was 12)
+            font_size_pt = 12 + 2  # 14
+
+            # Measure text width with Pillow to reduce left blank area
             dpi = 96
             font_px = int(font_size_pt * dpi / 72)
-
-            # Load font (update path as needed for your server)
             try:
                 ttf_path = "C:\\Windows\\Fonts\\times.ttf"
                 pil_font = ImageFont.truetype(ttf_path, font_px)
             except Exception:
-                pil_font = ImageFont.load_default()
+                try:
+                    pil_font = ImageFont.truetype("times.ttf", font_px)
+                except Exception:
+                    pil_font = ImageFont.load_default()
 
-            # Measure text using Pillow (new Pillow >=10 syntax)
-            img = Image.new("RGB", (2000, 2000), (255, 255, 255))
+            img = Image.new("RGB", (2000, 500), (255, 255, 255))
             draw = ImageDraw.Draw(img)
-            bbox = draw.textbbox((0, 0), alloc_text, font=pil_font)
-            text_width_px = bbox[2] - bbox[0]
-            text_height_px = bbox[3] - bbox[1]
+            try:
+                bbox = draw.textbbox((0, 0), alloc_text, font=pil_font)
+                text_width_px = bbox[2] - bbox[0]
+                text_height_px = bbox[3] - bbox[1]
+            except Exception:
+                text_width_px, text_height_px = draw.textsize(alloc_text, font=pil_font)
 
-            # Convert to inches → points (Word uses points)
-            inches_w = text_width_px / dpi
-            inches_h = text_height_px / dpi
-            pad_x_in = 0.12
-            pad_y_in = 0.06
-            width_pt = (inches_w + 2 * pad_x_in) * 72
-            height_pt = (inches_h + 2 * pad_y_in) * 72
+            # horizontal padding (in inches) to add around measured text
+            pad_x_in = 0.16  # increased for more space
 
-            # --- Create paragraph (keep right aligned for fallback) ---
-            alloc_para = doc.add_paragraph()
-            alloc_para.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
-            run = alloc_para.add_run()
+            # convert measured px to inches
+            measured_in = text_width_px / dpi
 
-            # --- Create right-aligned tight rectangle ---
-            textbox_xml = f"""
-            <w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-                xmlns:v="urn:schemas-microsoft-com:vml"
-                xmlns:w10="urn:schemas-microsoft-com:office:word">
-            <w:pict>
-                <v:shape id="AllocationBox" type="#_x0000_t202" strokecolor="black" strokeweight="1pt" fillcolor="white"
-                        style="width:{width_pt}pt;height:{height_pt}pt;position:absolute;right:0pt;margin-right:0pt;white-space:nowrap;mso-position-horizontal:right;">
-                <v:textbox inset="2pt,2pt,2pt,2pt">
-                    <w:txbxContent>
-                    <w:p>
-                        <w:r>
-                        <w:t xml:space="preserve">{alloc_text}</w:t>
-                        </w:r>
-                    </w:p>
-                    </w:txbxContent>
-                </v:textbox>
-                </v:shape>
-            </w:pict>
-            </w:r>
-            """
+            # computed width = measured text width + 2*padding
+            computed_width_in = measured_in + 2 * pad_x_in
 
-            # Append the shape XML to the run
-            run._r.append(parse_xml(textbox_xml))
+            # width limits (just slightly bigger overall)
+            max_width_in = 3.0   # keep same max
+            min_width_in = 2.2   # increase minimum to prevent narrow look
 
-            # Optional spacing
-            alloc_para.paragraph_format.space_after = Pt(6)
+            fixed_width_in = max(min(computed_width_in, max_width_in), min_width_in)
 
 
-            # doc.add_paragraph()
+            # Anchor paragraph for right alignment (keeps table anchored to this point)
+            anchor_para = doc.add_paragraph()
+            anchor_para.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
 
+            # Create a single-cell table to act as the box
+            table = doc.add_table(rows=1, cols=1)
+            table.style = "Table Grid"   # border around the cell
+            # Disable autofit to prevent Word from stretching it full width
+            try:
+                table.autofit = False
+            except Exception:
+                pass
+
+            # Try high-level column width set; fallback to low-level tcPr
+            try:
+                table.columns[0].width = Inches(fixed_width_in)
+            except Exception:
+                pass
+
+            # Fallback: set low-level cell width (twips)
+            try:
+                width_twips = int(fixed_width_in * 1440)
+                tc = table.rows[0].cells[0]._tc
+                tcPr = tc.get_or_add_tcPr()
+                existing_tcW = tcPr.find(qn('w:tcW'))
+                if existing_tcW is not None:
+                    tcPr.remove(existing_tcW)
+                tcW = OxmlElement('w:tcW')
+                tcW.set(qn('w:w'), str(width_twips))
+                tcW.set(qn('w:type'), 'dxa')
+                tcPr.append(tcW)
+            except Exception:
+                pass
+
+            # Ensure table alignment is right
+            try:
+                table.alignment = WD_TABLE_ALIGNMENT.RIGHT
+            except Exception:
+                pass
+
+            # Put the allocation text in the cell
+            cell = table.rows[0].cells[0]
+            cell_para = cell.paragraphs[0]
+            cell_para.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+            cell_para.paragraph_format.space_before = Pt(0)
+            cell_para.paragraph_format.space_after = Pt(0)
+
+            run = cell_para.add_run(alloc_text)
+            run.bold = True
+            run.font.size = Pt(font_size_pt)
+            run.font.name = "Times New Roman"
+            try:
+                rPr = run._element.get_or_add_rPr()
+                rFonts = rPr.get_or_add_rFonts()
+                rFonts.set(qn("w:cs"), "Times New Roman")
+            except Exception:
+                pass
+
+            # Small spacing after the box
+            try:
+                spacer = doc.add_paragraph()
+                spacer.paragraph_format.space_after = Pt(6)
+            except Exception:
+                pass
+
+            # ---------------------------
             # Recipient block
             recipients = [
                 "পরিচালক",
@@ -227,7 +270,7 @@ def individual_allocation_download(request):
             part1 = "বাপবিবোর্ডের “"
             english_text = "PBS Fund (084)"
             part2 = (
-                "” এর আওতায় সংগ্রহকৃত মালামাল নিম্নের ছকে উল্লেখিত কেন্দ্রীয় পন্যাগার হতে মূল্য পরিশোধ স্বাপেক্ষে "
+                "” এর আওতায় সংগ্রহকৃত মালামাল নিম্নের ছকে উল্লেখিত কেন্দ্রীয় পন্যাগার থেকে মূল্য পরিশোধ স্বাপেক্ষে "
                 "নিম্নোক্তভাবে বরাদ্দ প্রদান করা হলো। বরাদ্দপ্রাপ্ত মালামাল এর মূল্য বাপবিবো’র হিসাব পরিদপ্তরে জমা প্রদানের রশিদ দাখিল পূর্বক "
                 "নিম্নের ছকে উল্লেখিত কেন্দ্রীয় পন্যাগার হতে মালামালসমূহ গ্রহন করবে। "
             )
@@ -264,7 +307,7 @@ def individual_allocation_download(request):
 
             # doc.add_paragraph()
 
-            # Create table
+            # Create table for entries
             table = doc.add_table(rows=1, cols=7)
             table.style = "Table Grid"
 
@@ -299,8 +342,6 @@ def individual_allocation_download(request):
             # Widen column 5
             hdr_cells[4].width = Inches(2.5)
 
-            # first_col8_cell = None
-
             for idx, entry in enumerate(entries):
                 row_cells = table.add_row().cells
 
@@ -333,33 +374,6 @@ def individual_allocation_download(request):
                         rFonts = run._element.rPr.get_or_add_rFonts()
                         rFonts.set(qn("w:cs"), "Times New Roman")
 
-                # if idx == 0:
-                #     first_col8_cell = row_cells[7]
-                # else:
-                #     first_col8_cell.merge(row_cells[7])
-
-
-            # Set value and formatting for the merged column 8 cell
-            # first_col8_cell.text = "On Payment O&M Store"
-            # first_col8_cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-
-            # para = first_col8_cell.paragraphs[0]
-            # para.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-            # # Ensure the paragraph has text and formatting
-            # if not para.runs:
-            #     run = para.add_run("On Payment O&M Store")
-            # else:
-            #     para.runs[0].text = "On Payment O&M Store"
-            #     run = para.runs[0]
-
-            # run.font.size = Pt(11)
-            # run.font.name = "Times New Roman"
-            # rFonts = run._element.rPr.get_or_add_rFonts()
-            # rFonts.set(qn("w:cs"), "Times New Roman")
-
-
-            # doc.add_paragraph()
 
             closing_text = "বরাদ্দ অনুযায়ী প্রয়োজনীয় ব্যবস্থা গ্রহণের অনুরোধ করা হলো।"
             closing_para = doc.add_paragraph(closing_text)
@@ -368,14 +382,10 @@ def individual_allocation_download(request):
                 run.font.size = Pt(12)
                 set_font(run, "Nikosh")
 
-            # doc.add_paragraph()
-
             sigs = [
-                # Right-aligned block
                 {"text": "(       )     ", "align": WD_PARAGRAPH_ALIGNMENT.RIGHT},
                 {"text": "উপ-পরিচালক(কারিগরী)", "align": WD_PARAGRAPH_ALIGNMENT.RIGHT},
                 {"text": "", "align": WD_PARAGRAPH_ALIGNMENT.RIGHT},
-                # Left-aligned block
                 {"text": "অনুলিপি:", "align": WD_PARAGRAPH_ALIGNMENT.LEFT},
                 {
                     "text": "১।      উপ-পরিচালক, কেন্দ্রীয় পণ্যাগার, বাপবিবো,.......।",
@@ -389,7 +399,6 @@ def individual_allocation_download(request):
                     "text": "৩।      জেনারেল ম্যানেজার,..... পবিস।",
                     "align": WD_PARAGRAPH_ALIGNMENT.LEFT,
                 },
-                # Right-aligned block
                 {"text": "", "align": WD_PARAGRAPH_ALIGNMENT.RIGHT},
                 {"text": "(          )     ", "align": WD_PARAGRAPH_ALIGNMENT.RIGHT},
                 {"text": "সহকারী প্রকৌশলী", "align": WD_PARAGRAPH_ALIGNMENT.RIGHT},
@@ -398,11 +407,8 @@ def individual_allocation_download(request):
             for sig in sigs:
                 p = doc.add_paragraph(sig["text"])
                 p.alignment = sig["align"]
-
-                # 🔧 Remove spacing after/before paragraph
                 p.paragraph_format.space_after = Pt(0)
                 p.paragraph_format.space_before = Pt(0)
-
                 for run in p.runs:
                     set_font(run, font_name="Nikosh")
                     if sig["text"] == "অনুলিপি:":
@@ -419,12 +425,6 @@ def individual_allocation_download(request):
         messages.error(request, "Please select an allocation number.")
         return redirect("App_Allocation:individual_allocation_download")
 
-    # allocated_allocations = Allocation_Number.objects.filter(
-    #     Q(status="Allocated") | Q(status="Modified"),
-    #     allocation_no__in=Final_Allocation.objects.values_list(
-    #         "allocation_no", flat=True
-    #     ).distinct(),
-    # ).order_by("-allocation_no")
     allocated_allocations = Allocation_Number.objects.filter(
         Q(status="Allocated") | Q(status="Modified"),
         id__in=Final_Allocation.objects.values_list("allocation_no_id", flat=True).distinct(),
