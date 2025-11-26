@@ -162,7 +162,8 @@ def allocate_item(request, allocation_id, item_id):
         total_allocated = sum(existing.quantity for existing in existing_allocations)
 
         # ✅ Compare Decimals, not strings/ints
-        if quantity + total_allocated > item.quantity_of_item:
+        # if quantity + total_allocated > item.quantity_of_item:
+        if quantity > item.quantity_of_item:
             messages.error(request, "Total allocated quantity exceeds available stock!")
         elif quantity <= 0:  # ✅ also catches negative values
             messages.error(request, "Quantity must be greater than zero.")
