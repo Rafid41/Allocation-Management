@@ -52,7 +52,7 @@
             <tbody>
                 {% if items %}
                     {% for item in items %}
-                        <tr class="{% if item.remarks_status == 'Deleted' or item.status == 'Cancelled' %}table-danger{% endif %}">
+                         <tr class="{% if item.remarks_status == 'Deleted' or item.status == 'Cancelled' %}table-danger{% elif item.remarks_status == 'Added' or item.status == 'Modified' %}table-deep-blue{% elif item.status == 'Allocated' %}table-deep-green{% endif %}">
                             <td>{{ item.allocation_no }}</td>
                             <td>{{ item.pbs }}</td>
                             <td>{{ item.project }}</td>
@@ -162,6 +162,14 @@
             top: 0;
             width: 100%;
         }
+    }
+
+    /* Custom Deeper Colors */
+    .table-deep-blue, .table-deep-blue > th, .table-deep-blue > td {
+        background-color: #8cf4fc !important; /* Sky Blue */
+    }
+    .table-deep-green, .table-deep-green > th, .table-deep-green > td {
+        background-color:  #A8F29A !important; /* Light Green */
     }
 </style>
 
@@ -528,7 +536,7 @@ function exportToExcel() {
             { wch: 10 }, // PBS
             { wch: 15 }, // Project
             { wch: 25 }, // Item
-            { wch: 05 }, // Unit
+            { wch: 5 },  // Unit
             { wch: 12 }, // Warehouse
             { wch: 12 }, // Quantity
             { wch: 15 }, // Status
