@@ -36,7 +36,16 @@ def add_item(request, allocation_id, item_id):
         )
         total_allocated = sum(existing.quantity for existing in existing_allocations)
 
-        if total_allocated + quantity > item.quantity_of_item:
+         # Check stock limits
+        # print("####################################################################")
+        # print("Quantity to allocate:", quantity)
+        # print("Total already allocated:", total_allocated)
+        # print("Item stock available:", item.quantity_of_item)
+        # print(total_allocated ,"+", quantity ,">", item.quantity_of_item, "=", total_allocated + quantity > item.quantity_of_item)
+        # print(quantity ,">", item.quantity_of_item, "=", quantity > item.quantity_of_item)
+        # print("####################################################################")
+
+        if quantity > item.quantity_of_item:
             messages.error(request, "Total allocated quantity exceeds available stock!")
         elif quantity == 0:
             messages.error(request, "Quantity cannot be zero.")
