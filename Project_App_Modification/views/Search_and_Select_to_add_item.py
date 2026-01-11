@@ -5,40 +5,38 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from Project_App_Allocation.models import Allocation_Number
 from django.contrib import messages
+import json
 
 
 @login_required
 def Search_and_Select_Items(request, allocation_id=None):
     """Allows searching and selecting a new item to add to a given allocation."""
-    query = request.GET.get("query", "").strip()
-    filter_by = request.GET.get("filter_by", "All")
-    date_filter = request.GET.get("date", "")
-
+    # Filter Logic
     items = Item.objects.all()
+    applied_filters = []
+    
+    # Iterate through potential filters (supporting multiple rows)
+    for i in range(1, 10):
+        filter_type = request.GET.get(f"filter_type_{i}")
+        filter_value = request.GET.get(f"filter_value_{i}")
 
-    if query:
-        if filter_by == "All":
-            items = items.filter(
-                Q(name__icontains=query)
-                | Q(project__projectId__icontains=query)
-                | Q(warehouse__icontains=query)
-                | Q(unit_of_item__icontains=query)
-            )
-        elif filter_by == "Project ID":
-            items = items.filter(project__projectId__icontains=query)
-        elif filter_by == "Item Name":
-            items = items.filter(name__icontains=query)
-        elif filter_by == "Warehouse":
-            items = items.filter(warehouse__icontains=query)
-        elif filter_by == "Unit":
-            items = items.filter(unit_of_item__icontains=query)
+        if filter_value:
+             filter_value = filter_value.strip()
 
-    if filter_by == "Entry/Update date" and date_filter:
-        try:
-            date_obj = datetime.strptime(date_filter, "%Y-%m-%d")
-            items = items.filter(created_at__date=date_obj.date())
-        except ValueError:
-            pass
+        if not filter_type or filter_type == "no_condition" or not filter_value:
+            continue
+        
+        applied_filters.append({
+            "type": filter_type,
+            "value": filter_value
+        })
+
+        if filter_type == "project":
+            items = items.filter(project__projectId__iexact=filter_value)
+        elif filter_type == "item":
+            items = items.filter(name__iexact=filter_value)
+        elif filter_type == "warehouse":
+            items = items.filter(warehouse__iexact=filter_value)
 
     items = items.order_by("project__projectId")
 
@@ -50,15 +48,16 @@ def Search_and_Select_Items(request, allocation_id=None):
         except Allocation_Number.DoesNotExist:
             messages.error(request, "Invalid Allocation Number.")
 
+    # Get distinct warehouses for dropdown
+    warehouses = list(Item.objects.values_list('warehouse', flat=True).distinct())
+
     return render(
         request,
         "Project_Templates/Project_App_Modification/Search_and_Select_Items.html",
         {
             "items": items,
-            "query": query,
-            "filter_by": filter_by,
-            "date_filter": date_filter,
             "allocation_number": allocation_number,
             "allocation_id": allocation_id,
+            "warehouse_json": json.dumps(warehouses),
         },
     )
