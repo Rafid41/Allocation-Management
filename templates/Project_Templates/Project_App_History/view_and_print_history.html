@@ -52,7 +52,7 @@
             <tbody>
                 {% if items %}
                     {% for item in items %}
-                         <tr class="{% if item.remarks_status == 'Deleted' or item.status == 'Cancelled' %}table-danger{% elif item.remarks_status == 'Added' or item.status == 'Modified' %}table-deep-blue{% elif item.status == 'Allocated' %}table-deep-green{% endif %}">
+                         <tr class="{% if item.remarks_status == 'Deleted' or item.status == 'Cancelled' %}table-danger{% elif item.remarks_status == 'Added' and item.status == 'Modified' %}table-light-green{% endif %}">
                             <td>{{ item.allocation_no }}</td>
                             <td>{{ item.pbs }}</td>
                             <td>{{ item.project }}</td>
@@ -165,11 +165,8 @@
     }
 
     /* Custom Deeper Colors */
-    .table-deep-blue, .table-deep-blue > th, .table-deep-blue > td {
-        background-color: #8cf4fc !important; /* Sky Blue */
-    }
-    .table-deep-green, .table-deep-green > th, .table-deep-green > td {
-        background-color:  #A8F29A !important; /* Light Green */
+    .table-light-green, .table-light-green > th, .table-light-green > td {
+        background-color: #84eab3 !important;  /* soft light green */
     }
 </style>
 
