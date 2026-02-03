@@ -6,7 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
 import json
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 @login_required
 def status_page(request):
@@ -62,10 +64,25 @@ def status_page(request):
     # Determine group permission
     group = request.user.user_group.user_group_type if hasattr(request.user, "user_group") else ""
 
+    print_view = request.GET.get("print_view") == "true"
+    
+    if print_view:
+        items = all_items
+    else:
+        page = request.GET.get('page', 1)
+        paginator = Paginator(all_items, 30)
+        try:
+            items = paginator.page(page)
+        except PageNotAnInteger:
+            items = paginator.page(1)
+        except EmptyPage:
+            items = paginator.page(paginator.num_pages)
+
     context = {
-        "items": all_items,
+        "items": items,
         "unique_units": all_possible_units, # Pass the choices from the model
         "can_edit_comments": group == "Editor",
+        "is_print_view": print_view,
     }
     context.update(active_filters) # Add active filters back to context for template
 
