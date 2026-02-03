@@ -12,7 +12,7 @@
 <div class="container mt-4">
     <h2 class="text-center mb-3">History</h2>
 
-    <form method="GET" class="mb-4" id="dynamicSearchForm">
+    <form method="GET" class="mb-4" id="dynamicSearchForm" {% if is_print_view %}style="display:none;"{% endif %}>
         <div id="filterRowsContainer">
             <!-- Initial filter row will be added here by JavaScript -->
         </div>
@@ -20,7 +20,7 @@
             <div class="col-md-12">
                 <button type="submit" class="btn btn-primary me-2">Search</button>
                 <button type="button" class="btn btn-secondary me-2" onclick="printResults()">Print</button>
-                <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                <button type="button" class="btn btn-success" onclick="exportToExcelGeneric()">
                     <i class="fa fa-file-excel-o"></i> Export to Excel (.xlsx)
                 </button>
             </div>
@@ -156,6 +156,50 @@
             </tbody>
         </table>
     </div>
+    {% if not is_print_view and items.has_other_pages %}
+    <nav aria-label="Page navigation" class="mt-5 mb-5">
+      <ul class="pagination justify-content-center custom-pagination">
+        
+        <!-- First Page -->
+        <li class="page-item {% if not items.has_previous %}disabled{% endif %}">
+          <a class="page-link btn-nav btn-first-last" href="#" onclick="goToPage(1); return false;" aria-label="First">
+            <i class="fa fa-angle-double-left"></i> First
+          </a>
+        </li>
+
+        <!-- Previous Page -->
+        <li class="page-item {% if not items.has_previous %}disabled{% endif %}">
+          <a class="page-link btn-nav btn-prev-next" href="#" onclick="{% if items.has_previous %}goToPage({{ items.previous_page_number }});{% endif %} return false;" aria-label="Previous">
+            <i class="fa fa-angle-left"></i> Prev
+          </a>
+        </li>
+
+        <!-- Page Numbers -->
+        {% for i in items.paginator.page_range %}
+          {% if i > items.number|add:'-4' and i < items.number|add:'4' %}
+            <li class="page-item {% if items.number == i %}active{% endif %}">
+              <a class="page-link" href="#" onclick="goToPage({{ i }}); return false;">{{ i }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        <!-- Next Page -->
+        <li class="page-item {% if not items.has_next %}disabled{% endif %}">
+          <a class="page-link btn-nav btn-prev-next" href="#" onclick="{% if items.has_next %}goToPage({{ items.next_page_number }});{% endif %} return false;" aria-label="Next">
+             Next <i class="fa fa-angle-right"></i>
+          </a>
+        </li>
+
+        <!-- Last Page -->
+        <li class="page-item {% if not items.has_next %}disabled{% endif %}">
+           <a class="page-link btn-nav btn-first-last" href="#" onclick="goToPage({{ items.paginator.num_pages }}); return false;" aria-label="Last">
+            Last <i class="fa fa-angle-double-right"></i>
+          </a>
+        </li>
+
+      </ul>
+    </nav>
+    {% endif %}
 </div>
 
 <!-- Reset Confirmation Modal -->
@@ -207,7 +251,83 @@
             width: 100%;
         }
     }
-    /* Custom Deeper Colors */
+    /* Custom Pagination Styles */
+    .custom-pagination {
+        background: #ffffff;
+        padding: 10px 20px;
+        border-radius: 50px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        align-items: center;
+    }
+    .custom-pagination .page-item {
+        margin: 0 3px;
+    }
+    .custom-pagination .page-link {
+        border: none;
+        border-radius: 50px; /* Pill shape for all */
+        min-width: 40px;
+        height: 40px;
+        line-height: 40px;
+        text-align: center;
+        padding: 0 10px;
+        color: #555;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+    .custom-pagination .page-link:hover {
+        background-color: #f0f0f0;
+        color: #333;
+        transform: translateY(-2px);
+    }
+    
+    /* Active Page Number */
+    .custom-pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 10px rgba(118, 75, 162, 0.4);
+        transform: scale(1.1);
+        min-width: 40px; /* Keep page nums circular-ish if single digit */
+    }
+
+    /* Navigation Buttons (Base) */
+    .custom-pagination .btn-nav {
+        padding: 0 15px;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Prev/Next Color Scheme (e.g., Cool Blue/Cyan) */
+    .custom-pagination .btn-prev-next {
+        background-color: #e0f2fe; /* light blue */
+        color: #0284c7; /* dark blue text */
+    }
+    .custom-pagination .btn-prev-next:hover {
+        background-color: #0ea5e9; /* vivid blue hover */
+        color: white;
+    }
+
+    /* First/Last Color Scheme (e.g., Warm Orange/Rose or different tone) */
+    .custom-pagination .btn-first-last {
+        background-color: #ffe4e6; /* light rose */
+        color: #e11d48; /* dark rose/red text */
+        font-weight: 700;
+    }
+    .custom-pagination .btn-first-last:hover {
+        background-color: #f43f5e; /* vivid rose hover */
+        color: white;
+    }
+
+    .custom-pagination .page-item.disabled .page-link {
+        color: #ccc;
+        background-color: transparent !important;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+    
+    /* Previous styles... */
     .table-light-green, .table-light-green > th, .table-light-green > td {
         background-color: #84eab3 !important;  /* soft light green */
     }
@@ -457,7 +577,56 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-function printResults() { window.print(); }
+{% if is_print_view %}
+  window.onload = function() {
+      // Auto-print when loaded in print view
+      window.print();
+      // Optional: close after print? User might want to keep it open.
+  };
+{% endif %}
+
+function goToPage(n) {
+  const p = new URLSearchParams(window.location.search);
+  p.set('page', n);
+  window.location.search = p.toString();
+}
+
+function printResults() { 
+    const p = new URLSearchParams(window.location.search);
+    p.set('print_view', 'true');
+    window.open('?' + p.toString(), '_blank');
+}
+
+function exportToExcelGeneric() {
+    // If we are already in print view (full data), just export immediately
+    // If we are in regular view (paginated), fetch print view background and export that
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('print_view') === 'true') {
+        exportToExcel(document.getElementById('historyTable'));
+    } else {
+        p.set('print_view', 'true');
+        // Add loading indicator?
+        const btn = document.querySelector('button[onclick="exportToExcelGeneric()"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Exporting...';
+        btn.disabled = true;
+
+        fetch('?' + p.toString())
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                const table = doc.getElementById('historyTable');
+                exportToExcel(table);
+            })
+            .catch(err => alert("Export failed: " + err))
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+    }
+}
+
 
 function showInput(id, field) {
     document.getElementById(`input_${field}_${id}`).style.display = 'block';
@@ -569,14 +738,15 @@ function submitComment(id) {
 }
 /* ========================================= */
 
-function exportToExcel() {
+function exportToExcel(sourceTable) {
     try {
         if (typeof XLSX === 'undefined') {
             alert('SheetJS (XLSX) library not loaded. Make sure you included it in base.html.');
             return;
         }
-
-        const originalTable = document.getElementById('historyTable');
+        
+        // Use provided table or default to current dom table
+        const originalTable = sourceTable || document.getElementById('historyTable');
         
         // Create a new table in memory for export
         const newTable = document.createElement('table');
