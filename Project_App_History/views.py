@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.db.models import Q
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 @login_required
 def history(request):
@@ -85,13 +86,29 @@ def history(request):
                         results = results.filter(**{f"{field_name}__iexact": filter_value})
 
     # Determine group permission
+    # Determine group permission
     group = request.user.user_group.user_group_type if hasattr(request.user, "user_group") else ""
 
+    print_view = request.GET.get("print_view") == "true"
+    
+    if print_view:
+        items = results
+    else:
+        page = request.GET.get('page', 1)
+        paginator = Paginator(results, 30)
+        try:
+            items = paginator.page(page)
+        except PageNotAnInteger:
+            items = paginator.page(1)
+        except EmptyPage:
+            items = paginator.page(paginator.num_pages)
+
     context = {
-        "items": results,
+        "items": items,
         "status_choices_json": json.dumps(History.STATUS_CHOICES),
         "can_edit_carry": group in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"],
         "can_edit_comments": group in ["Editor"],
+        "is_print_view": print_view,
     }
 
     return render(request, "Project_Templates/Project_App_History/view_and_print_history.html", context)
