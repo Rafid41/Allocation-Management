@@ -1,8 +1,8 @@
-# App_Status\views.py
 from django.shortcuts import render
 from App_Entry.models import Item
 from django.db.models import Q
 from datetime import datetime
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def status_page(request):
     """Renders the package and item entry page with dynamic search functionality"""
@@ -54,9 +54,25 @@ def status_page(request):
     # Get unit choices from the Item model
     all_possible_units = [choice[0] for choice in Item.UNIT_CHOICES]
 
+    # Print view logic
+    print_view = request.GET.get("print_view") == "true"
+    
+    if print_view:
+        items = all_items
+    else:
+        page = request.GET.get('page', 1)
+        paginator = Paginator(all_items, 30)
+        try:
+            items = paginator.page(page)
+        except PageNotAnInteger:
+            items = paginator.page(1)
+        except EmptyPage:
+            items = paginator.page(paginator.num_pages)
+
     context = {
-        "items": all_items,
+        "items": items,
         "unique_units": all_possible_units, # Pass the choices from the model
+        "is_print_view": print_view,
     }
     context.update(active_filters) # Add active filters back to context for template
 
