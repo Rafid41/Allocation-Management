@@ -61,7 +61,7 @@ def status_page(request):
         items = all_items
     else:
         page = request.GET.get('page', 1)
-        paginator = Paginator(all_items, 30)
+        paginator = Paginator(all_items, 50)
         try:
             items = paginator.page(page)
         except PageNotAnInteger:

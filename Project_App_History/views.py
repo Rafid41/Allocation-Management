@@ -95,7 +95,7 @@ def history(request):
         items = results
     else:
         page = request.GET.get('page', 1)
-        paginator = Paginator(results, 30)
+        paginator = Paginator(results, 50)
         try:
             items = paginator.page(page)
         except PageNotAnInteger:
