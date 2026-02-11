@@ -234,6 +234,23 @@
         font-size: 16px;
         text-align: center;
     }
+    
+    /* STICKY HEADER STYLES */
+    .table-responsive {
+        max-height: 80vh; /* Adjust height as needed */
+        overflow-y: auto;
+        position: relative; /* Context for sticky */
+    }
+    
+    .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1020; /* High z-index to stay on top */
+        background-color: #212529; /* Match table-dark color */
+        color: white;
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* Optional shadow for separation */
+    }
+
     .date-cell button.update-btn { display: none; }
     .date-cell:hover button.update-btn { display: inline-block; }
 
@@ -249,6 +266,17 @@
             left: 0;
             top: 0;
             width: 100%;
+        }
+        /* Override sticky/scroll behavior for print so all rows show */
+        .table-responsive {
+            max-height: none !important;
+            overflow: visible !important;
+            height: auto !important;
+        }
+        /* Optional: remove sticky header on print if it causes issues, or keep it */
+        .table thead th {
+            position: static !important; 
+            box-shadow: none !important;
         }
     }
     /* Custom Pagination Styles */
@@ -357,13 +385,19 @@ const ALL_FILTER_OPTIONS = [
   { value: "pbs", text: "PBS", type: "text" },
   { value: "package", text: "Package", type: "text" },
   { value: "item", text: "Item", type: "text" },
-  { value: "warehouse", text: "Warehouse", type: "text" },
+  { value: "warehouse", text: "Warehouse", type: "warehouse_dropdown" },
   { value: "status", text: "Status", type: "status_dropdown" },
   { value: "cs_and_m_date", text: "CS&M Date", type: "date" },
   { value: "carry_from_warehouse_date", text: "Carry from Warehouse Date", type: "date" },
 ];
 
 const STATUS_CHOICES = JSON.parse('{{ status_choices_json|escapejs }}');
+const WAREHOUSE_CHOICES = [
+    {% for w in unique_warehouses %}
+        "{{ w|escapejs }}",
+    {% endfor %}
+];
+
 let filterRowCount = 0;
 const maxFilterRows = 9;
 let suppressAutoAdd = false;
@@ -417,6 +451,10 @@ function updateFilterRow(select) {
   } else if (opt && opt.type === "status_dropdown") {
     let opts = "";
     STATUS_CHOICES.forEach(c => { opts += `<option value="${c[0]}">${c[1]}</option>`; });
+    input.innerHTML = `<select name="filter_value_${idx}" class="form-select">${opts}</select>`;
+  } else if (opt && opt.type === "warehouse_dropdown") {
+    let opts = `<option value="">Select Warehouse</option>`;
+    WAREHOUSE_CHOICES.forEach(w => { opts += `<option value="${w}">${w}</option>`; });
     input.innerHTML = `<select name="filter_value_${idx}" class="form-select">${opts}</select>`;
   }
 

@@ -12,6 +12,12 @@ import json
 @login_required
 def history(request):
     results = History.objects.all().order_by('-created_at')
+
+    # Fetch unique warehouses for the dropdown
+    unique_warehouses = sorted(list(set(
+        History.objects.values_list('warehouse', flat=True).distinct()
+    )))
+
     applied_filters = []
 
     for i in range(1, 10):  # Supports up to 9 filters
@@ -94,7 +100,9 @@ def history(request):
         "can_edit_cs": group in ["Editor", "Only_View_History_and_Edit_CS&M_Column"],
         "can_edit_carry": group in ["Editor", "Only_View_History_and_Edit_Carry_From_Warehouse_Column"],
         "can_edit_comments": group in ["Editor"],
+        "can_edit_comments": group in ["Editor"],
         "is_print_view": print_view,
+        "unique_warehouses": unique_warehouses,
     }
 
     return render(request, "App_History/view_and_print_history.html", context)
