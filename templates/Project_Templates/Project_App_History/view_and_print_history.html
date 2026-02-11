@@ -299,12 +299,19 @@ const ALL_FILTER_OPTIONS = [
   { value: "pbs", text: "PBS", type: "text" },
   { value: "project", text: "Project", type: "text" },
   { value: "item", text: "Item", type: "text" },
-  { value: "warehouse", text: "Warehouse", type: "text" },
+  { value: "warehouse", text: "Warehouse", type: "warehouse_dropdown" },
   { value: "status", text: "Status", type: "status_dropdown" },
+  { value: "comments", text: "Comments", type: "text" },
   { value: "carry_from_warehouse_date", text: "Carry from Warehouse Date", type: "date" }
 ];
 
 const STATUS_CHOICES = JSON.parse('{{ status_choices_json|escapejs }}');
+const WAREHOUSE_CHOICES = [
+    {% for w in unique_warehouses %}
+        "{{ w|escapejs }}",
+    {% endfor %}
+];
+
 let filterRowCount = 0;
 const maxFilterRows = 9;
 let suppressAutoAdd = false;
@@ -357,6 +364,10 @@ function updateFilterRow(select) {
   } else if (opt && opt.type === "status_dropdown") {
     let opts = "";
     STATUS_CHOICES.forEach(c => { opts += `<option value="${c[0]}">${c[1]}</option>`; });
+    input.innerHTML = `<select name="filter_value_${idx}" class="form-select">${opts}</select>`;
+  } else if (opt && opt.type === "warehouse_dropdown") {
+    let opts = `<option value="">Select Warehouse</option>`;
+    WAREHOUSE_CHOICES.forEach(w => { opts += `<option value="${w}">${w}</option>`; });
     input.innerHTML = `<select name="filter_value_${idx}" class="form-select">${opts}</select>`;
   }
 
