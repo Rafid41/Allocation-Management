@@ -18,30 +18,15 @@
 <div class="container mt-4">
     <h2>Search Allocations</h2>
 
-    <form method="GET" action="{% url 'Project_App_Allocation:final_allocation' %}" class="row g-3">
-        <div class="col-md-4">
-            <input type="text" name="query" id="searchQuery" class="form-control" placeholder="Search..." value="{{ query }}">
+    <form method="GET" id="dynamicSearchForm" class="mb-4">
+        <div id="filterRowsContainer">
+            <!-- Initial filter row will be added here by JavaScript -->
         </div>
-
-        <div class="col-md-3">
-            <select name="filter_by" id="filterDropdown" class="form-select" onchange="toggleInputFields()">
-                <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
-                <option value="allocation_no" {% if filter_by == "allocation_no" %}selected{% endif %}>Allocation No</option>
-                <option value="pbs" {% if filter_by == "pbs" %}selected{% endif %}>PBS</option>
-                <option value="project" {% if filter_by == "project" %}selected{% endif %}>Project</option>
-                <option value="item" {% if filter_by == "item" %}selected{% endif %}>Item</option>
-                <option value="warehouse" {% if filter_by == "warehouse" %}selected{% endif %}>Warehouse</option>
-                <option value="Entry/Update date" {% if filter_by == "Entry/Update date" %}selected{% endif %}>Entry/Update Date</option>
-            </select>
-        </div>
-
-        <div class="col-md-3" id="datePickerContainer" style="display: none;">
-            <input type="date" name="date" id="dateInput" class="form-control" value="{{ date_filter }}">
-        </div>
-
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary me-3">Search</button>
-            <button type="button" class="btn btn-secondary" onclick="printResults()">Print</button>
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary me-2">Search</button>
+                <button type="button" class="btn btn-secondary me-2" onclick="printResults()">Print</button>
+            </div>
         </div>
     </form>
 
@@ -78,7 +63,7 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="8" class="text-center text-danger">No matching data found</td>
+                        <td colspan="7" class="text-center text-danger">No matching data found</td>
                     </tr>
                 {% endif %}
             </tbody>
@@ -119,20 +104,14 @@
 
     /* Hide unnecessary elements when printing */
     @media print {
-        body * {
-            visibility: hidden;
-        }
-        #printableArea, #printableArea * {
-            visibility: visible;
-        }
+        body * { visibility: hidden; }
+        #printableArea, #printableArea * { visibility: visible; }
         #printableArea {
             position: absolute;
             left: 0;
             top: 0;
             width: 100%;
         }
-
-        /* Add margins to the printed page */
         @page {
             size: A4;
             margin: 0.5in;
@@ -141,22 +120,182 @@
 </style>
 
 <script>
-    function toggleInputFields() {
-        var filterDropdown = document.getElementById("filterDropdown");
-        var searchQuery = document.getElementById("searchQuery");
-        var datePickerContainer = document.getElementById("datePickerContainer");
+    const ALL_FILTER_OPTIONS = [
+      { value: "no_condition", text: "No Condition", type: "none" },
+      { value: "allocation_no", text: "Allocation No", type: "text" },
+      { value: "pbs", text: "PBS", type: "text" },
+      { value: "project", text: "Project", type: "text" },
+      { value: "item", text: "Item", type: "text" },
+      { value: "warehouse", text: "Warehouse", type: "warehouse_dropdown" },
+    ];
 
-        if (filterDropdown.value === "Entry/Update date") {
-            searchQuery.style.display = "none";
-            datePickerContainer.style.display = "block";
-        } else {
-            searchQuery.style.display = "block";
-            datePickerContainer.style.display = "none";
-        }
+    // Build Warehouse Choices from Django context
+    const WAREHOUSE_CHOICES = [
+        {% for w in unique_warehouses %}
+            "{{ w|escapejs }}",
+        {% endfor %}
+    ];
+
+    let filterRowCount = 0;
+    const maxFilterRows = 9;
+    let suppressAutoAdd = false;
+    let lastRowManuallyCreated = false;
+
+    function getSelectedFilterValues() {
+      const selected = [];
+      document.querySelectorAll('.filter-select').forEach(sel => {
+        if (sel.value !== "no_condition") selected.push(sel.value);
+      });
+      return selected;
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        toggleInputFields();
+    function updateAvailableFilters() {
+      const selected = getSelectedFilterValues();
+      document.querySelectorAll('.filter-select').forEach(sel => {
+        const curVal = sel.value;
+        sel.innerHTML = "";
+        ALL_FILTER_OPTIONS.forEach(opt => {
+          if (opt.value === "no_condition" || opt.value === curVal || !selected.includes(opt.value)) {
+            const o = document.createElement("option");
+            o.value = opt.value;
+            o.textContent = opt.text;
+            sel.appendChild(o);
+          }
+        });
+        sel.value = curVal;
+      });
+    }
+
+    function updateFilterRow(select) {
+      const row = select.closest(".filter-row");
+      const type = select.value;
+      const input = row.querySelector(".input-container");
+      input.innerHTML = "";
+      const opt = ALL_FILTER_OPTIONS.find(o => o.value === type);
+      const idx = row.dataset.filterIndex;
+
+      if (opt && opt.type === "text") {
+        input.innerHTML = `<input type="text" name="filter_value_${idx}" class="form-control" placeholder="${opt.text}">`;
+      } else if (opt && opt.type === "warehouse_dropdown") {
+        let opts = `<option value="">Select Warehouse</option>`;
+        WAREHOUSE_CHOICES.forEach(w => { opts += `<option value="${w}">${w}</option>`; });
+        input.innerHTML = `<select name="filter_value_${idx}" class="form-select">${opts}</select>`;
+      }
+
+      updateAvailableFilters();
+
+      const lastRow = document.querySelector(".filter-row:last-child");
+      const prevVal = select.dataset.prevValue ?? "no_condition";
+
+      if (
+        !suppressAutoAdd &&
+        lastRow === row &&
+        type !== "no_condition" &&
+        prevVal === "no_condition" &&
+        filterRowCount < maxFilterRows
+      ) {
+        addFilterRow();
+      }
+
+      select.dataset.prevValue = type;
+      updateAddRemoveButtonVisibility();
+    }
+
+    function addFilterRow(initial = "no_condition", val = "") {
+      if (filterRowCount >= maxFilterRows) return;
+      filterRowCount++;
+      const idx = filterRowCount;
+      const cont = document.getElementById("filterRowsContainer");
+
+      const row = document.createElement("div");
+      row.classList.add("row", "g-3", "mb-3", "filter-row");
+      row.dataset.filterIndex = idx;
+      row.innerHTML = `
+        <div class="col-md-4">
+          <select name="filter_type_${idx}" class="form-select filter-select"></select>
+        </div>
+        <div class="col-md-6 input-container"></div>
+        <div class="col-md-2 d-flex justify-content-end">
+          <button type="button" class="btn btn-danger remove-filter-row me-1" onclick="removeFilterRow(this)">
+            <i class="fa fa-times"></i>
+          </button>
+          <button type="button" class="btn btn-info add-filter-row-btn" style="display:none;">
+            <i class="fa fa-plus"></i> Add
+          </button>
+        </div>
+      `;
+      cont.appendChild(row);
+
+      const select = row.querySelector(".filter-select");
+      updateAvailableFilters();
+      select.value = initial;
+      select.addEventListener("focus", () => select.dataset.prevValue = select.value);
+      select.addEventListener("pointerdown", () => select.dataset.prevValue = select.value);
+      select.addEventListener("change", () => updateFilterRow(select));
+      updateFilterRow(select);
+
+      if (val) {
+        const input = row.querySelector(`[name="filter_value_${idx}"]`);
+        if (input) input.value = val;
+      }
+
+      row.querySelector(".add-filter-row-btn").addEventListener("click", () => addFilterRow());
+      updateAddRemoveButtonVisibility();
+    }
+
+    function removeFilterRow(btn) {
+      const row = btn.closest(".filter-row");
+      const all = Array.from(document.querySelectorAll(".filter-row"));
+      const isLast = all.length && all[all.length - 1] === row;
+      row.remove();
+      filterRowCount = document.querySelectorAll(".filter-row").length;
+
+      lastRowManuallyCreated = isLast;
+      updateAvailableFilters();
+      updateAddRemoveButtonVisibility();
+    }
+
+    function updateAddRemoveButtonVisibility() {
+      const rows = document.querySelectorAll(".filter-row");
+      rows.forEach((row, i) => {
+        const rm = row.querySelector(".remove-filter-row");
+        const add = row.querySelector(".add-filter-row-btn");
+        const sel = row.querySelector(".filter-select");
+
+        rm.style.display = (rows.length > 1) ? "inline-block" : "none";
+        add.style.display = "none";
+
+        if (i === rows.length - 1) {
+          if (lastRowManuallyCreated) {
+            add.style.display = (filterRowCount < maxFilterRows) ? "inline-block" : "none";
+          } else if (sel.value === "no_condition" && filterRowCount < maxFilterRows) {
+            add.style.display = "inline-block";
+          }
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      suppressAutoAdd = true;
+      const urlParams = new URLSearchParams(window.location.search);
+      const existing = [];
+      for (let i = 1; i <= maxFilterRows; i++) {
+        const ft = urlParams.get(`filter_type_${i}`);
+        const fv = urlParams.get(`filter_value_${i}`);
+        if (ft && ft !== "no_condition") existing.push({ type: ft, value: fv || "" });
+      }
+
+      if (existing.length) {
+        existing.forEach(f => addFilterRow(f.type, f.value));
+        if (filterRowCount < maxFilterRows) addFilterRow();
+      } else {
+        addFilterRow();
+      }
+
+      document.querySelectorAll(".filter-select").forEach(sel => sel.dataset.prevValue = sel.value);
+      suppressAutoAdd = false;
+      updateAddRemoveButtonVisibility();
+      updateAvailableFilters();
     });
 
     function printResults() {
