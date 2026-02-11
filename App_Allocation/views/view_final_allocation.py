@@ -9,41 +9,40 @@ from App_Allocation.models import Temporary_Allocation
 from django.db.models import Q
 
 def final_allocation_search(request):
-    query = request.GET.get("query", "")
-    filter_by = request.GET.get("filter_by", "All")
-    date_filter = request.GET.get("date", "")
-
     results = Temporary_Allocation.objects.all().order_by('-created_at')
 
-    if query:
-        if filter_by == "All":
-            # search across all relevant fields with exact (case-insensitive) match
-            results = results.filter(
-                Q(allocation_no__allocation_no__iexact=query)
-                | Q(pbs__name__iexact=query)
-                | Q(package__packageId__iexact=query)
-                | Q(item__name__iexact=query)
-                | Q(warehouse__iexact=query)
-            )
-        elif filter_by == "allocation_no":
-            results = results.filter(allocation_no__allocation_no__iexact=query)
-        elif filter_by == "pbs":
-            results = results.filter(pbs__name__iexact=query)
-        elif filter_by == "package":
-            results = results.filter(package__packageId__iexact=query)
-        elif filter_by == "item":
-            results = results.filter(item__name__iexact=query)
-        elif filter_by == "warehouse":
-            results = results.filter(warehouse__iexact=query)
+    # Fetch unique warehouses for the dropdown
+    unique_warehouses = sorted(list(set(
+        Temporary_Allocation.objects.values_list('warehouse', flat=True).distinct()
+    )))
 
-    if date_filter:
-        results = results.filter(created_at__date=date_filter)
+    # Apply Dynamic Filters
+    for i in range(1, 10):  # Supports up to 9 filters
+        filter_type = request.GET.get(f"filter_type_{i}")
+        filter_value = request.GET.get(f"filter_value_{i}")
+        
+        if filter_value:
+            filter_value = filter_value.strip()
+
+        # Skip empty or no-condition filters
+        if not filter_type or filter_type == "no_condition" or not filter_value:
+            continue
+        
+        # Apply filters based on type
+        if filter_type == "allocation_no":
+            results = results.filter(allocation_no__allocation_no__iexact=filter_value)
+        elif filter_type == "pbs":
+            results = results.filter(pbs__name__iexact=filter_value)
+        elif filter_type == "package":
+            results = results.filter(package__packageId__iexact=filter_value)
+        elif filter_type == "item":
+            results = results.filter(item__name__iexact=filter_value)
+        elif filter_type == "warehouse":
+            results = results.filter(warehouse__iexact=filter_value)
 
     context = {
         "items": results,
-        "query": query,
-        "filter_by": filter_by,
-        "date_filter": date_filter,
+        "unique_warehouses": unique_warehouses,
     }
 
     return render(request, "App_Allocation/view_print_Final_Allocation.html", context)
