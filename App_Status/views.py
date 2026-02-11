@@ -8,6 +8,11 @@ def status_page(request):
     """Renders the package and item entry page with dynamic search functionality"""
     
     all_items = Item.objects.all()
+
+    # Fetch unique warehouses for the dropdown
+    unique_warehouses = sorted(list(set(
+        Item.objects.values_list('warehouse', flat=True).distinct()
+    )))
     
     # Store active filters and queries to pass back to the template
     active_filters = {}
@@ -72,6 +77,7 @@ def status_page(request):
     context = {
         "items": items,
         "unique_units": all_possible_units, # Pass the choices from the model
+        "unique_warehouses": unique_warehouses,
         "is_print_view": print_view,
     }
     context.update(active_filters) # Add active filters back to context for template

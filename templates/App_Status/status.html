@@ -269,8 +269,8 @@
             case "No Condition": return { hasInput: false };
             case "Package ID": return { hasInput: true, inputType: "text" };
             case "Item Name": return { hasInput: true, inputType: "text" };
-            case "Warehouse": return { hasInput: true, inputType: "text" };
-            case "Unit": return { hasInput: true, inputType: "select" }; // Changed to 'select'
+            case "Warehouse": return { hasInput: true, inputType: "select" }; // Changed to 'select'
+            case "Unit": return { hasInput: true, inputType: "select" };
             case "Entry/Update date": return { hasInput: true, inputType: "date" };
             default: return { hasInput: false };
         }
@@ -287,14 +287,26 @@
         rowDiv.className = "row g-3 mb-2 align-items-center";
         rowDiv.id = rowId;
 
-        const inputFieldHtml = (initialFilterBy === "Unit") ?
-            `<select name="query_${index}" id="searchQuery_${index}" class="form-select search-query">
+        // Determine initial input field HTML
+        let inputFieldHtml = '';
+        if (initialFilterBy === "Unit") {
+            inputFieldHtml = `<select name="query_${index}" id="searchQuery_${index}" class="form-select search-query">
                 <option value="">Select Unit</option>
                 {% for unit in unique_units %}
-                    <option value="{{ unit }}" {% if unit == initialQuery %}selected{% endif %}>{{ unit }}</option>
+                    <option value="{{ unit }}">{{ unit }}</option>
                 {% endfor %}
-            </select>` :
-            `<input type="text" name="query_${index}" id="searchQuery_${index}" class="form-control search-query" placeholder="Search..." value="${initialQuery}">`;
+            </select>`;
+        } else if (initialFilterBy === "Warehouse") {
+            inputFieldHtml = `<select name="query_${index}" id="searchQuery_${index}" class="form-select search-query">
+                <option value="">Select Warehouse</option>
+                {% for w in unique_warehouses %}
+                    <option value="{{ w }}">{{ w }}</option>
+                {% endfor %}
+            </select>`;
+        } else {
+             inputFieldHtml = `<input type="text" name="query_${index}" id="searchQuery_${index}" class="form-control search-query" placeholder="Search..." value="${initialQuery}">`;
+        }
+
 
         rowDiv.innerHTML = `
             <div class="col-md-5">
@@ -330,12 +342,19 @@
 
         // Set initial selected value
         dropdown.value = initialFilterBy;
+        
+        // FIX: Manually set the value for select inputs (Unit/Warehouse) because Django template tags 
+        // cannot access the 'initialQuery' JS variable during server-side rendering.
+        if ((initialFilterBy === "Unit" || initialFilterBy === "Warehouse") && initialQuery) {
+            inputField.value = initialQuery;
+        }
 
         // Handle initial input field visibility and type
         const selectedOptionProps = getFilterOptionProperties(initialFilterBy);
         if (selectedOptionProps.hasInput) {
             inputField.style.display = "block";
-            if (selectedOptionProps.inputType !== "select") { // Only set type if not a select
+            // For selects (Unit, Warehouse), we construct HTML directly, so no need to set type property here
+            if (selectedOptionProps.inputType !== "select") {
                 inputField.type = selectedOptionProps.inputType;
             }
         } else {
@@ -357,6 +376,13 @@
                         <option value="{{ unit }}">{{ unit }}</option>
                     {% endfor %}
                 </select>`;
+            } else if (this.value === "Warehouse") {
+                newInputFieldHtml = `<select name="query_${index}" id="searchQuery_${index}" class="form-select search-query">
+                    <option value="">Select Warehouse</option>
+                    {% for w in unique_warehouses %}
+                        <option value="{{ w }}">{{ w }}</option>
+                    {% endfor %}
+                </select>`;
             } else if (selectedOptionProps.hasInput) {
                 newInputFieldHtml = `<input type="${selectedOptionProps.inputType}" name="query_${index}" id="searchQuery_${index}" class="form-control search-query" placeholder="Search..." value="${previousValue}">`;
             } else {
@@ -371,15 +397,19 @@
             } else {
                 updatedInputField.style.display = "none";
             }
-            // Restore previous value if applicable and handle selection for unit dropdown
-            if (this.value === "Unit" && previousValue) {
+           
+            // Restore previous value if applicable (and if it matches an option for selects)
+            if ((this.value === "Unit" || this.value === "Warehouse") && previousValue) {
                 const trimmedPreviousValue = previousValue.trim();
+                let found = false;
                 for (let i = 0; i < updatedInputField.options.length; i++) {
                     if (updatedInputField.options[i].value === trimmedPreviousValue) {
                         updatedInputField.options[i].selected = true;
+                        found = true;
                         break;
                     }
                 }
+                // If previous value wasn't found in options (e.g. switched from text to select), it defaults to first option
             } else {
                 updatedInputField.value = previousValue; // Restore previous value for other input types
             }
