@@ -58,6 +58,31 @@ def add_item_to_package(request):
     packages = Package.objects.all().order_by("packageId")
     items = Item.objects.all().order_by("package__packageId")
 
+    # Fetch unique warehouses for the dropdown
+    unique_warehouses = sorted(list(set(
+        Item.objects.values_list('warehouse', flat=True).distinct()
+    )))
+
+    # Apply Dynamic Filters
+    for i in range(1, 10):  # Supports up to 9 filters
+        filter_type = request.GET.get(f"filter_type_{i}")
+        filter_value = request.GET.get(f"filter_value_{i}")
+
+        if filter_value:
+            filter_value = filter_value.strip()
+
+        # Skip empty or no-condition filters
+        if not filter_type or filter_type == "no_condition" or not filter_value:
+            continue
+
+        # Apply filters based on type
+        if filter_type == "package":
+            items = items.filter(package__packageId__iexact=filter_value)
+        elif filter_type == "item":
+            items = items.filter(name__iexact=filter_value)
+        elif filter_type == "warehouse":
+            items = items.filter(warehouse__iexact=filter_value)
+
     UNIT_CHOICES =  [choice[0] for choice in Item.UNIT_CHOICES]
 
     if request.method == "POST":
@@ -122,7 +147,12 @@ def add_item_to_package(request):
     return render(
         request,
         "App_Entry/Add_item_to_package.html",
-        {"packages": packages, "items": items, "unit_choices": UNIT_CHOICES},
+        {
+            "packages": packages,
+            "items": items,
+            "unit_choices": UNIT_CHOICES,
+            "unique_warehouses": unique_warehouses,
+        },
     )
 
 @login_required
