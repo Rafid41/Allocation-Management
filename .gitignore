@@ -3,3 +3,11 @@ zz.instructions.txt
 z.instructions.txt
 z.error.txt
 z.saved_ins.txt
+db.sqlite3
+
+
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
