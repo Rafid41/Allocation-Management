@@ -85,8 +85,15 @@ def history(request):
     if print_view:
         items = results
     else:
+        # Fetch dynamic pagination limit
+        from App_Admin_Panel.models import PaginationManager
+        try:
+            limit = PaginationManager.load().table_pagination_limit
+        except:
+            limit = 50 # Fallback
+
         page = request.GET.get('page', 1)
-        paginator = Paginator(results, 50)
+        paginator = Paginator(results, limit)
         try:
             items = paginator.page(page)
         except PageNotAnInteger:

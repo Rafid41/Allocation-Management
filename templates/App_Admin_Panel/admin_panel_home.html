@@ -20,14 +20,19 @@
     </div>
 
     <div class="row justify-content-center">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-6 mb-3">
             <a href="{% url 'App_Admin_Panel:add_new_user' %}" class="btn btn-primary btn-lg btn-block">
                 <i class="fas fa-user-plus"></i> Add New User
             </a>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-6 mb-3">
             <a href="{% url 'App_Admin_Panel:change_user_group' %}" class="btn btn-secondary btn-lg btn-block">
                 <i class="fas fa-user-cog"></i> Change User Group
+            </a>
+        </div>
+        <div class="col-md-6 mb-3">
+            <a href="{% url 'App_Admin_Panel:manage_pagination' %}" class="btn btn-success btn-lg btn-block">
+                <i class="fas fa-list-ol"></i> Set Table Row in Page
             </a>
         </div>
     </div>
