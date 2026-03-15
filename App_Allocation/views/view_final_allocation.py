@@ -40,9 +40,35 @@ def final_allocation_search(request):
         elif filter_type == "warehouse":
             results = results.filter(warehouse__iexact=filter_value)
 
+    
+    # Pagination
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+        
+    print_view = request.GET.get("print_view") == "true"
+    
+    if print_view:
+        items = results
+    else:
+        # Fetch dynamic pagination limit
+        from App_Admin_Panel.models import PaginationManager
+        try:
+            limit = PaginationManager.load().table_pagination_limit
+        except:
+            limit = 50 # Fallback
+
+        page = request.GET.get('page', 1)
+        paginator = Paginator(results, limit)
+        try:
+            items = paginator.page(page)
+        except PageNotAnInteger:
+            items = paginator.page(1)
+        except EmptyPage:
+            items = paginator.page(paginator.num_pages)
+
     context = {
-        "items": results,
+        "items": items,
         "unique_warehouses": unique_warehouses,
+        "is_print_view": print_view,
     }
 
     return render(request, "App_Allocation/view_print_Final_Allocation.html", context)
