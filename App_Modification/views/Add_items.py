@@ -119,6 +119,25 @@ def add_item(request, allocation_id, item_id):
         allocation_no=allocation_no_obj
     ).order_by("-created_at")
 
+    # Pagination Logic
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    from App_Admin_Panel.models import PaginationManager
+    
+    try:
+        limit = PaginationManager.load().table_pagination_limit
+    except:
+        limit = 50
+        
+    page = request.GET.get('page', 1)
+    paginator = Paginator(allocations, limit)
+    
+    try:
+        allocations_paginated = paginator.page(page)
+    except PageNotAnInteger:
+        allocations_paginated = paginator.page(1)
+    except EmptyPage:
+        allocations_paginated = paginator.page(paginator.num_pages)
+
     return render(
         request,
         "App_Modification/add_item.html",
@@ -127,6 +146,6 @@ def add_item(request, allocation_id, item_id):
             "item": item,
             "allocation_no_obj": allocation_no_obj,
             "pbss": pbss,
-            "allocations": allocations,
+            "allocations": allocations_paginated,
         },
     )

@@ -42,11 +42,30 @@ def view_final_allocation(request, allocation_id):
     # Get distinct warehouses for dropdown
     warehouses = list(Final_Allocation.objects.values_list('warehouse', flat=True).distinct())
     
+    # Pagination Logic
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    from App_Admin_Panel.models import PaginationManager
+    
+    try:
+        limit = PaginationManager.load().table_pagination_limit
+    except:
+        limit = 50
+        
+    page = request.GET.get('page', 1)
+    paginator = Paginator(allocations, limit)
+    
+    try:
+        allocations_paginated = paginator.page(page)
+    except PageNotAnInteger:
+        allocations_paginated = paginator.page(1)
+    except EmptyPage:
+        allocations_paginated = paginator.page(paginator.num_pages)
+
     return render(
         request,
         "App_Modification/view_and_delete_Item.html",
         {
-            "allocations": allocations,
+            "allocations": allocations_paginated,
             "allocation_no_obj": allocation_no_obj,
             "warehouse_json": json.dumps(warehouses),
         },

@@ -144,12 +144,31 @@ def add_item_to_package(request):
 
         return redirect("App_Entry:add_item_to_package")
 
+    # Pagination Logic
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    from App_Admin_Panel.models import PaginationManager
+    
+    try:
+        limit = PaginationManager.load().table_pagination_limit
+    except:
+        limit = 50
+        
+    page = request.GET.get('page', 1)
+    paginator = Paginator(items, limit)
+    
+    try:
+        items_paginated = paginator.page(page)
+    except PageNotAnInteger:
+        items_paginated = paginator.page(1)
+    except EmptyPage:
+        items_paginated = paginator.page(paginator.num_pages)
+
     return render(
         request,
         "App_Entry/Add_item_to_package.html",
         {
             "packages": packages,
-            "items": items,
+            "items": items_paginated,
             "unit_choices": UNIT_CHOICES,
             "unique_warehouses": unique_warehouses,
         },
