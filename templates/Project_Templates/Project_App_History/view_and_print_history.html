@@ -207,6 +207,32 @@
             top: 0;
             width: 100%;
         }
+        /* Override sticky/scroll behavior for print so all rows show */
+        .table-responsive {
+            max-height: none !important;
+            overflow: visible !important;
+            height: auto !important;
+        }
+        .table thead th {
+            position: static !important; 
+            box-shadow: none !important;
+        }
+    }
+
+    /* STICKY HEADER STYLES */
+    .table-responsive {
+        max-height: 80vh; /* Adjust height as needed */
+        overflow-y: auto;
+        position: relative; /* Context for sticky */
+    }
+    
+    .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1020; /* High z-index to stay on top */
+        background-color: #212529; /* Match table-dark color */
+        color: white;
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* Optional shadow for separation */
     }
 
     /* Custom Deeper Colors */
