@@ -93,7 +93,7 @@
     <h3 class="text-center text-secondary"><b>Temporary Allocated Items</b></h3>
     <div class="table-responsive"> 
         <table class="table table-bordered table-striped">
-            <thead class="table-dark">
+            <thead class="table-dark sticky-top">
                 <tr>
                     <th>PBS</th>
                     <th>Item Name</th>
@@ -296,6 +296,22 @@
             cursor: not-allowed;
             box-shadow: none;
             transform: none;
+        }
+
+        /* STICKY HEADER STYLES */
+        .table-responsive {
+            max-height: 80vh; /* Match history page screen height */
+            overflow-y: auto;
+            position: relative; /* Context for sticky */
+        }
+        
+        .table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1020; /* High z-index to stay on top */
+            background-color: #212529; /* Match table-dark color */
+            color: white !important;
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* Optional shadow for separation */
         }
 
         /* Ensure delete button is fully visible */

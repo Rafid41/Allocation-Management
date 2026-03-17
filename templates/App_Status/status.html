@@ -125,8 +125,24 @@
 
     /* Make table header stand out */
     .table-dark th {
-        background-color: #343a40 !important;
+        background-color: #212529 !important;
         color: white !important;
+    }
+
+    /* STICKY HEADER STYLES */
+    .table-responsive {
+        max-height: 80vh; /* Match history page screen height */
+        overflow-y: auto;
+        position: relative; /* Context for sticky */
+    }
+    
+    .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1020; /* High z-index to stay on top */
+        background-color: #212529; /* Match table-dark color */
+        color: white !important;
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* Optional shadow for separation */
     }
 
     /* Improve spacing and border visibility */
@@ -229,6 +245,17 @@
             left: 0;
             top: 0;
             width: 100%;
+        }
+
+        /* Override sticky/scroll behavior for print so all rows show */
+        .table-responsive {
+            max-height: none !important;
+            overflow: visible !important;
+            height: auto !important;
+        }
+        .table thead th {
+            position: static !important;
+            box-shadow: none !important;
         }
 
         /* Add margins to the printed page */

@@ -293,8 +293,9 @@
             window.location.search = p.toString();
         }
     </script>
+    <div class="table-responsive">
     <table class="table table-hover table-bordered table-striped mt-3">
-        <thead class="table-dark">
+        <thead class="table-dark sticky-top">
             <tr class="text-center">
                 <th>Package ID</th>
                 <th>Item Name</th>
@@ -352,6 +353,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 
     <!-- Modern Pagination Controls (Matched to History Page) -->
     {% if items.has_other_pages %}
@@ -491,6 +493,22 @@
     }
     .action-cell:hover .action-buttons {
         opacity: 1;
+    }
+
+    /* STICKY HEADER STYLES */
+    .table-responsive {
+        max-height: 80vh; /* Match history page screen height */
+        overflow-y: auto;
+        position: relative; /* Context for sticky */
+    }
+    
+    .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1020; /* High z-index to stay on top */
+        background-color: #212529; /* Match table-dark color */
+        color: white !important;
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4); /* Optional shadow for separation */
     }
 
     .custom-close {
