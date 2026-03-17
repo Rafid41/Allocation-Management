@@ -16,6 +16,9 @@ def entry_page(request):
 from django.urls import reverse_lazy
 
 
+from django.core.paginator import Paginator
+from App_Admin_Panel.models import PaginationManager
+
 ##################################  view package and add new Package #################################
 def view_package_and_addNew(request):
     """Handles both displaying the package list and adding a new package."""
@@ -37,13 +40,23 @@ def view_package_and_addNew(request):
             messages.error(request, "Package ID cannot be empty.")
 
     # Fetch all packages with their items and sort by packageId, item name, and warehouse
-    packages = Package.objects.all().order_by("packageId")
+    all_packages = Package.objects.all().order_by("packageId")
     items = Item.objects.select_related("package").order_by("package__packageId", "name", "warehouse")
+
+    # Pagination Logic
+    try:
+        limit = PaginationManager.load().table_pagination_limit
+    except:
+        limit = 50
+
+    page_number = request.GET.get('page')
+    paginator = Paginator(all_packages, limit)
+    packages_paginated = paginator.get_page(page_number)
 
     return render(
         request,
         "App_Entry/view_package_and_addNew.html",
-        {"current_package_list": packages, "items": items},
+        {"current_package_list": packages_paginated, "items": items},
     )
 
 

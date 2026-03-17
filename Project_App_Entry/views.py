@@ -17,6 +17,9 @@ def entry_page(request):
 
 
 
+from django.core.paginator import Paginator
+from App_Admin_Panel.models import PaginationManager
+
 ##################################  view project and add new Project #################################
 def view_project_and_addNew(request):
     """Handles both displaying the project list and adding a new project."""
@@ -38,13 +41,23 @@ def view_project_and_addNew(request):
             messages.error(request, "Project ID cannot be empty.")
 
     # Fetch all projects with their items and sort by projectId, item name, and warehouse
-    projects = Project.objects.all().order_by("projectId")
+    all_projects = Project.objects.all().order_by("projectId")
     items = Project_Item.objects.select_related("project").order_by("project__projectId", "name", "warehouse")
+
+    # Pagination Logic
+    try:
+        limit = PaginationManager.load().table_pagination_limit
+    except:
+        limit = 50
+
+    page_number = request.GET.get('page')
+    paginator = Paginator(all_projects, limit)
+    projects_paginated = paginator.get_page(page_number)
 
     return render(
         request,
         "Project_Templates/Project_App_Entry/view_project_and_addNew.html",
-        {"current_project_list": projects, "items": items},
+        {"current_project_list": projects_paginated, "items": items},
     )
 
 

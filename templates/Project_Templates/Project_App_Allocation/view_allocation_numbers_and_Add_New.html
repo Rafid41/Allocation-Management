@@ -105,20 +105,80 @@
             {% endfor %}
         {% endif %}
 
-        <!-- Allocation Numbers List -->
+        <!-- Allocation Numbers Table -->
         <h5 class="fw-bold mb-2"><i class="fa fa-list"></i> Existing Allocation Numbers</h5>
-        <div class="list-container mb-4">
-            {% for allocation in allocation_numbers %}
-                <div class="list-item">
-                    <span><i class="fa fa-hashtag"></i> {{ allocation.allocation_no }}</span>
-                    <span class="badge-user" style="background-color:#007bff; color:white; padding:5px 10px; border-radius:5px;">
-                        <i class="fa fa-user" style="color: white;"></i> {{ allocation.user.username }}
-                    </span>
-                </div>
-            {% empty %}
-                <p class="text-center text-muted mb-0">No Allocation Numbers available.</p>
-            {% endfor %}
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark sticky-top">
+                    <tr>
+                        <th class="text-center"><i class="fa fa-hashtag"></i> Allocation Number</th>
+                        <th class="text-center"><i class="fa fa-user"></i> Created By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for allocation in allocation_numbers %}
+                        <tr>
+                            <td class="fw-bold text-center">{{ allocation.allocation_no }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-primary">
+                                    <i class="fa fa-user"></i> {{ allocation.user.username }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">No Allocation Numbers available.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+
+        <!-- Modern Pagination Controls (Matched to History Page) -->
+        {% if allocation_numbers.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4 mb-4">
+          <ul class="pagination justify-content-center custom-pagination">
+            
+            <!-- First Page -->
+            <li class="page-item {% if not allocation_numbers.has_previous %}disabled{% endif %}">
+              <a class="page-link btn-nav btn-first-last" href="#" onclick="goToPage(1); return false;" aria-label="First">
+                <i class="fa fa-angle-double-left"></i> First
+              </a>
+            </li>
+
+            <!-- Previous Page -->
+            <li class="page-item {% if not allocation_numbers.has_previous %}disabled{% endif %}">
+              <a class="page-link btn-nav btn-prev-next" href="#" onclick="{% if allocation_numbers.has_previous %}goToPage({{ allocation_numbers.previous_page_number }});{% endif %} return false;" aria-label="Previous">
+                <i class="fa fa-angle-left"></i> Prev
+              </a>
+            </li>
+
+            <!-- Page Numbers -->
+            {% for i in allocation_numbers.paginator.page_range %}
+              {% if i > allocation_numbers.number|add:'-4' and i < allocation_numbers.number|add:'4' %}
+                <li class="page-item {% if allocation_numbers.number == i %}active{% endif %}">
+                  <a class="page-link" href="#" onclick="goToPage({{ i }}); return false;">{{ i }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+
+            <!-- Next Page -->
+            <li class="page-item {% if not allocation_numbers.has_next %}disabled{% endif %}">
+              <a class="page-link btn-nav btn-prev-next" href="#" onclick="{% if allocation_numbers.has_next %}goToPage({{ allocation_numbers.next_page_number }});{% endif %} return false;" aria-label="Next">
+                 Next <i class="fa fa-angle-right"></i>
+              </a>
+            </li>
+
+            <!-- Last Page -->
+            <li class="page-item {% if not allocation_numbers.has_next %}disabled{% endif %}">
+               <a class="page-link btn-nav btn-first-last" href="#" onclick="goToPage({{ allocation_numbers.paginator.num_pages }}); return false;" aria-label="Last">
+                Last <i class="fa fa-angle-double-right"></i>
+              </a>
+            </li>
+
+          </ul>
+        </nav>
+        {% endif %}
 
         <!-- Add New Allocation Form -->
         <form method="post" class="mt-3">
@@ -134,5 +194,106 @@
 
     </div>
 </div>
+
+<script>
+    function goToPage(pageNumber) {
+        const p = new URLSearchParams(window.location.search);
+        p.set('page', pageNumber);
+        window.location.search = p.toString();
+    }
+</script>
+
+<style>
+    /* STICKY HEADER STYLES */
+    .table-responsive {
+        max-height: 400px; /* Reduced for this specific small list */
+        overflow-y: auto;
+        position: relative;
+    }
+    
+    .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        background-color: #212529;
+        color: white !important;
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Custom Pagination Styles */
+    .custom-pagination {
+        background: #ffffff;
+        padding: 10px 20px;
+        border-radius: 50px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        align-items: center;
+        list-style: none;
+        display: flex;
+    }
+    .custom-pagination .page-item {
+        margin: 0 3px;
+    }
+    .custom-pagination .page-link {
+        border: none;
+        border-radius: 50px;
+        min-width: 40px;
+        height: 40px;
+        line-height: 40px;
+        text-align: center;
+        padding: 0 10px;
+        color: #555;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+        text-decoration: none;
+    }
+    .custom-pagination .page-link:hover {
+        background-color: #f0f0f0;
+        color: #333;
+        transform: translateY(-2px);
+    }
+    
+    .custom-pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 10px rgba(118, 75, 162, 0.4);
+        transform: scale(1.1);
+        min-width: 40px;
+    }
+
+    .custom-pagination .btn-nav {
+        padding: 0 15px;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .custom-pagination .btn-prev-next {
+        background-color: #e0f2fe;
+        color: #0284c7;
+    }
+    .custom-pagination .btn-prev-next:hover {
+        background-color: #0ea5e9;
+        color: white;
+    }
+
+    .custom-pagination .btn-first-last {
+        background-color: #ffe4e6;
+        color: #e11d48;
+        font-weight: 700;
+    }
+    .custom-pagination .btn-first-last:hover {
+        background-color: #f43f5e;
+        color: white;
+    }
+
+    .custom-pagination .page-item.disabled .page-link {
+        color: #ccc;
+        background-color: transparent !important;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+</style>
 
 {% endblock %}

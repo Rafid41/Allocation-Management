@@ -6,6 +6,8 @@ from django.urls import reverse
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect
+from django.core.paginator import Paginator
+from App_Admin_Panel.models import PaginationManager
 
 
 @login_required
@@ -35,7 +37,17 @@ def view_allocation_numbers_and_Add_New(request):
                 )
 
     # Fetch all allocation numbers to display
-    allocation_numbers = Allocation_Number.objects.all().order_by("-allocation_no")
+    all_allocation_numbers = Allocation_Number.objects.all().order_by("-allocation_no")
+
+    # Pagination Logic
+    try:
+        limit = PaginationManager.load().table_pagination_limit
+    except:
+        limit = 50
+
+    page_number = request.GET.get('page')
+    paginator = Paginator(all_allocation_numbers, limit)
+    allocation_numbers = paginator.get_page(page_number)
 
     return render(
         request,
