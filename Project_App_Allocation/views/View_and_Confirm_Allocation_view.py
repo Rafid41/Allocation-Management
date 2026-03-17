@@ -9,13 +9,32 @@ import uuid
 
 def view_confirm_allocation(request, allocation_id):
     allocation_no_obj = get_object_or_404(Allocation_Number, id=allocation_id)
-    allocations = Temporary_Allocation.objects.filter(allocation_no=allocation_no_obj)
+    allocations = Temporary_Allocation.objects.filter(allocation_no=allocation_no_obj).order_by("-created_at")
+
+    # Pagination Logic
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    from App_Admin_Panel.models import PaginationManager
+
+    try:
+        limit = PaginationManager.load().table_pagination_limit
+    except:
+        limit = 50
+
+    page = request.GET.get('page', 1)
+    paginator = Paginator(allocations, limit)
+
+    try:
+        allocations_paginated = paginator.page(page)
+    except PageNotAnInteger:
+        allocations_paginated = paginator.page(1)
+    except EmptyPage:
+        allocations_paginated = paginator.page(paginator.num_pages)
 
     return render(
         request,
         "Project_Templates/Project_App_Allocation/view_and_confirm_allocation.html",
         {
-            "allocations": allocations,
+            "allocations": allocations_paginated,
             "allocation_no_obj": allocation_no_obj,
         },
     )

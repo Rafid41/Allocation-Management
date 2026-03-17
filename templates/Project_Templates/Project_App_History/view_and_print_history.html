@@ -588,6 +588,20 @@ document.getElementById("confirmResetBtn").addEventListener("click", function() 
 
 function goToPage(n) {
   const p = new URLSearchParams(window.location.search);
+  
+  // Also get any filters from the form if needed (though they are usually already in the URL)
+  const searchForm = document.getElementById('dynamicSearchForm');
+  if (searchForm) {
+      const formData = new FormData(searchForm);
+      for (const [key, value] of formData.entries()) {
+          if (value && value !== "" && value !== "no_condition") {
+              p.set(key, value);
+          } else {
+              p.delete(key);
+          }
+      }
+  }
+
   p.set('page', n);
   window.location.search = p.toString();
 }

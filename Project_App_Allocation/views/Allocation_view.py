@@ -97,6 +97,25 @@ def Search_and_Select(request, allocation_id=None):
     # Order the results by project ID (as requested)
     all_items = all_items.order_by("project__projectId")
 
+    # Pagination Logic
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    from App_Admin_Panel.models import PaginationManager
+
+    try:
+        limit = PaginationManager.load().table_pagination_limit
+    except:
+        limit = 50
+
+    page = request.GET.get("page", 1)
+    paginator = Paginator(all_items, limit)
+
+    try:
+        items_paginated = paginator.page(page)
+    except PageNotAnInteger:
+        items_paginated = paginator.page(1)
+    except EmptyPage:
+        items_paginated = paginator.page(paginator.num_pages)
+
     # Get warehouse choices from the Item model for the template select
     all_possible_warehouses = [choice[0] for choice in Item.WAREHOUSE_CHOICES]
 
@@ -112,7 +131,7 @@ def Search_and_Select(request, allocation_id=None):
 
     # Build context and add active filters so template can pre-populate fields
     context = {
-        "items": all_items,
+        "items": items_paginated,
         "allocation_number": allocation_number,
         "allocation_id": allocation_id,
         "unique_warehouses": all_possible_warehouses,
@@ -201,6 +220,25 @@ def allocate_item(request, allocation_id, item_id):
         allocation_no=allocation_no_obj
     ).order_by("-created_at")
 
+    # Pagination Logic
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    from App_Admin_Panel.models import PaginationManager
+
+    try:
+        limit = PaginationManager.load().table_pagination_limit
+    except:
+        limit = 50
+
+    page = request.GET.get("page", 1)
+    paginator = Paginator(allocations, limit)
+
+    try:
+        allocations_paginated = paginator.page(page)
+    except PageNotAnInteger:
+        allocations_paginated = paginator.page(1)
+    except EmptyPage:
+        allocations_paginated = paginator.page(paginator.num_pages)
+
     return render(
         request,
         "Project_Templates/Project_App_Allocation/allocate_item.html",
@@ -209,7 +247,7 @@ def allocate_item(request, allocation_id, item_id):
             "item": item,
             "allocation_no_obj": allocation_no_obj,
             "pbss": pbss,
-            "allocations": allocations,
+            "allocations": allocations_paginated,
         },
     )
 

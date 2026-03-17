@@ -599,6 +599,20 @@
 
     function goToPage(n) {
       const p = new URLSearchParams(window.location.search);
+      
+      // Also get any filters from the form if needed (though they are usually already in the URL)
+      const searchForm = document.getElementById('searchForm');
+      if (searchForm) {
+          const formData = new FormData(searchForm);
+          for (const [key, value] of formData.entries()) {
+              if (value && value !== "" && value !== "No Condition") {
+                  p.set(key, value);
+              } else {
+                  p.delete(key);
+              }
+          }
+      }
+
       p.set('page', n);
       window.location.search = p.toString();
     }

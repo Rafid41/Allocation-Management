@@ -146,12 +146,31 @@ def add_item_to_project(request):
 
         return redirect("Project_App_Entry:add_item_to_project")
 
+    # Pagination Logic
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    from App_Admin_Panel.models import PaginationManager
+
+    try:
+        limit = PaginationManager.load().table_pagination_limit
+    except:
+        limit = 50
+
+    page = request.GET.get('page', 1)
+    paginator = Paginator(items, limit)
+
+    try:
+        items_paginated = paginator.page(page)
+    except PageNotAnInteger:
+        items_paginated = paginator.page(1)
+    except EmptyPage:
+        items_paginated = paginator.page(paginator.num_pages)
+
     return render(
         request,
         "Project_Templates/Project_App_Entry/Add_item_to_project.html",
         {
             "projects": projects,
-            "items": items,
+            "items": items_paginated,
             "unit_choices": UNIT_CHOICES,
             "unique_warehouses": unique_warehouses,
         },

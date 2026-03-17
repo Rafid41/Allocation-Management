@@ -41,8 +41,27 @@ def final_allocation_search(request):
         elif filter_type == "warehouse":
             results = results.filter(warehouse__iexact=filter_value)
 
+    # Pagination Logic
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    from App_Admin_Panel.models import PaginationManager
+
+    try:
+        limit = PaginationManager.load().table_pagination_limit
+    except:
+        limit = 50
+
+    page = request.GET.get('page', 1)
+    paginator = Paginator(results, limit)
+
+    try:
+        items_paginated = paginator.page(page)
+    except PageNotAnInteger:
+        items_paginated = paginator.page(1)
+    except EmptyPage:
+        items_paginated = paginator.page(paginator.num_pages)
+
     context = {
-        "items": results,
+        "items": items_paginated,
         "unique_warehouses": unique_warehouses,
     }
 

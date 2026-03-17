@@ -91,9 +91,28 @@ def project_details(request, project_id):
             "id": item.id,
         })
 
+    # Pagination Logic
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    from App_Admin_Panel.models import PaginationManager
+
+    try:
+        limit = PaginationManager.load().table_pagination_limit
+    except:
+        limit = 50
+
+    page = request.GET.get('page', 1)
+    paginator = Paginator(item_data, limit)
+
+    try:
+        item_data_paginated = paginator.page(page)
+    except PageNotAnInteger:
+        item_data_paginated = paginator.page(1)
+    except EmptyPage:
+        item_data_paginated = paginator.page(paginator.num_pages)
+
     context = {
         "project": project,
-        "item_data": item_data,
+        "item_data": item_data_paginated,
         "warehouse_choices_json": json.dumps(Project_Item.WAREHOUSE_CHOICES),
         "unit_choices_json": json.dumps(Project_Item.UNIT_CHOICES),
         "applied_filters_json": json.dumps(applied_filters),

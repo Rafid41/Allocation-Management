@@ -43,7 +43,7 @@
 
   <h4 class="text-secondary">Search Results</h4>
 
-  <div class="table-responsive">
+    <div class="table-responsive">
     <table class="table table-bordered table-hover">
       <thead class="table-dark">
         <tr>
@@ -81,6 +81,52 @@
       </tbody>
     </table>
   </div>
+
+  <!-- Modern Pagination Controls (Matched to History Page) -->
+  {% if items.has_other_pages %}
+  <nav aria-label="Page navigation" class="mt-5 mb-5 d-print-none">
+    <ul class="pagination justify-content-center custom-pagination">
+      
+      <!-- First Page -->
+      <li class="page-item {% if not items.has_previous %}disabled{% endif %}">
+        <a class="page-link btn-nav btn-first-last" href="#" onclick="goToPage(1); return false;" aria-label="First">
+          <i class="fa fa-angle-double-left"></i> First
+        </a>
+      </li>
+
+      <!-- Previous Page -->
+      <li class="page-item {% if not items.has_previous %}disabled{% endif %}">
+        <a class="page-link btn-nav btn-prev-next" href="#" onclick="{% if items.has_previous %}goToPage({{ items.previous_page_number }});{% endif %} return false;" aria-label="Previous">
+          <i class="fa fa-angle-left"></i> Prev
+        </a>
+      </li>
+
+      <!-- Page Numbers -->
+      {% for i in items.paginator.page_range %}
+        {% if i > items.number|add:'-4' and i < items.number|add:'4' %}
+          <li class="page-item {% if items.number == i %}active{% endif %}">
+            <a class="page-link" href="#" onclick="goToPage({{ i }}); return false;">{{ i }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      <!-- Next Page -->
+      <li class="page-item {% if not items.has_next %}disabled{% endif %}">
+        <a class="page-link btn-nav btn-prev-next" href="#" onclick="{% if items.has_next %}goToPage({{ items.next_page_number }});{% endif %} return false;" aria-label="Next">
+           Next <i class="fa fa-angle-right"></i>
+        </a>
+      </li>
+
+      <!-- Last Page -->
+      <li class="page-item {% if not items.has_next %}disabled{% endif %}">
+         <a class="page-link btn-nav btn-first-last" href="#" onclick="goToPage({{ items.paginator.num_pages }}); return false;" aria-label="Last">
+          Last <i class="fa fa-angle-double-right"></i>
+        </a>
+      </li>
+
+    </ul>
+  </nav>
+  {% endif %}
 </div>
 
 <script>
@@ -284,5 +330,105 @@
   .custom-close:hover {
       color: darkred;
   }
+
+  /* Custom Pagination Styles */
+  .custom-pagination {
+      background: #ffffff;
+      padding: 10px 20px;
+      border-radius: 50px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      align-items: center;
+      list-style: none;
+      display: flex;
+  }
+  .custom-pagination .page-item {
+      margin: 0 3px;
+  }
+  .custom-pagination .page-link {
+      border: none;
+      border-radius: 50px;
+      min-width: 40px;
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      padding: 0 10px;
+      color: #555;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-block;
+      text-decoration: none;
+  }
+  .custom-pagination .page-link:hover {
+      background-color: #f0f0f0;
+      color: #333;
+      transform: translateY(-2px);
+  }
+  
+  /* Active Page Number */
+  .custom-pagination .page-item.active .page-link {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 10px rgba(118, 75, 162, 0.4);
+      transform: scale(1.1);
+      min-width: 40px;
+  }
+
+  /* Navigation Buttons (Base) */
+  .custom-pagination .btn-nav {
+      padding: 0 15px;
+      font-size: 0.9em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+  }
+
+  /* Prev/Next Color Scheme */
+  .custom-pagination .btn-prev-next {
+      background-color: #e0f2fe;
+      color: #0284c7;
+  }
+  .custom-pagination .btn-prev-next:hover {
+      background-color: #0ea5e9;
+      color: white;
+  }
+
+  /* First/Last Color Scheme */
+  .custom-pagination .btn-first-last {
+      background-color: #ffe4e6;
+      color: #e11d48;
+      font-weight: 700;
+  }
+  .custom-pagination .btn-first-last:hover {
+      background-color: #f43f5e;
+      color: white;
+  }
+
+  .custom-pagination .page-item.disabled .page-link {
+      color: #ccc;
+      background-color: transparent !important;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+  }
 </style>
+
+<script>
+    function goToPage(pageNumber) {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Update URL with all form data from dynamicSearchForm
+        const searchForm = document.getElementById('dynamicSearchForm');
+        const formData = new FormData(searchForm);
+        
+        for (const [key, value] of formData.entries()) {
+            if (value && value !== "" && value !== "no_condition") {
+                urlParams.set(key, value);
+            } else {
+                urlParams.delete(key);
+            }
+        }
+        
+        urlParams.set('page', pageNumber);
+        window.location.search = urlParams.toString();
+    }
+</script>
 {% endblock %}
