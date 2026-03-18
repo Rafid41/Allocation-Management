@@ -169,33 +169,42 @@
 </div>
 
 <div class="main-wrapper">
-    <div class="option-grid">
-        <a href="#" class="option-card">
-            <i class="fas fa-balance-scale"></i>
-            <span>PBSWise Balance</span>
-        </a>
-        <a href="#" class="option-card">
-            <i class="fas fa-chart-pie"></i>
-            <span>Summary of PBS Balance</span>
-        </a>
-        <a href="#" class="option-card">
-            <i class="fas fa-warehouse"></i>
-            <span>Storewise Balance</span>
-        </a>
-        <a href="#" class="option-card">
-            <i class="fas fa-file-invoice-dollar"></i>
-            <span>PBS Demand</span>
-        </a>
-        <a href="#" class="option-card">
-            <i class="fas fa-boxes"></i>
-            <span>Inventory Management</span>
-        </a>
-        <a href="#" class="option-card">
-            <i class="fas fa-history"></i>
-            <span>History</span>
-        </a>
-       
-    </div>
+    {% if user.is_authenticated %}
+        <div class="option-grid">
+            <a href="#" class="option-card">
+                <i class="fas fa-balance-scale"></i>
+                <span>PBSWise Balance</span>
+            </a>
+            <a href="#" class="option-card">
+                <i class="fas fa-chart-pie"></i>
+                <span>Summary of PBS Balance</span>
+            </a>
+            <a href="#" class="option-card">
+                <i class="fas fa-warehouse"></i>
+                <span>Storewise Balance</span>
+            </a>
+            <a href="#" class="option-card">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>PBS Demand</span>
+            </a>
+            <a href="#" class="option-card">
+                <i class="fas fa-boxes"></i>
+                <span>Inventory Management</span>
+            </a>
+            <a href="#" class="option-card">
+                <i class="fas fa-history"></i>
+                <span>History</span>
+            </a>
+        </div>
+    {% else %}
+        <div class="text-center mt-5 p-5 shadow-sm bg-white rounded-pill" style="max-width: 600px; border: 2px dashed #1e3a8a;">
+            <h4 class="text-primary fw-bold mb-3"><i class="fas fa-lock"></i> Protected Section</h4>
+            <p class="text-muted mb-4">Please log in to your account to access the store balance and inventory tools.</p>
+            <a href="{% url 'App_Login:login' %}" class="btn btn-primary px-5 py-2 rounded-pill shadow">
+                <i class="fas fa-sign-in-alt"></i> Login Now
+            </a>
+        </div>
+    {% endif %}
 </div>
  <br/><br/>
 {% endblock %}

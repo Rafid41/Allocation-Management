@@ -12,6 +12,7 @@ class LoginRequiredMiddleware:
         # Allow access if user is authenticated, or if the path is login page or static/media files
         if not request.user.is_authenticated:
             if (request.path_info != login_url and
+                request.path_info != '/pbswise/home/' and
                 not request.path_info.startswith('/static/') and
                 not request.path_info.startswith('/media/')):
                 return redirect(login_url)
@@ -38,6 +39,7 @@ class AutoLogoutMiddleware:
                 login_time = datetime.datetime.fromisoformat(login_time)
                 elapsed = now() - login_time
                 
+                # if elapsed.total_seconds() > 12 * 3600:  # 12 hours
                 if elapsed.total_seconds() > 12 * 3600:  # 12 hours
                     logout(request)
             else:
