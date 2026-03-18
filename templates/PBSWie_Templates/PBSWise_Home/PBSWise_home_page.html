@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title_block %} PBSWise Home {% endblock %}
+
+{% block css_block %}
+<style>
+    /* Professional refinement of the example design */
+    body {
+        background: linear-gradient(120deg, #f0f4f8, #d9e2ec);
+    }
+
+    .page-title {
+        text-align: center;
+        padding: 20px 10px 10px 10px;
+        color: #1e3a8a;
+    }
+
+    .page-title h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .page-title p {
+        font-size: 1.2rem;
+        color: #64748b;
+    }
+
+    /* Back button positioning - Top Left as requested */
+    .back-btn-container {
+        position: absolute;
+        top: 80px; /* Adjust based on navbar height */
+        left: 20px;
+        z-index: 10;
+    }
+
+    .back-btn {
+        padding: 10px 20px;
+        background: white;
+        color: #1e3a8a;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+
+    .back-btn:hover {
+        background: #1e3a8a;
+        color: white;
+        transform: translateX(-5px);
+        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        text-decoration: none;
+    }
+
+    .main-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 0 20px 0;
+    }
+
+    .option-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+        max-width: 1000px;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .option-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px 20px;
+        text-align: center;
+        text-decoration: none;
+        color: #1e3a8a;
+        font-weight: 700;
+        font-size: 1.25rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid #f1f5f9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        min-height: 180px;
+    }
+
+    .option-card i {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, #3b82f6, #1e3a8a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 5px;
+    }
+
+    .option-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(30, 58, 138, 0.15);
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        color: white;
+        text-decoration: none;
+        border-color: #1e3a8a;
+    }
+
+    .option-card:hover i {
+        background: white;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .footer-logo-section {
+        background-color: transparent;
+        padding: 40px 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .footer-logo-section img {
+        height: 120px;
+        width: auto;
+        filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
+    }
+
+    @media (max-width: 900px) {
+        .option-grid { grid-template-columns: repeat(2, 1fr); }
+        .page-title h1 { font-size: 2.5rem; }
+    }
+
+    @media (max-width: 600px) {
+        .option-grid { grid-template-columns: 1fr; }
+        .back-btn-container { position: static; margin-bottom: 20px; margin-left: 20px; }
+    }
+
+    /* Override footer logic to reduce gap */
+    .footer-wrapper {
+        min-height: auto !important;
+        margin-top: -30px; /* Pull it up a bit */
+    }
+    
+    .footer-push {
+        display: none !important;
+    }
+</style>
+{% endblock %}
+
+{% block body_block %}
+<div class="back-btn-container">
+    <a href="{% url 'App_Home:home_page' %}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Main
+    </a>
+</div>
+
+<div class="page-title">
+    <h1>BREB-PBS Store Balance</h1>
+    <p>Integrated Inventory & Balance Management System</p>
+</div>
+
+<div class="main-wrapper">
+    <div class="option-grid">
+        <a href="#" class="option-card">
+            <i class="fas fa-balance-scale"></i>
+            <span>PBSWise Balance</span>
+        </a>
+        <a href="#" class="option-card">
+            <i class="fas fa-chart-pie"></i>
+            <span>Summary of PBS Balance</span>
+        </a>
+        <a href="#" class="option-card">
+            <i class="fas fa-warehouse"></i>
+            <span>Storewise Balance</span>
+        </a>
+        <a href="#" class="option-card">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>PBS Demand</span>
+        </a>
+        <a href="#" class="option-card">
+            <i class="fas fa-boxes"></i>
+            <span>Inventory Management</span>
+        </a>
+        <a href="#" class="option-card">
+            <i class="fas fa-history"></i>
+            <span>History</span>
+        </a>
+       
+    </div>
+</div>
+ <br/><br/>
+{% endblock %}

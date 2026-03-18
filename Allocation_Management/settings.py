@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "Project_App_Modification",
     "Project_App_Cancellation",
     "Project_App_ProjectWiseBalance",
+    "PBSWise_Home",
 ]
 
 # bootstrap, bootstrap3, bootstrap4, uni-form
