@@ -171,7 +171,7 @@
 <div class="main-wrapper">
     {% if user.is_authenticated %}
         <div class="option-grid">
-            <a href="#" class="option-card">
+            <a href="{% url 'PBSWise_Balance:pbs_list_view' %}" class="option-card">
                 <i class="fas fa-balance-scale"></i>
                 <span>PBSWise Balance</span>
             </a>

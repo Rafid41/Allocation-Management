@@ -136,7 +136,11 @@
                             <i class="fas fa-university"></i> PBS Home
                         </a>
                     </li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-balance-scale"></i> Balance</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'PBSWise_Balance:pbs_list_view' %}">
+                            <i class="fas fa-balance-scale"></i> Balance
+                        </a>
+                    </li>
                     <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-chart-pie"></i> Summary</a></li>
                     <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-warehouse"></i> Storewise</a></li>
                     <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-file-invoice-dollar"></i> Demand</a></li>

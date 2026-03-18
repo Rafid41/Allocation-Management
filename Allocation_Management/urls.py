@@ -31,6 +31,7 @@ urlpatterns = [
     path("project/project_cancellation/", include("Project_App_Cancellation.urls")),
     path("project/project_wise_balance/", include("Project_App_ProjectWiseBalance.urls")),
     path("pbswise/", include("PBSWise_Home.urls")),
+    path("pbswise/", include("PBSWise_Balance.urls")),
 ]
 
 
