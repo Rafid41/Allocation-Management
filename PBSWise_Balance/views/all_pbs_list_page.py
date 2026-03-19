@@ -57,12 +57,12 @@ def pbs_list_view(request):
     else:
         pbs_items = PBS_List.objects.all().order_by('pbs_name')
     
-    is_editor = check_editor_permission(request.user)
+    can_modify = check_editor_permission(request.user)
     
     context = {
         'pbs_items': pbs_items,
         'search_query': search_query,
-        'is_editor': is_editor,
+        'can_modify': can_modify,
     }
     return render(request, "PBSWise_Templates/PBSWise_Balance/all_pbs_list_page.html", context)
 

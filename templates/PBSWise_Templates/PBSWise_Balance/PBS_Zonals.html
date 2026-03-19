@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title_block %} {{ pbs.pbs_name }} Zonals {% endblock %}
+
+{% block css_block %}
+<style>
+    body {
+        background: linear-gradient(120deg, #f0f4f8, #e2e8f0);
+    }
+    
+    .page-wrapper {
+        padding: 40px 20px;
+        position: relative;
+    }
+
+    .back-btn-container {
+        position: absolute;
+        top: 40px;
+        left: 20px;
+    }
+
+    .back-btn {
+        padding: 10px 20px;
+        background: #1e40af;
+        color: white;
+        border-radius: 25px;
+        font-weight: 700;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: 0.3s;
+    }
+
+    .back-btn:hover {
+        background: #111827;
+        color: white;
+        text-decoration: none;
+        transform: translateX(-5px);
+    }
+
+    .header-section {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #1e3a8a;
+    }
+
+    .header-section h1 {
+        font-size: 32px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    /* Search and Add Row */
+    .controls-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .search-group {
+        display: flex;
+        gap: 10px;
+        flex: 1;
+        max-width: 500px;
+    }
+
+    .search-input {
+        padding: 12px 25px;
+        width: 100%;
+        border-radius: 30px;
+        border: 2px solid #cbd5e1;
+        outline: none;
+        font-size: 14px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .search-btn {
+        padding: 0 25px;
+        background: #1e40af;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        font-weight: bold;
+    }
+
+    .add-zonal-btn {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 30px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+    }
+
+    .add-zonal-btn:hover {
+        background: #059669;
+        color: white;
+    }
+
+    .sum-btn {
+        background: linear-gradient(135deg, #fbbf24, #d97706);
+        color: white;
+        border: none;
+        padding: 20px 60px;
+        border-radius: 15px;
+        font-weight: 800;
+        font-size: 24px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 10px 20px rgba(217, 119, 6, 0.3);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        min-height: 80px;
+    }
+
+    .sum-btn:hover {
+        background: linear-gradient(135deg, #f59e0b, #b45309);
+        color: white;
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 15px 30px rgba(217, 119, 6, 0.4);
+        text-decoration: none;
+    }
+
+    /* Zonal Columns */
+    .zonal-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+    }
+
+    .zonal-column {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        min-height: 500px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    .column-header {
+        border-bottom: 3px solid;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .column-header h3 {
+        font-size: 20px;
+        font-weight: 800;
+        margin: 0;
+        color: #334155;
+    }
+
+    .column-hq { border-color: #1e40af; }
+    .column-zonal { border-color: #0f766e; }
+    .column-subzonal { border-color: #15803d; }
+
+    /* Zonal Unit Buttons */
+    .zonal-unit-card {
+        padding: 15px 15px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        font-weight: 700;
+        color: white;
+        text-align: center;
+        position: relative;
+        cursor: pointer;
+        transition: 0.2s;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .btn-hq { background: linear-gradient(135deg, #1e40af, #2563eb); }
+    .btn-zonal { background: linear-gradient(135deg, #0d9488, #14b8a6); }
+    .btn-subzonal { background: linear-gradient(135deg, #16a34a, #22c55e); }
+
+    .zonal-unit-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Admin Action Icons Overlay on top of units */
+    .unit-actions {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        display: flex;
+        gap: 4px;
+        opacity: 0;
+        transition: 0.2s;
+        z-index: 10;
+    }
+
+    .zonal-unit-card:hover .unit-actions {
+        opacity: 1;
+    }
+
+    .action-icon {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+    }
+
+    .action-icon:hover { background: rgba(255, 255, 255, 0.4); }
+
+    /* Modals */
+    .modal-content { border-radius: 20px; border: none; }
+    .form-control-custom { border-radius: 12px; padding: 12px; }
+
+    /* Messages box style */
+    .alert { border-radius: 12px; }
+
+</style>
+{% endblock %}
+
+{% block body_block %}
+<div class="page-wrapper">
+    <!-- Messages logic -->
+    {% if messages %}
+        <div class="messages-container" style="max-width: 600px; margin: 0 auto 20px auto;">
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} mr-2"></i>
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="back-btn-container">
+        <a href="{% url 'PBSWise_Balance:pbs_list_view' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to PBS List
+        </a>
+    </div>
+
+    <div class="header-section">
+        <h1>{{ pbs.pbs_name }} Units Management</h1>
+    </div>
+
+
+
+    <div class="controls-row">
+        <div class="search-group">
+            <input type="text" id="zonalSearch" class="search-input" placeholder="Partial search unit name...">
+            <button type="button" class="search-btn">Go</button>
+        </div>
+
+        {% if can_modify %}
+            <button class="add-zonal-btn" data-toggle="modal" data-target="#addZonalModal">
+                <i class="fas fa-plus"></i> Add New Zonals
+            </button>
+        {% endif %}
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-bottom: 30px;">
+        <a href="#" class="sum-btn">
+            <i class="fas fa-calculator"></i> Sum
+        </a>
+    </div>
+
+    <div class="zonal-container">
+        <!-- HQ Section -->
+        <div class="zonal-column column-hq">
+            <div class="column-header">
+                <h3>HQ</h3>
+                <span class="badge badge-primary rounded-circle">{{ hq_units.count }}</span>
+            </div>
+            <div class="units-list" id="hqList">
+                {% for item in hq_units %}
+                {% include "PBSWise_Templates/PBSWise_Balance/zonal_item_card.html" with item=item btn_class="btn-hq" %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Zonal Section -->
+        <div class="zonal-column column-zonal">
+            <div class="column-header">
+                <h3>Zonal Offices</h3>
+                <span class="badge badge-info rounded-circle">{{ zonal_units.count }}</span>
+            </div>
+            <div class="units-list" id="zonalList">
+                {% for item in zonal_units %}
+                {% include "PBSWise_Templates/PBSWise_Balance/zonal_item_card.html" with item=item btn_class="btn-zonal" %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Sub-Zonal Section -->
+        <div class="zonal-column column-subzonal">
+            <div class="column-header">
+                <h3>Sub-Zonal Offices</h3>
+                <span class="badge badge-success rounded-circle">{{ sub_zonal_units.count }}</span>
+            </div>
+            <div class="units-list" id="subZonalList">
+                {% for item in sub_zonal_units %}
+                {% include "PBSWise_Templates/PBSWise_Balance/zonal_item_card.html" with item=item btn_class="btn-subzonal" %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if can_modify %}
+    <!-- Add Modal -->
+    <div class="modal fade" id="addZonalModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{% url 'PBSWise_Balance:pbs_zonal_add' pbs.id %}" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title font-weight-bold">Add New Unit</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="font-weight-bold">Unit Name</label>
+                            <input type="text" name="zonal_name" class="form-control form-control-custom" placeholder="e.g. Head Quarters" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Unit Type</label>
+                            <select name="zonal_type" class="form-control form-control-custom" required>
+                                {% if not has_hq %}
+                                <option value="HQ">HQ</option>
+                                {% endif %}
+                                <option value="Zonal" selected>Zonal</option>
+                                <option value="Sub-Zonal">Sub-Zonal</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success font-weight-bold">Save Unit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<script>
+    // Real-time Search Logic
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('zonalSearch');
+        const unitCards = document.querySelectorAll('.zonal-unit-card');
+
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            
+            unitCards.forEach(card => {
+                const name = card.getAttribute('data-name').toLowerCase();
+                if (name.includes(query)) {
+                    card.parentElement.style.display = 'block';
+                } else {
+                    card.parentElement.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Delete Confirmation Logic
+    function validateZonalDelete(input, btnId) {
+        const btn = document.getElementById(btnId);
+        if (input.value === 'CONFIRM DELETE') {
+            btn.classList.remove('disabled');
+            btn.style.pointerEvents = 'auto';
+            btn.style.opacity = '1';
+        } else {
+            btn.classList.add('disabled');
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.5';
+        }
+    }
+
+    // Edit Confirmation Logic
+    function validateZonalEdit(input, btnId) {
+        const btn = document.getElementById(btnId);
+        const current = input.value.trim().toLowerCase();
+        const original = input.getAttribute('data-original').trim().toLowerCase();
+        
+        if (current !== "" && current !== original) {
+            btn.classList.remove('disabled');
+            btn.style.pointerEvents = 'auto';
+            btn.style.opacity = '1';
+        } else {
+            btn.classList.add('disabled');
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.5';
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+<!-- template: templates/PBSWise_Templates/PBSWise_Balance/zonal_item_card.html -->
+<div class="zonal-item-wrapper mb-3" data-name="{{ item.zonal_name|lower }}">
+    <a href="#" class="zonal-unit-card {{ btn_class }}" data-name="{{ item.zonal_name }}">
+        <span>{{ item.zonal_name }}</span>
+        
+        {% if can_modify %}
+            <div class="unit-actions">
+                <button type="button" class="action-icon" data-toggle="modal" data-target="#editZonal{{ item.id }}" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button type="button" class="action-icon" data-toggle="modal" data-target="#deleteZonal{{ item.id }}" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        {% endif %}
+    </a>
+</div>
+
+{% if can_modify %}
+<!-- Edit Modal -->
+<div class="modal fade" id="editZonal{{ item.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0">
+            <form action="{% url 'PBSWise_Balance:pbs_zonal_edit' pbs.id item.id %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title font-weight-bold">Edit Unit</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Unit Name</label>
+                        <input type="text" name="zonal_name" class="form-control form-control-custom" 
+                               value="{{ item.zonal_name }}" 
+                               data-original="{{ item.zonal_name }}"
+                               oninput="validateZonalEdit(this, 'editBtn{{ item.id }}')"
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Unit Type</label>
+                        <select name="zonal_type" class="form-control form-control-custom" 
+                                onchange="validateZonalEdit(this.parentElement.previousElementSibling.querySelector('input'), 'editBtn{{ item.id }}')"
+                                required>
+                            <!-- If it's already HQ, or if no HQ exists, show HQ -->
+                            {% if item.zonal_type == 'HQ' or not has_hq %}
+                            <option value="HQ" {% if item.zonal_type == 'HQ' %}selected{% endif %}>HQ</option>
+                            {% endif %}
+                            <option value="Zonal" {% if item.zonal_type == 'Zonal' %}selected{% endif %}>Zonal</option>
+                            <option value="Sub-Zonal" {% if item.zonal_type == 'Sub-Zonal' %}selected{% endif %}>Sub-Zonal</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
+                    <button type="submit" id="editBtn{{ item.id }}" 
+                            class="btn btn-warning font-weight-bold disabled" 
+                            style="pointer-events: none; opacity: 0.5;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteZonal{{ item.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title font-weight-bold">SECURE DELETE</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <div class="alert alert-danger font-weight-bold uppercase mb-4" style="font-size: 13px;">
+                    WARNING: Deleting unit <strong>{{ item.zonal_name }}</strong> will remove all its associated data!
+                </div>
+                <p>Type <strong class="text-danger">CONFIRM DELETE</strong> to proceed:</p>
+                <input type="text" class="form-control text-center font-weight-bold border-danger mb-3" 
+                       oninput="validateZonalDelete(this, 'deleteBtn{{ item.id }}')">
+                <a href="{% url 'PBSWise_Balance:pbs_zonal_delete' pbs.id item.id %}" id="deleteBtn{{ item.id }}" 
+                   class="btn btn-danger btn-block font-weight-bold disabled" 
+                   style="pointer-events: none; opacity: 0.5;">Execute Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

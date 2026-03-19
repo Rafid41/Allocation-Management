@@ -270,7 +270,7 @@
             <button type="button" class="search-btn">Go</button>
         </div>
 
-        {% if is_editor %}
+        {% if can_modify %}
             <button class="add-btn" data-toggle="modal" data-target="#addPBSModal">
                 <i class="fas fa-plus"></i> Add New PBS
             </button>
@@ -280,9 +280,9 @@
     <div class="pbs-grid shadow" id="pbsGrid">
         {% for pbs in pbs_items %}
             <div class="pbs-card" data-name="{{ pbs.pbs_name|lower }}">
-                <a href="#" class="pbs-link-overlay"></a>
+                <a href="{% url 'PBSWise_Balance:pbs_zonals_view' pbs.id %}" class="pbs-link-overlay"></a>
                 <span>{{ pbs.pbs_name }}</span>
-                {% if is_editor %}
+                {% if can_modify %}
                     <div class="card-actions">
                         <button class="action-icon edit-icon" data-toggle="modal" data-target="#editModal{{ pbs.id }}" title="Edit">
                             <i class="fas fa-edit"></i>
@@ -294,7 +294,7 @@
                 {% endif %}
             </div>
 
-            {% if is_editor %}
+            {% if can_modify %}
                 <!-- Edit Modal -->
                 <div class="modal fade" id="editModal{{ pbs.id }}" tabindex="-1" role="dialog">
                     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -421,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-{% if is_editor %}
+{% if can_modify %}
     <!-- Add Modal -->
     <div class="modal fade" id="addPBSModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
