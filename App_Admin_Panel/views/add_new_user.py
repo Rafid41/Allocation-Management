@@ -42,14 +42,16 @@ def assign_user_group_view(request, user_id):
 
 
     user = User.objects.get(id=user_id)
+    filtered_choices = [choice for choice in User_Group.STATUS_CHOICES if choice[0] != "Specific_PBS_Account"]
 
     if request.method == "POST":
         group_type = request.POST.get("user_group_type")
-        User_Group.objects.create(user=user, user_group_type=group_type)
-        messages.success(request, f"User group assigned to {user.username}.")
-        return redirect("App_Admin_Panel:admin_panel_home")
+        if group_type in dict(filtered_choices):
+            User_Group.objects.create(user=user, user_group_type=group_type)
+            messages.success(request, f"User group assigned to {user.username}.")
+            return redirect("App_Admin_Panel:admin_panel_home")
 
     return render(request, "App_Admin_Panel/assign_user_group.html", {
         "user": user,
-        "group_choices": User_Group.STATUS_CHOICES,
+        "group_choices": filtered_choices,
     })

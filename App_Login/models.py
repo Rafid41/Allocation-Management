@@ -9,6 +9,7 @@ class User_Group(models.Model):
         ("Editor", "Editor"), 
         ("Only_View_History_and_Edit_CS&M_Column", "OnlyView History and Edit CS&M Column"),
         ("Only_View_History_and_Edit_Carry_From_Warehouse_Column", "Only View History and Edit Carry_From_Warehouse Column"),
+        ("Specific_PBS_Account", "Specific PBS Account"),
     ]
     user_group_type = models.CharField(
         max_length=100, choices=STATUS_CHOICES, default="View History and Status only"
