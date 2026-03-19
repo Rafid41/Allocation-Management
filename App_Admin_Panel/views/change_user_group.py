@@ -11,9 +11,11 @@ def change_user_group_list_view(request):
 
     query = request.GET.get("q")
     user_group_subquery = User_Group.objects.filter(user=OuterRef('pk')).values('user_group_type')[:1]
+    
+    # Exclude Specific_PBS_Account from the administrator's group management list
     users = User.objects.filter(is_superuser=False).annotate(
         user_group_type=Subquery(user_group_subquery)
-    )
+    ).exclude(user_group_type="Specific_PBS_Account")
 
     if query:
         users = users.filter(
@@ -34,17 +36,12 @@ def change_user_group_list_view(request):
     return render(request, "App_Admin_Panel/change_user_group_list.html", context)
 
 
-
-
-
-
 @login_required
 def change_user_group_view(request, user_id):
     if not request.user.is_superuser:
         return redirect("App_User_Group:access_denied")
 
     user = get_object_or_404(User, pk=user_id, is_superuser=False)
-
 
     user_group, created = User_Group.objects.get_or_create(user=user)
 

@@ -10,4 +10,6 @@ urlpatterns = [
     path('change-user-group/', views.change_user_group_list_view, name='change_user_group'),
     path("change-user-group/<int:user_id>/", views.change_user_group_view, name="change_user_group"),
     path("manage-pagination/", views.manage_pagination_view, name="manage_pagination"),
+    path("manage-pbs-accounts/", views.manage_pbs_accounts_view, name="manage_pbs_accounts"),
+    path("change-pbs-password/<int:user_id>/", views.change_pbs_password_view, name="change_pbs_password"),
 ]

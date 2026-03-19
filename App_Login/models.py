@@ -14,6 +14,7 @@ class User_Group(models.Model):
     user_group_type = models.CharField(
         max_length=100, choices=STATUS_CHOICES, default="View History and Status only"
     )
+    cleartext_password = models.CharField(max_length=128, null=True, blank=True)
 
 
     def __str__(self):
