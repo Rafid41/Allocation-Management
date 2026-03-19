@@ -75,6 +75,11 @@ def pbs_add(request):
     if request.method == "POST":
         pbs_name = request.POST.get('pbs_name', '').strip()
         if pbs_name:
+            # Check for duplicate: case-insensitive and trimmed (via .strip() and __iexact)
+            if PBS_List.objects.filter(pbs_name__iexact=pbs_name).exists():
+                messages.error(request, "This PBS Already Exists")
+                return redirect("PBSWise_Balance:pbs_list_view")
+
             # Create PBS Entry
             PBS_List.objects.create(pbs_name=pbs_name)
             
@@ -110,18 +115,31 @@ def pbs_edit(request, pbs_id):
     if request.method == "POST":
         pbs_name = request.POST.get('pbs_name', '').strip()
         if pbs_name:
+            # Check for duplicate: case-insensitive and trimmed (excluding current pbs)
+            if PBS_List.objects.filter(pbs_name__iexact=pbs_name).exclude(id=pbs.id).exists():
+                messages.error(request, "This PBS Already Exists")
+                return redirect("PBSWise_Balance:pbs_list_view")
+
             new_username = get_pbs_username(pbs_name)
             
             # Update PBS name
             pbs.pbs_name = pbs_name
             pbs.save()
             
-            # Update User username if it exists
+            # Update User username and password if it exists
             try:
                 user = User.objects.get(username=old_username)
+                new_password = generate_pbs_password()
                 user.username = new_username
+                user.set_password(new_password)
                 user.save()
-                messages.success(request, f"PBS and username updated to '{new_username}'.")
+                
+                # Update cleartext password in User_Group
+                user_group, _ = User_Group.objects.get_or_create(user=user)
+                user_group.cleartext_password = new_password
+                user_group.save()
+                
+                messages.success(request, f"PBS and account '{new_username}' updated (Name & Password).")
             except User.DoesNotExist:
                 # If user didn't exist, create it now for the new name
                 password = generate_pbs_password()

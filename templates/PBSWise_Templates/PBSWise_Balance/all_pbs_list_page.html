@@ -239,6 +239,21 @@
 
 {% block body_block %}
 <div class="page-wrapper">
+    <!-- Messages logic -->
+    {% if messages %}
+        <div class="messages-container" style="max-width: 600px; margin: 0 auto 20px auto;">
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} mr-2"></i>
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="this.parentElement.style.display='none';">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <div class="back-btn-container">
         <a href="{% url 'PBSWise_Home:home_page' %}" class="back-btn">
             <i class="fas fa-arrow-left"></i> Back
@@ -293,12 +308,18 @@
                                 <div class="modal-body">
                                     <div class="form-group">
                                         <label class="font-weight-bold">PBS NAME</label>
-                                        <input type="text" name="pbs_name" class="form-control form-control-custom" value="{{ pbs.pbs_name }}" required>
+                                        <input type="text" name="pbs_name" class="form-control form-control-custom pbs-edit-input" 
+                                               value="{{ pbs.pbs_name }}" 
+                                               data-original="{{ pbs.pbs_name }}" 
+                                               oninput="validateEdit(this, 'updateBtn{{ pbs.id }}')"
+                                               required>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
-                                    <button type="submit" class="btn btn-warning font-weight-bold">Update PBS</button>
+                                    <button type="submit" id="updateBtn{{ pbs.id }}" 
+                                            class="btn btn-warning font-weight-bold disabled" 
+                                            style="pointer-events: none; opacity: 0.5;">Update PBS</button>
                                 </div>
                             </form>
                         </div>
@@ -349,6 +370,23 @@
 function validateDelete(inputElement, deleteBtnId) {
     const btn = document.getElementById(deleteBtnId);
     if (inputElement.value === 'CONFIRM DELETE') {
+        btn.classList.remove('disabled');
+        btn.style.pointerEvents = 'auto';
+        btn.style.opacity = '1';
+    } else {
+        btn.classList.add('disabled');
+        btn.style.pointerEvents = 'none';
+        btn.style.opacity = '0.5';
+    }
+}
+
+function validateEdit(inputElement, updateBtnId) {
+    const btn = document.getElementById(updateBtnId);
+    const current = inputElement.value.trim().toLowerCase();
+    const original = inputElement.getAttribute('data-original').trim().toLowerCase();
+    
+    // Enable only if name is different and not empty
+    if (current !== "" && current !== original) {
         btn.classList.remove('disabled');
         btn.style.pointerEvents = 'auto';
         btn.style.opacity = '1';
