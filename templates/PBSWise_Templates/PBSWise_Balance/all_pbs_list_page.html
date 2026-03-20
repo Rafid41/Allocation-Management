@@ -11,45 +11,46 @@
     }
 
     /* Expand page to full width by overriding base container */
-    .container {
+    .container, .container-fluid {
         max-width: 100% !important;
-        padding-left: 20px !important;
-        padding-right: 20px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
     }
 
     .page-wrapper {
-        padding: 20px 0;
+        padding: 5px 0;
         position: relative;
     }
 
     /* Top Left Back Button - Match Home Page */
     .back-btn-container {
-        position: absolute;
-        top: 20px;
-        left: 20px;
+        margin: 5px 10px;
         z-index: 10;
     }
 
     .back-btn {
-        padding: 8px 18px;
-        background: #2563eb;
-        color: white;
-        border-radius: 20px;
-        font-size: 13px;
+        padding: 10px 24px;
+        background: white;
+        color: #1e3a8a;
+        border-radius: 50px;
         font-weight: 700;
         text-decoration: none;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
     }
 
     .back-btn:hover {
-        background: #1e40af;
+        background: #1e3a8a;
         color: white;
-        text-decoration: none;
         transform: translateX(-5px);
+        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        text-decoration: none;
     }
 
     .header-section {

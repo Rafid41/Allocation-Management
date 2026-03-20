@@ -10,35 +10,43 @@
     }
     
     .page-wrapper {
-        padding: 40px 20px;
+        padding: 5px 0;
         position: relative;
     }
 
+    .container, .container-fluid {
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
     .back-btn-container {
-        position: absolute;
-        top: 40px;
-        left: 20px;
+        margin: 5px 10px;
     }
 
     .back-btn {
-        padding: 10px 20px;
-        background: #1e40af;
-        color: white;
-        border-radius: 25px;
+        padding: 10px 24px;
+        background: white;
+        color: #1e3a8a;
+        border-radius: 50px;
         font-weight: 700;
         text-decoration: none;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        transition: 0.3s;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
     }
 
     .back-btn:hover {
-        background: #111827;
+        background: #1e3a8a;
         color: white;
-        text-decoration: none;
         transform: translateX(-5px);
+        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        text-decoration: none;
     }
 
     .header-section {
