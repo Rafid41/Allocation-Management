@@ -94,9 +94,34 @@
     .nav-card:hover div.overlay { transform: scale(3); }
 
     .back-btn-container {
-        position: absolute;
-        top: 40px;
-        left: 20px;
+        width: 100%;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: flex-start;
+    }
+
+    .back-btn {
+        padding: 10px 20px;
+        background: white;
+        color: #1e3a8a;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+
+    .back-btn:hover {
+        background: #1e3a8a;
+        color: white;
+        transform: translateX(-5px);
+        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        text-decoration: none;
     }
 
 </style>
@@ -105,8 +130,8 @@
 {% block body_block %}
 <div class="page-wrapper">
     <div class="back-btn-container">
-        <a href="{% url 'PBSWise_Balance:pbs_list_view' %}" class="btn btn-outline-dark rounded-pill px-4 font-weight-bold">
-            <i class="fas fa-arrow-left mr-2"></i> Back to List
+        <a href="{% url 'PBSWise_Balance:pbs_list_view' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Balance List
         </a>
     </div>
 
@@ -123,7 +148,7 @@
                 <span>Manage Items</span>
             </a>
 
-            <a href="#" class="nav-card card-balance">
+            <a href="{% url 'PBSWise_Balance:zonal_balance_view' %}" class="nav-card card-balance">
                 <div class="overlay"></div>
                 <i class="fas fa-chart-line"></i>
                 <span>Manage Zonal Balance</span>

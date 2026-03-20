@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import all_pbs_list_page, PBS_Zonals, manage_zonal_items
+from .views import all_pbs_list_page, PBS_Zonals, manage_zonal_items, Zonal_Balance
 
 app_name = "PBSWise_Balance"
 
@@ -15,6 +15,14 @@ urlpatterns = [
     path("pbswise_balance/zonal_item_add", manage_zonal_items.zonal_item_add, name="zonal_item_add"),
     path("pbswise_balance/zonal_item_edit/<uuid:item_id>", manage_zonal_items.zonal_item_edit, name="zonal_item_edit"),
     path("pbswise_balance/zonal_item_delete/<uuid:item_id>", manage_zonal_items.zonal_item_delete, name="zonal_item_delete"),
+
+    # Zonal Balance Management (Table-wise)
+    path("pbswise_balance/Zonal_Balance", Zonal_Balance.zonal_balance_view, name="zonal_balance_view"),
+    path("pbswise_balance/Zonal_Balance/add/", Zonal_Balance.zonal_balance_add, name="zonal_balance_add"),
+    path("pbswise_balance/Zonal_Balance/edit/<uuid:record_id>/", Zonal_Balance.zonal_balance_edit, name="zonal_balance_edit"),
+    path("pbswise_balance/Zonal_Balance/delete/<uuid:record_id>/", Zonal_Balance.zonal_balance_delete, name="zonal_balance_delete"),
+    path("pbswise_balance/Zonal_Balance/get_zonals/", Zonal_Balance.get_zonals_by_pbs, name="get_zonals_by_pbs"),
+    path("pbswise_balance/Zonal_Balance/check_unique/", Zonal_Balance.check_unique_zonal_balance, name="check_unique_zonal_balance"),
 
     # PBS Zonals
     path("pbs_zonals/<uuid:pbs_id>/", PBS_Zonals.pbs_zonals_view, name="pbs_zonals_view"),
