@@ -133,6 +133,31 @@
         text-decoration: none;
     }
 
+    .manage-all-btn {
+        background: linear-gradient(135deg, #6366f1, #4338ca);
+        color: white;
+        padding: 12px 35px;
+        border-radius: 30px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 8px 15px rgba(67, 56, 202, 0.2);
+        transition: 0.3s;
+        border: none;
+    }
+
+    .manage-all-btn:hover {
+        background: linear-gradient(135deg, #4f46e5, #3730a3);
+        transform: translateY(-3px);
+        color: white;
+        box-shadow: 0 12px 20px rgba(67, 56, 202, 0.3);
+        text-decoration: none;
+    }
+
     /* PBS Grid: Matched to Example */
     .pbs-grid {
         margin: 20px 10px 40px 10px;
@@ -262,6 +287,13 @@
 
     <div class="header-section">
         <h1>PBSWise Store Balance</h1>
+        {% if can_modify %}
+        <div style="margin-top: 25px;">
+            <a href="{% url 'PBSWise_Balance:manage_zonal_home' %}" class="manage-all-btn">
+                <i class="fas fa-boxes"></i> Manage All Zonal Balance
+            </a>
+        </div>
+        {% endif %}
     </div>
 
     <div class="controls-container">

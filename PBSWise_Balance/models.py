@@ -24,3 +24,11 @@ class PBS_Zonals(models.Model):
 
     def __str__(self):
         return f"{self.pbs.pbs_name} - {self.zonal_name} ({self.zonal_type})"
+
+class Zonal_Items(models.Model):
+    """Model to store Items for zonal balance management."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    item_name = models.CharField(max_length=256)
+
+    def __str__(self):
+        return self.item_name

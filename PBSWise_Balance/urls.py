@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import all_pbs_list_page, PBS_Zonals
+from .views import all_pbs_list_page, PBS_Zonals, manage_zonal_items
 
 app_name = "PBSWise_Balance"
 
@@ -9,6 +9,13 @@ urlpatterns = [
     path("pbswise_balance/pbs_edit/<uuid:pbs_id>", all_pbs_list_page.pbs_edit, name="pbs_edit"),
     path("pbswise_balance/pbs_delete/<uuid:pbs_id>", all_pbs_list_page.pbs_delete, name="pbs_delete"),
     
+    # Zonal Items Management (Global)
+    path("pbswise_balance/manage_zonal_home", manage_zonal_items.manage_zonal_home, name="manage_zonal_home"),
+    path("pbswise_balance/manage_zonal_items", manage_zonal_items.manage_zonal_items, name="manage_zonal_items"),
+    path("pbswise_balance/zonal_item_add", manage_zonal_items.zonal_item_add, name="zonal_item_add"),
+    path("pbswise_balance/zonal_item_edit/<uuid:item_id>", manage_zonal_items.zonal_item_edit, name="zonal_item_edit"),
+    path("pbswise_balance/zonal_item_delete/<uuid:item_id>", manage_zonal_items.zonal_item_delete, name="zonal_item_delete"),
+
     # PBS Zonals
     path("pbs_zonals/<uuid:pbs_id>/", PBS_Zonals.pbs_zonals_view, name="pbs_zonals_view"),
     path("pbs_zonals/<uuid:pbs_id>/add/", PBS_Zonals.pbs_zonal_add, name="pbs_zonal_add"),

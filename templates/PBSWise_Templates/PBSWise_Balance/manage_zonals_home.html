@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title_block %} Zonal Balance Home {% endblock %}
+
+{% block css_block %}
+<style>
+    body {
+        background: radial-gradient(circle at top right, #f8fafc, #e2e8f0);
+    }
+    
+    .home-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+        gap: 40px;
+    }
+
+    .home-header {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #1e293b;
+    }
+
+    .home-header h1 {
+        font-size: 36px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .btn-container {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .nav-card {
+        width: 320px;
+        height: 200px;
+        background: white;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: #334155;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.02);
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        text-decoration: none;
+        color: white;
+    }
+
+    .nav-card i {
+        font-size: 50px;
+        margin-bottom: 15px;
+        transition: 0.3s;
+    }
+
+    .nav-card span {
+        font-size: 20px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Column Specific Hover Backgrounds */
+    .card-items:hover { background: linear-gradient(135deg, #6366f1, #4338ca); }
+    .card-balance:hover { background: linear-gradient(135deg, #10b981, #059669); }
+
+    .nav-card div.overlay {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 50%;
+        top: -50px;
+        right: -50px;
+        transition: 0.3s;
+    }
+
+    .nav-card:hover div.overlay { transform: scale(3); }
+
+    .back-btn-container {
+        position: absolute;
+        top: 40px;
+        left: 20px;
+    }
+
+</style>
+{% endblock %}
+
+{% block body_block %}
+<div class="page-wrapper">
+    <div class="back-btn-container">
+        <a href="{% url 'PBSWise_Balance:pbs_list_view' %}" class="btn btn-outline-dark rounded-pill px-4 font-weight-bold">
+            <i class="fas fa-arrow-left mr-2"></i> Back to List
+        </a>
+    </div>
+
+    <div class="home-wrapper">
+        <div class="home-header">
+            <h1>Zonal Balance Management</h1>
+            <p class="text-muted">Configure inventory items and track zonal balance across all offices.</p>
+        </div>
+
+        <div class="btn-container">
+            <a href="{% url 'PBSWise_Balance:manage_zonal_items' %}" class="nav-card card-items">
+                <div class="overlay"></div>
+                <i class="fas fa-boxes"></i>
+                <span>Manage Items</span>
+            </a>
+
+            <a href="#" class="nav-card card-balance">
+                <div class="overlay"></div>
+                <i class="fas fa-chart-line"></i>
+                <span>Manage Zonal Balance</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
