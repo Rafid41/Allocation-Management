@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title_block %} Manage Zonal Balance {% endblock %}
+
+{% block css_block %}
+<style>
+    body {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        min-height: 100vh;
+    }
+
+    .page-wrapper {
+        padding: 5px 0;
+        position: relative;
+    }
+
+    .back-btn-container {
+        margin: 5px 10px;
+    }
+
+    .back-btn {
+        padding: 10px 24px;
+        background: white;
+        color: #1e3a8a;
+        border-radius: 50px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+
+    .back-btn:hover {
+        background: #1e3a8a;
+        color: white;
+        transform: translateX(-5px);
+        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        text-decoration: none;
+    }
+
+    .header-section {
+        text-align: center;
+        margin-top: 20px;
+        color: #14532d;
+    }
+
+    .header-section h1 {
+        font-size: 36px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .pbs-badge {
+        background: #15803d;
+        color: white;
+        padding: 8px 25px;
+        border-radius: 30px;
+        display: inline-block;
+        margin-top: 10px;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(21, 128, 61, 0.2);
+    }
+
+    .main-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 0;
+    }
+
+    .option-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        max-width: 800px;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .option-card {
+        background: white;
+        border-radius: 25px;
+        padding: 50px 30px;
+        text-align: center;
+        text-decoration: none;
+        color: #14532d;
+        font-weight: 700;
+        font-size: 1.5rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid #bbf7d0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        min-height: 220px;
+    }
+
+    .option-card i {
+        font-size: 3.5rem;
+        background: linear-gradient(135deg, #10b981, #15803d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .option-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 20px 40px rgba(21, 128, 61, 0.15);
+        background: linear-gradient(135deg, #15803d 0%, #14532d 100%);
+        color: white;
+        text-decoration: none;
+        border-color: #14532d;
+    }
+
+    .option-card:hover i {
+        background: white;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    @media (max-width: 600px) {
+        .option-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block body_block %}
+<div class="page-wrapper">
+    <div class="back-btn-container">
+        <a href="{% url 'PBSWise_Balance:pbs_zonals_view' pbs.id %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Units
+        </a>
+    </div>
+
+    <div class="header-section">
+        <h1>Manage Zonal Balance</h1>
+        <div class="pbs-badge">{{ pbs.pbs_name }}</div>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="option-grid">
+            <!-- Manage Items -->
+            <a href="{% url 'PBSWise_Balance:manage_individual_pbs_zonal_items' pbs.id %}" class="option-card">
+                <i class="fas fa-tasks"></i>
+                <span>Manage Items</span>
+            </a>
+
+            <!-- Manage Zonal Balance -->
+            <a href="{% url 'PBSWise_Balance:zonal_balance_view' %}?pbs_id={{ pbs.id }}" class="option-card">
+                <i class="fas fa-balance-scale"></i>
+                <span>Manage Zonal Balance</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

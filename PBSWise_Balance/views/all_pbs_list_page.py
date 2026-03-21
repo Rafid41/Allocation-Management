@@ -48,6 +48,18 @@ def check_editor_permission(user):
     except User_Group.DoesNotExist:
         return False
 
+def check_pbs_management_permission(user):
+    """Helper to check if user is admin, editor or a specific PBS account."""
+    if not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    try:
+        user_group = User_Group.objects.get(user=user)
+        return user_group.user_group_type in ["Editor", "Specific_PBS_Account"]
+    except User_Group.DoesNotExist:
+        return False
+
 def pbs_list_view(request):
     """View to list all PBS items with search and CRUD options."""
     search_query = request.GET.get('search', '').strip()

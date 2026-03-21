@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from ..models import PBS_List, PBS_Zonals
-from .all_pbs_list_page import check_editor_permission
+from .all_pbs_list_page import check_editor_permission, check_pbs_management_permission
 
 def pbs_zonals_view(request, pbs_id):
     """View to list all Zonal units for a specific PBS."""
@@ -12,12 +12,14 @@ def pbs_zonals_view(request, pbs_id):
     has_hq = PBS_Zonals.objects.filter(pbs=pbs, zonal_type='HQ').exists()
     
     can_modify = check_editor_permission(request.user)
+    can_manage_pbs = check_pbs_management_permission(request.user)
     
     context = {
         'pbs': pbs,
         'zonals': zonals,
         'has_hq': has_hq,
         'can_modify': can_modify,
+        'can_manage_pbs': can_manage_pbs,
         # Sectional breakdown
         'hq_units': zonals.filter(zonal_type='HQ').order_by('zonal_name'),
         'zonal_units': zonals.filter(zonal_type='Zonal').order_by('zonal_name'),

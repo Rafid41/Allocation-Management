@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import all_pbs_list_page, PBS_Zonals, manage_zonal_items, Zonal_Balance, zonal_details
+from .views import all_pbs_list_page, PBS_Zonals, manage_zonal_items, Zonal_Balance, zonal_details, individual_pbs_balance
 
 app_name = "PBSWise_Balance"
 
@@ -32,4 +32,8 @@ urlpatterns = [
     
     # Zonal Details View-Only
     path("pbswise_balance/zonal_details/<uuid:zonal_id>/", zonal_details.zonal_details_view, name="zonal_details_view"),
+
+    # Individual PBS Management
+    path("pbswise_balance/pbs_zonals/<uuid:pbs_id>/manage_individual_pbs_zonal_home", individual_pbs_balance.manage_individual_pbs_zonal_home, name="manage_individual_pbs_zonal_home"),
+    path("pbswise_balance/pbs_zonals/<uuid:pbs_id>/manage_individual_pbs_zonal_items", individual_pbs_balance.manage_individual_pbs_zonal_items, name="manage_individual_pbs_zonal_items"),
 ]
