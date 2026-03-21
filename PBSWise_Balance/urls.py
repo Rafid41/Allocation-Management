@@ -25,10 +25,10 @@ urlpatterns = [
     path("pbswise_balance/Zonal_Balance/check_unique/", Zonal_Balance.check_unique_zonal_balance, name="check_unique_zonal_balance"),
 
     # PBS Zonals
-    path("pbs_zonals/<uuid:pbs_id>/", PBS_Zonals.pbs_zonals_view, name="pbs_zonals_view"),
-    path("pbs_zonals/<uuid:pbs_id>/add/", PBS_Zonals.pbs_zonal_add, name="pbs_zonal_add"),
-    path("pbs_zonals/<uuid:pbs_id>/edit/<uuid:zonal_id>/", PBS_Zonals.pbs_zonal_edit, name="pbs_zonal_edit"),
-    path("pbs_zonals/<uuid:pbs_id>/delete/<uuid:zonal_id>/", PBS_Zonals.pbs_zonal_delete, name="pbs_zonal_delete"),
+    path("pbswise_balance/pbs_zonals/<uuid:pbs_id>/", PBS_Zonals.pbs_zonals_view, name="pbs_zonals_view"),
+    path("pbswise_balance/pbs_zonals/<uuid:pbs_id>/add/", PBS_Zonals.pbs_zonal_add, name="pbs_zonal_add"),
+    path("pbswise_balance/pbs_zonals/<uuid:pbs_id>/edit/<uuid:zonal_id>/", PBS_Zonals.pbs_zonal_edit, name="pbs_zonal_edit"),
+    path("pbswise_balance/pbs_zonals/<uuid:pbs_id>/delete/<uuid:zonal_id>/", PBS_Zonals.pbs_zonal_delete, name="pbs_zonal_delete"),
     
     # Zonal Details View-Only
     path("pbswise_balance/zonal_details/<uuid:zonal_id>/", zonal_details.zonal_details_view, name="zonal_details_view"),
