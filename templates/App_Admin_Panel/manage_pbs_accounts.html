@@ -130,8 +130,39 @@
         text-decoration: underline;
     }
 
-    .modal-content { border-radius: 20px; border: none; }
-    .btn-rounded { border-radius: 12px; font-weight: 600; padding: 10px 25px; }
+    .copy-btn, .copy-btn-sm {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        transition: 0.2s;
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
+    
+    .copy-btn:hover, .copy-btn-sm:hover {
+        color: #2563eb;
+        background-color: #eff6ff;
+    }
+
+    .copy-btn-sm { padding: 2px 6px; font-size: 13px; }
+
+    /* Toast style for Copy Feedback */
+    #copyToast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e293b;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 14px;
+        z-index: 9999;
+        display: none;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
 
 </style>
 {% endblock %}
@@ -168,14 +199,24 @@
                                     <div class="font-weight-bold text-dark">{{ acc.pbs_name }}</div>
                                 </td>
                                 <td>
-                                    <span class="username-badge">{{ acc.user.username }}</span>
+                                    <div class="d-flex align-items-center">
+                                        <span class="username-badge" id="user-{{ acc.user.id }}">{{ acc.user.username }}</span>
+                                        <button class="copy-btn ml-2" title="Copy Username" onclick="copyText('user-{{ acc.user.id }}')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="password-field-container">
                                         <span class="password-text" id="pass-{{ acc.user.id }}" data-pass="{{ acc.cleartext_password }}">••••••••••</span>
-                                        <button class="reveal-btn" onclick="togglePassword('{{ acc.user.id }}')">
-                                            <i class="fas fa-eye" id="eye-{{ acc.user.id }}"></i>
-                                        </button>
+                                        <div class="d-flex align-items-center ml-2 border-left pl-2" style="gap: 8px;">
+                                            <button class="reveal-btn" title="Show/Hide" onclick="togglePassword('{{ acc.user.id }}')">
+                                                <i class="fas fa-eye" id="eye-{{ acc.user.id }}"></i>
+                                            </button>
+                                            <button class="copy-btn-sm" title="Copy Password" onclick="copyPassword('{{ acc.user.id }}')">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="text-right">
@@ -221,7 +262,8 @@
                 </div>
             {% endif %}
         </div>
-    </div>
+    <!-- Copy Feedback Toast -->
+    <div id="copyToast"><i class="fas fa-check-circle mr-2 text-success"></i> Copied to Clipboard!</div>
 </div>
 
 <script>
@@ -241,6 +283,26 @@
             eyeIcon.classList.remove('fa-eye-slash');
             eyeIcon.classList.add('fa-eye');
         }
+    }
+
+    function showToast() {
+        const toast = $('#copyToast');
+        toast.stop(true, true).fadeIn().delay(1500).fadeOut();
+    }
+
+    function copyText(elemId) {
+        const textToCopy = document.getElementById(elemId).textContent;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            showToast();
+        });
+    }
+
+    function copyPassword(userId) {
+        const passElem = document.getElementById('pass-' + userId);
+        const realPass = passElem.getAttribute('data-pass');
+        navigator.clipboard.writeText(realPass).then(() => {
+            showToast();
+        });
     }
 </script>
 {% endblock %}
