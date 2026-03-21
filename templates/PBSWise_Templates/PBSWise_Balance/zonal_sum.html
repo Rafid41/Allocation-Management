@@ -113,8 +113,8 @@
     }
     .table th:nth-child(1) { z-index: 110 !important; background: #334155 !important; }
 
-    /* Total is 11th */
-    .table td:nth-child(11), .table th:nth-child(11) {
+    /* Total is 10th column (Item Name, Unit, 7 Categories) */
+    .table td:nth-child(10), .table th:nth-child(10) {
         position: sticky;
         right: 0;
         z-index: 10;
@@ -123,7 +123,7 @@
         font-weight: 800;
         color: #1e293b;
     }
-    .table th:nth-child(11) { z-index: 110 !important; background: #334155 !important; color: white !important; }
+    .table th:nth-child(10) { z-index: 110 !important; background: #334155 !important; color: white !important; }
 
     .table tbody td {
         padding: 15px 20px;
@@ -169,6 +169,11 @@
         transform: scale(1.1);
         box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
     }
+    .btn-nav { font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 15px !important; }
+    .btn-prev-next { background-color: #e0f2fe; color: #0284c7; }
+    .btn-prev-next:hover { background-color: #0ea5e9; color: white !important; }
+    .btn-first-last { background-color: #ffe4e6; color: #e11d48; font-weight: 700; }
+    .btn-first-last:hover { background-color: #f43f5e; color: white !important; }
 
     @media print {
         .navbar, .footer-wrapper, .back-btn-container, .search-card, .custom-pagination, .footer-logo-section {
@@ -202,7 +207,12 @@
         <form method="GET" class="row g-3">
             <div class="col-md-6">
                 <label class="font-weight-bold text-muted small text-uppercase mb-2">Search Item Name</label>
-                <input type="text" name="search" value="{{ search_query }}" class="form-control rounded-pill" placeholder="Type item name to filter...">
+                <select name="search" class="form-control rounded-pill">
+                    <option value="">All Items</option>
+                    {% for it_name in items_all %}
+                    <option value="{{ it_name }}" {% if it_name == search_query %}selected{% endif %}>{{ it_name }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="col-md-3 mt-auto">
                 <button type="submit" class="btn btn-primary btn-block font-weight-bold rounded-pill py-2">
@@ -266,10 +276,14 @@
     {% if summary.has_other_pages and not is_print_view %}
     <ul class="custom-pagination">
         <li class="page-item {% if not summary.has_previous %}disabled{% endif %}">
-            <a class="page-link" href="#" onclick="goToPage(1); return false;"><i class="fas fa-angle-double-left"></i> First</a>
+            <a class="page-link btn-nav btn-first-last" href="#" onclick="goToPage(1); return false;">
+                <i class="fas fa-angle-double-left"></i> First
+            </a>
         </li>
         <li class="page-item {% if not summary.has_previous %}disabled{% endif %}">
-             <a class="page-link" href="#" onclick="{% if summary.has_previous %}goToPage({{ summary.previous_page_number }});{% endif %} return false;"><i class="fas fa-angle-left"></i> Prev</a>
+            <a class="page-link btn-nav btn-prev-next" href="#" onclick="{% if summary.has_previous %}goToPage({{ summary.previous_page_number }});{% endif %} return false;">
+                <i class="fas fa-angle-left"></i> Prev
+            </a>
         </li>
         {% for i in summary.paginator.page_range %}
             {% if i > summary.number|add:'-3' and i < summary.number|add:'3' %}
@@ -279,10 +293,14 @@
             {% endif %}
         {% endfor %}
         <li class="page-item {% if not summary.has_next %}disabled{% endif %}">
-             <a class="page-link" href="#" onclick="{% if summary.has_next %}goToPage({{ summary.next_page_number }});{% endif %} return false;">Next <i class="fas fa-angle-right"></i></a>
+            <a class="page-link btn-nav btn-prev-next" href="#" onclick="{% if summary.has_next %}goToPage({{ summary.next_page_number }});{% endif %} return false;">
+                Next <i class="fas fa-angle-right"></i>
+            </a>
         </li>
         <li class="page-item {% if not summary.has_next %}disabled{% endif %}">
-             <a class="page-link" href="#" onclick="goToPage({{ summary.paginator.num_pages }}); return false;">Last <i class="fas fa-angle-double-right"></i></a>
+            <a class="page-link btn-nav btn-first-last" href="#" onclick="goToPage({{ summary.paginator.num_pages }}); return false;">
+                Last <i class="fas fa-angle-double-right"></i>
+            </a>
         </li>
     </ul>
     {% endif %}

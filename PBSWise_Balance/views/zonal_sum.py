@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Sum
 from django.core.paginator import Paginator
 from ..models import PBS_List, Zonals_Balance
+from App_Admin_Panel.models import PaginationManager
 
 def zonal_sum_view(request, pbs_id):
     """
@@ -14,8 +15,11 @@ def zonal_sum_view(request, pbs_id):
     # Filter by PBS
     balances = Zonals_Balance.objects.filter(pbs=pbs)
     
+    # Unique item names for the dropdown (from actual records under this PBS)
+    items_all = balances.order_by('item__item_name').values_list('item__item_name', flat=True).distinct()
+    
     if search_query:
-        balances = balances.filter(item__item_name__icontains=search_query)
+        balances = balances.filter(item__item_name=search_query) # Exact match for dropdown
         
     # Group by item and unit, sum all categories
     # item__item_name and item__unit are the grouping keys
@@ -55,15 +59,26 @@ def zonal_sum_view(request, pbs_id):
             'total': row_total
         })
 
-    paginator = Paginator(processed_summary, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    # Fetch dynamic pagination limit
+    try:
+        limit = PaginationManager.load().table_pagination_limit
+    except:
+        limit = 50
+
+    paginator = Paginator(processed_summary, limit)
+    page_number = request.GET.get('page', 1)
+    
+    try:
+        page_obj = paginator.get_page(page_number)
+    except:
+        page_obj = paginator.get_page(1)
     
     print_view = request.GET.get('print_view') == 'true'
 
     context = {
         'pbs': pbs,
         'summary': page_obj,
+        'items_all': items_all,
         'search_query': search_query,
         'is_print_view': print_view,
     }
