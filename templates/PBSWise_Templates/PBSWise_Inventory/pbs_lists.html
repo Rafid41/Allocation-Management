@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title_block %} PBS Inventory Management {% endblock %}
+
+{% block css_block %}
+<style>
+    body {
+        background: linear-gradient(120deg, #f0f4f8, #dbeafe);
+        min-height: 100vh;
+    }
+
+    .container, .container-fluid {
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    .page-wrapper {
+        padding: 5px 0;
+        position: relative;
+    }
+
+    .back-btn-container {
+        margin: 5px 10px;
+        z-index: 10;
+    }
+
+    .back-btn {
+        padding: 10px 24px;
+        background: white;
+        color: #1e3a8a;
+        border-radius: 50px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+
+    .back-btn:hover {
+        background: #1e3a8a;
+        color: white;
+        transform: translateX(-5px);
+        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        text-decoration: none;
+    }
+
+    .header-section {
+        text-align: center;
+        margin-top: 10px;
+        color: #0f172a;
+    }
+
+    .header-section h1 {
+        font-size: 28px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .controls-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 12px;
+        margin: 20px 10px 10px 10px;
+    }
+
+    .search-group {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .search-input {
+        padding: 10px 20px;
+        width: 350px;
+        border-radius: 25px;
+        border: 1px solid #cbd5e1;
+        outline: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        font-size: 14px;
+    }
+
+    .search-btn {
+        padding: 0 25px;
+        height: 42px;
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .search-btn:hover {
+        background-color: #1e40af;
+        transform: scale(1.05);
+    }
+
+    .pbs-grid {
+        margin: 20px 10px 40px 10px;
+        background: white;
+        padding: 25px;
+        border-radius: 18px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+
+    .pbs-card {
+        background: linear-gradient(135deg, #14b8a6, #0f766e);
+        color: white;
+        text-align: center;
+        padding: 12px 5px;
+        border-radius: 10px;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid rgba(255,255,255,0.1);
+        min-height: 80px;
+        position: relative;
+    }
+
+    .pbs-link-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+    }
+
+    .pbs-card:hover {
+        transform: scale(1.05);
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    @media (max-width: 1100px) {
+        .pbs-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 900px) {
+        .pbs-grid { grid-template-columns: repeat(2, 1fr); }
+        .controls-container { align-items: stretch; margin: 20px 20px; }
+        .search-input { width: 100%; }
+        .search-group { justify-content: stretch; }
+    }
+
+    @media (max-width: 600px) {
+        .pbs-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block body_block %}
+<div class="page-wrapper">
+    <div class="back-btn-container">
+        <a href="{% url 'PBSWise_Home:home_page' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+    </div>
+
+    <div class="header-section">
+        <h1>PBSWise Inventory Management</h1>
+    </div>
+
+    <div class="controls-container">
+        <div class="search-group">
+            <input type="text" id="pbsSearch" class="search-input" placeholder="Search PBS Name here...">
+            <button type="button" class="search-btn">Go</button>
+        </div>
+    </div>
+
+    <div class="pbs-grid shadow" id="pbsGrid">
+        {% for pbs in pbs_items %}
+            <div class="pbs-card" data-name="{{ pbs.pbs_name|lower }}">
+                <!-- In future, this will link to Inventory Balance for this PBS -->
+                <a href="#" class="pbs-link-overlay"></a>
+                <span>{{ pbs.pbs_name }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div id="noResults" class="col-12 text-center mt-5" style="display: none;">
+        <i class="fas fa-search-minus text-muted mb-3 fa-2x"></i>
+        <h5 class="text-muted">No matching PBS found</h5>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('pbsSearch');
+    const pbsCards = document.querySelectorAll('.pbs-card');
+    const noResults = document.getElementById('noResults');
+
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim().toLowerCase();
+        let hasVisible = false;
+        
+        pbsCards.forEach(card => {
+            const pbsName = card.getAttribute('data-name');
+            if (pbsName.includes(query)) {
+                card.style.display = 'flex';
+                hasVisible = true;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        noResults.style.display = hasVisible ? 'none' : 'block';
+    });
+});
+</script>
+{% endblock %}
