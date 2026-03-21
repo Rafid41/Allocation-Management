@@ -18,7 +18,7 @@ def pbswise_history_view(request):
     Restricted to Superusers and Editors for administrative auditing.
     """
     if not request.user.is_superuser and request.user.user_group.user_group_type != "Editor":
-        return redirect("App_User_Group:access_denied")
+        return redirect("App_User_Group:access-denied")
 
     # Initial Queryset
     queryset = PBS_History.objects.select_related('pbs', 'item', 'zonal_from', 'zonal_to').all()
