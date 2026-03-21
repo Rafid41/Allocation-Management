@@ -1,0 +1,472 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title_block %} Summary of PBS Balance {% endblock %}
+
+{% block css_block %}
+<style>
+    /* Premium Auditing Theme - Slate and Royal Blue */
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: 100vh;
+    }
+
+    .container, .container-fluid {
+        max-width: 98% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 1% !important;
+        margin-right: 1% !important;
+    }
+
+    .page-header {
+        text-align: center;
+        padding-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    .pbs-title {
+        color: #1e293b;
+        font-size: 38px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: -0.5px;
+    }
+
+    .back-btn-container {
+        margin: -10px 0 10px 0;
+    }
+
+    .back-btn {
+        padding: 10px 24px;
+        background: white;
+        color: #1e3a8a;
+        border-radius: 50px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: 0.3s;
+        border: 1px solid #e2e8f0;
+    }
+
+    .back-btn:hover {
+        background: #1e3a8a;
+        color: white;
+        transform: translateX(-5px);
+        text-decoration: none;
+    }
+
+    /* Management Card */
+    .summary-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        margin-bottom: 10px;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Search & Filter Panel */
+    .search-panel {
+        padding: 25px 30px;
+        border-bottom: 1px solid #f1f5f9;
+        background: #fdfdfd;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .form-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #475569;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        border: 1.5px solid #e2e8f0;
+        padding: 12px 18px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Data Table - Double Sticky Engine */
+    .table-wrapper {
+        max-height: 70vh;
+        overflow: auto;
+        position: relative;
+        border-radius: 0;
+    }
+
+    .summary-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    /* Sticky Headers */
+    .summary-table thead th {
+        position: sticky;
+        top: 0;
+        background-color: #1e293b;
+        color: white;
+        padding: 18px 15px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: 1px solid #334155;
+        z-index: 100;
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    /* 1st Column: Item - Sticky Left */
+    .summary-table td:nth-child(1), .summary-table th:nth-child(1) {
+        position: sticky;
+        left: 0;
+        z-index: 120;
+        background-color: #f8fafc;
+        border-right: 2px solid #e2e8f0;
+        min-width: 250px;
+        text-align: left;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .summary-table th:nth-child(1) { 
+        z-index: 250; 
+        background-color: #1e293b !important; 
+        color: white !important;
+    }
+
+    /* 2nd Column: Unit - Normal */
+    .summary-table td:nth-child(2), .summary-table th:nth-child(2) {
+        min-width: 80px;
+    }
+
+    /* Last Column: Summary - Sticky Right */
+    .summary-table td:last-child, .summary-table th:last-child {
+        position: sticky;
+        right: 0;
+        z-index: 120;
+        background-color: #eff6ff;
+        border-left: 2px solid #bfdbfe;
+        min-width: 140px;
+        font-weight: 800;
+        color: #1e40af;
+        text-align: center;
+    }
+    .summary-table th:last-child { 
+        z-index: 250; 
+        background-color: #1e3a8a !important; 
+        color: white !important;
+    }
+
+    .summary-table tbody td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+        color: #334155;
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    .summary-table tbody tr:hover td {
+        background-color: #f1f5f9;
+    }
+
+    /* Maintain Summary Column Background on Hover */
+    .summary-table tbody tr:hover td:last-child {
+        background-color: #dbeafe !important;
+    }
+
+    /* Suggestion logic */
+    .suggestion-container { position: relative; }
+    .suggestion-list {
+        position: absolute; top: 100%; left: 0; right: 0;
+        background: white; border: 1px solid #e2e8f0; border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1000;
+        display: none; max-height: 200px; overflow-y: auto;
+    }
+    .suggestion-item { padding: 10px 15px; cursor: pointer; font-size: 14px; color: #1e293b; transition: 0.2s; }
+    .suggestion-item:hover { background: #f1f5f9; color: #3b82f6; }
+
+    /* Custom Pagination (Match History) */
+    .custom-pagination {
+        background: #ffffff; padding: 10px 20px; border-radius: 50px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        display: flex; justify-content: center; list-style: none;
+        max-width: fit-content; margin: 30px auto; align-items: center;
+    }
+    .custom-pagination .page-item { margin: 0 3px; }
+    .custom-pagination .page-link {
+        border: none; border-radius: 50px; min-width: 40px; height: 40px;
+        line-height: 40px; text-align: center; padding: 0 10px;
+        color: #555; font-weight: 600; text-decoration: none; display: block;
+    }
+    .custom-pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white;
+        transform: scale(1.1); box-shadow: 0 4px 10px rgba(30, 58, 138, 0.3);
+    }
+    .btn-nav { font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 15px !important; }
+    .btn-prev-next { background-color: #e0f2fe; color: #0284c7; }
+    .btn-first-last { background-color: #ffe4e6; color: #e11d48; font-weight: 700; }
+
+    @media print {
+        .navbar, .back-btn-container, .search-panel, .card-footer, .footer-wrapper { display: none !important; }
+        .summary-table { border-collapse: collapse !important; }
+        .summary-table th, .summary-table td { position: static !important; border: 1px solid #ddd !important; }
+        .container-fluid { padding: 0 !important; }
+    }
+</style>
+{% endblock %}
+
+{% block body_block %}
+<div class="container-fluid pt-0 pb-4">
+    
+    {% if not is_print_view %}
+    <div class="back-btn-container mb-0">
+        <a href="{% url 'PBSWise_Home:home_page' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to PBS Home
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="page-header">
+        <h1 class="pbs-title">Summary of PBS Balance</h1>
+        <p class="text-muted small">Global administrative matrix of all 80 PBS inventory totals</p>
+    </div>
+
+    <div class="summary-card mt-4">
+        {% if not is_print_view %}
+        <div class="search-panel">
+            <form method="GET" id="summaryFilterForm">
+                <div class="row align-items-end g-3">
+                    <div class="col-md-5">
+                        <label class="form-label">Inventory Item</label>
+                        <div class="suggestion-container">
+                            <input type="text" name="item_name" value="{{ item_name }}" class="form-control" placeholder="Search by item name..." autocomplete="off" id="search_item_summary">
+                            <div class="suggestion-list" id="suggest_item_summary"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100 py-2 font-weight-bold rounded-pill shadow-sm">
+                            <i class="fas fa-search mr-2"></i> Filter
+                        </button>
+                    </div>
+                    <div class="col-md-5 d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-print btn-secondary px-4 py-2 rounded-pill font-weight-bold" onclick="printSummary()">
+                            <i class="fas fa-print mr-2"></i> Print
+                        </button>
+                        <button type="button" class="btn btn-excel btn-success px-4 py-2 rounded-pill font-weight-bold" id="exportSummaryExcel" onclick="exportSummaryToExcel()">
+                            <i class="fas fa-file-excel mr-2"></i> Export Excel
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="table-wrapper">
+            <table class="table summary-table" id="summaryTable">
+                <thead>
+                    <tr>
+                        <th style="min-width: 250px;">Item</th>
+                        <th>Unit</th>
+                        {% for pbs in pbs_list %}
+                        <th style="min-width: 120px;">{{ pbs.pbs_name }}</th>
+                        {% endfor %}
+                        <th style="min-width: 140px;">Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in summary_data %}
+                    <tr>
+                        <td class="text-left font-weight-bold">{{ row.item.item_name }}</td>
+                        <td class="text-center font-weight-bold"><span class="badge badge-dark rounded-pill px-3 py-2" style="background: #334155; color: white; font-size: 11px;">{{ row.unit }}</span></td>
+                        {% for val in row.pbs_values %}
+                        <td>{{ val|floatformat:2 }}</td>
+                        {% endfor %}
+                        <td class="font-weight-bold">{{ row.row_total|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{{ pbs_list|length|add:3 }}" class="text-center py-5 text-muted">
+                            <i class="fas fa-box-open fa-3x mb-3 opacity-20"></i>
+                            <p>No inventory items found matching your criteria.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if items.has_other_pages and not is_print_view %}
+        <div class="card-footer bg-white border-0 py-4">
+            <ul class="custom-pagination">
+                <li class="page-item {% if not items.has_previous %}disabled{% endif %}">
+                    <a class="page-link btn-nav btn-first-last" href="#" onclick="goToPage(1); return false;">
+                        <i class="fas fa-angle-double-left"></i> First
+                    </a>
+                </li>
+                <li class="page-item {% if not items.has_previous %}disabled{% endif %}">
+                    <a class="page-link btn-nav btn-prev-next" href="#" onclick="{% if items.has_previous %}goToPage({{ items.previous_page_number }});{% endif %} return false;">
+                        <i class="fas fa-angle-left"></i> Prev
+                    </a>
+                </li>
+                {% for n in items.paginator.page_range %}
+                    {% if items.number == n %}
+                    <li class="page-item active"><span class="page-link">{{ n }}</span></li>
+                    {% elif n > items.number|add:'-3' and n < items.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="goToPage({{ n }}); return false;">{{ n }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item {% if not items.has_next %}disabled{% endif %}">
+                    <a class="page-link btn-nav btn-prev-next" href="#" onclick="{% if items.has_next %}goToPage({{ items.next_page_number }});{% endif %} return false;">
+                        Next <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item {% if not items.has_next %}disabled{% endif %}">
+                    <a class="page-link btn-nav btn-first-last" href="#" onclick="goToPage({{ items.paginator.num_pages }}); return false;">
+                        Last <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- SheetJS -->
+<script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+
+<script>
+    // --- Dynamic Search Suggestions ---
+    function setupSummarySuggestions() {
+        const input = document.getElementById('search_item_summary');
+        const box = document.getElementById('suggest_item_summary');
+
+        input.addEventListener('input', function() {
+            const query = this.value;
+            if (query.length < 1) { box.style.display = 'none'; return; }
+
+            fetch(`{% url 'PBSWise_Summary:summary_suggestions_ajax' %}?query=${query}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.suggestions.length > 0) {
+                        box.innerHTML = data.suggestions.map(s => `<div class="suggestion-item">${s}</div>`).join('');
+                        box.style.display = 'block';
+                    } else { box.style.display = 'none'; }
+                });
+        });
+
+        box.addEventListener('click', function(e) {
+            if (e.target.classList.contains('suggestion-item')) {
+                input.value = e.target.textContent;
+                box.style.display = 'none';
+                input.form.submit();
+            }
+        });
+
+        document.addEventListener('click', e => { if (e.target !== input && e.target !== box) box.style.display = 'none'; });
+    }
+    setupSummarySuggestions();
+
+    // --- Navigation & Print Controllers ---
+    function goToPage(page) {
+        let url = new URL(window.location.href);
+        url.searchParams.set('page', page);
+        window.location.href = url.toString();
+    }
+
+    function printSummary() {
+        const p = new URLSearchParams(window.location.search);
+        p.set('print_view', 'true');
+        window.open('?' + p.toString(), '_blank');
+    }
+
+    {% if is_print_view %}
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            window.print();
+        }, 500);
+    });
+    {% endif %}
+
+    // --- Absolute Excel Export Engine (Full Record) ---
+    function exportSummaryToExcel() {
+        const p = new URLSearchParams(window.location.search);
+        p.set('print_view', 'true');
+        
+        const btn = document.getElementById('exportSummaryExcel');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Exporting...';
+        btn.disabled = true;
+
+        fetch('?' + p.toString())
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                const table = doc.querySelector('#summaryTable');
+                if (table) {
+                    processExcelSheet(table);
+                }
+            })
+            .catch(err => alert("Regional export failure: " + err))
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+    }
+
+    function processExcelSheet(sourceTable) {
+        if (typeof XLSX === 'undefined') {
+            alert('Regional auditing suite requires SheetJS (XLSX).');
+            return;
+        }
+
+        const wb = XLSX.utils.table_to_book(sourceTable, {sheet: "PBS Summary"});
+        const ws = wb.Sheets["PBS Summary"];
+
+        // Apply Premium Borders & Professional Sticky Header Simulation in Excel
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cell_ref = XLSX.utils.encode_cell({ c: C, r: R });
+                if (!ws[cell_ref]) continue;
+                if (!ws[cell_ref].s) ws[cell_ref].s = {};
+                
+                ws[cell_ref].s.border = {
+                    top: { style: "thin" }, bottom: { style: "thin" },
+                    left: { style: "thin" }, right: { style: "thin" }
+                };
+
+                if (R === 0) {
+                    ws[cell_ref].s.font = { bold: true };
+                    ws[cell_ref].s.fill = { fgColor: { rgb: "F1F5F9" } };
+                }
+            }
+        }
+
+        // Set Reasonable Column Widths for many columns
+        let cols = [{ wch: 35 }, { wch: 10 }]; // Item, Unit
+        for (let i = 0; i < {{ pbs_list|length }}; i++) { cols.push({ wch: 15 }); }
+        cols.push({ wch: 20 }); // Summary
+
+        ws['!cols'] = cols;
+        XLSX.writeFile(wb, "Global_PBS_Inventory_Summary.xlsx");
+    }
+</script>
+{% endblock %}

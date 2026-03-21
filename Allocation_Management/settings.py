@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     "PBSWise_Balance",
     "PBSWise_Inventory",
     "PBSWise_History",
+    'PBSWise_Summary',
 ]
 
 # bootstrap, bootstrap3, bootstrap4, uni-form
