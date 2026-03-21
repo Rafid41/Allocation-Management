@@ -191,8 +191,8 @@
     <div class="pbs-grid shadow" id="pbsGrid">
         {% for pbs in pbs_items %}
             <div class="pbs-card" data-name="{{ pbs.pbs_name|lower }}">
-                <!-- In future, this will link to Inventory Balance for this PBS -->
-                <a href="#" class="pbs-link-overlay"></a>
+                <!-- Links to Inventory Management for this PBS -->
+                <a href="{% url 'PBSWise_Inventory:inventory_management_view' pbs.id %}" class="pbs-link-overlay"></a>
                 <span>{{ pbs.pbs_name }}</span>
             </div>
         {% endfor %}
