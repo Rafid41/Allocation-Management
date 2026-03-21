@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
 from PBSWise_Balance.models import PBS_List, PBS_Zonals, Zonal_Items, Zonals_Balance
+from PBSWise_History.models import PBS_History
 from App_Admin_Panel.models import PaginationManager
 
 def inventory_management_view(request, pbs_id):
@@ -72,6 +73,20 @@ def inventory_management_view(request, pbs_id):
                             current_dest_val = getattr(dest_record, store_to) or 0
                             setattr(dest_record, store_to, current_dest_val + quantity)
                             dest_record.save()
+                        
+                        # 3. Log to History
+                        PBS_History.objects.create(
+                            pbs=pbs,
+                            item=source_record.item,
+                            quantity=quantity,
+                            action=action,
+                            zonal_from_id=zonal_from_id,
+                            store_from=store_from,
+                            zonal_to_id=zonal_to_id if action == "Transfer Item" else None,
+                            store_to=store_to if action == "Transfer Item" else None
+                        )
+
+                        if action == "Transfer Item":
                             messages.success(request, f"Successfully transferred {quantity} units to {dest_record.zonal.zonal_name} ({store_to.replace('_', ' ').title()}).")
                         else:
                             messages.success(request, f"Successfully withdrew {quantity} units from {source_record.zonal.zonal_name} ({store_from.replace('_', ' ').title()}).")

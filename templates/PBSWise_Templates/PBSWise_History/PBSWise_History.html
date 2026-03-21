@@ -1,0 +1,611 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title_block %} PBS Inventory History {% endblock %}
+
+{% block css_block %}
+<style>
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: 100vh;
+    }
+
+    .container, .container-fluid {
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
+    .page-header {
+        text-align: center;
+        padding: 10px 20px;
+        margin-bottom: 20px;
+    }
+
+    .pbs-title {
+        color: #1e293b;
+        font-size: 32px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .back-btn-container {
+        margin: -10px 10px 10px 10px;
+    }
+
+    .back-btn {
+        padding: 10px 24px;
+        background: white;
+        color: #1e3a8a;
+        border-radius: 50px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+
+    .back-btn:hover {
+        background: #1e3a8a;
+        color: white;
+        transform: translateX(-5px);
+        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        text-decoration: none;
+    }
+
+    /* Management Card */
+    .history-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        margin-bottom: 40px;
+        border: none;
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        padding: 20px 30px;
+        border: none;
+    }
+
+    /* Search Section */
+    .search-panel {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 25px 30px;
+    }
+
+    .form-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #475569;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        padding: 12px 16px;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Suggestion Box */
+    .suggestion-container {
+        position: relative;
+    }
+    .suggestion-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        z-index: 1000;
+        display: none;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .suggestion-item {
+        padding: 10px 15px;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 14px;
+        color: #1e293b;
+    }
+    .suggestion-item:hover {
+        background: #f1f5f9;
+        color: #3b82f6;
+    }
+
+    /* Table Design */
+    .table-responsive {
+        padding: 0;
+    }
+
+    .history-table {
+        margin-bottom: 0;
+        width: 100%;
+    }
+
+    .history-table thead th {
+        background: #f1f5f9;
+        color: #475569;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 1px;
+        border: none;
+        padding: 15px 20px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .history-table tbody td {
+        padding: 15px 20px;
+        vertical-align: middle;
+        font-size: 13px;
+        color: #1e293b;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .badge-pills {
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 11px;
+        text-transform: uppercase;
+    }
+
+    .bg-transfer { background: #dcfce7; color: #166534; }
+    .bg-withdraw { background: #fee2e2; color: #991b1b; }
+    
+    .na-text {
+        color: #94a3b8;
+        font-style: italic;
+        font-weight: 500;
+    }
+
+    /* Export Buttons */
+    .export-btn {
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-print { background: #1e293b; color: white; }
+    .btn-excel { background: #166534; color: white; }
+    .btn-docx { background: #1e40af; color: white; }
+
+    .export-btn:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Custom Pagination Styling */
+    .custom-pagination {
+        background: #ffffff;
+        padding: 10px 20px;
+        border-radius: 50px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: center;
+        list-style: none;
+        max-width: fit-content;
+        margin: 30px auto;
+        align-items: center;
+    }
+    .custom-pagination .page-item { margin: 0 3px; }
+    .custom-pagination .page-link {
+        border: none;
+        border-radius: 50px;
+        min-width: 40px;
+        height: 40px;
+        line-height: 40px;
+        text-align: center;
+        padding: 0 10px;
+        color: #555;
+        font-weight: 600;
+        transition: 0.3s;
+        text-decoration: none;
+        display: block;
+        background: transparent;
+    }
+    .custom-pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        color: white;
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(30, 58, 138, 0.3);
+    }
+    .custom-pagination .page-item.disabled .page-link {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .btn-nav { font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 15px !important; }
+    .btn-prev-next { background-color: #e0f2fe; color: #0284c7; }
+    .btn-prev-next:hover { background-color: #0ea5e9; color: white !important; }
+    .btn-first-last { background-color: #ffe4e6; color: #e11d48; font-weight: 700; }
+    .btn-first-last:hover { background-color: #f43f5e; color: white !important; }
+
+    @media print {
+        .navbar, .back-btn-container, .search-panel, .card-footer, .export-btn, .footer-wrapper {
+            display: none !important;
+        }
+        body { background: white !important; }
+        .history-card { box-shadow: none !important; margin-bottom: 0 !important; border-radius: 0 !important; }
+        .history-table thead th { background: #f8fafc !important; color: black !important; position: static !important; border: 1px solid #ddd !important; }
+        .history-table td { border: 1px solid #ddd !important; }
+        .container-fluid { padding: 0 !important; }
+    }
+
+</style>
+{% endblock %}
+
+{% block body_block %}
+<div class="container-fluid pt-0 pb-4">
+    
+    {% if not is_print_view %}
+    <div class="back-btn-container mb-3">
+        <a href="{% url 'PBSWise_Home:home_page' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to PBS Home
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="page-header">
+        <h1 class="pbs-title">PBS Inventory History Log</h1>
+        <p class="text-muted small">Centralized longitudinal audit trail for regional inventory movements</p>
+    </div>
+
+    <div class="history-card mt-4">
+        <!-- Search & Filter Panel -->
+        {% if not is_print_view %}
+        <div class="search-panel">
+            <form method="GET" id="filterForm">
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <label class="form-label">PBS Name</label>
+                        <div class="suggestion-container">
+                            <input type="text" name="pbs_name" value="{{ pbs_name }}" class="form-control" placeholder="Select PBS..." autocomplete="off" id="search_pbs">
+                            <div class="suggestion-list" id="suggest_pbs"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Date</label>
+                        <input type="date" name="date" value="{{ date_val }}" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Item Name</label>
+                        <div class="suggestion-container">
+                            <input type="text" name="item_name" value="{{ item_name }}" class="form-control" placeholder="Search Item..." autocomplete="off" id="search_item">
+                            <div class="suggestion-list" id="suggest_item"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Action</label>
+                        <select name="action" class="form-select">
+                            <option value="">Any action</option>
+                            {% for act in actions %}
+                            <option value="{{ act }}" {% if selected_action == act %}selected{% endif %}>{{ act }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Zonal From</label>
+                        <div class="suggestion-container">
+                            <input type="text" name="zonal_from" value="{{ zonal_from_val }}" class="form-control" placeholder="Select Zonal..." autocomplete="off" id="search_zonal">
+                            <div class="suggestion-list" id="suggest_zonal"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Store From</label>
+                        <div class="suggestion-container">
+                            <input type="text" name="store_from" value="{{ store_from_val }}" class="form-control" placeholder="Select Store..." autocomplete="off" id="search_store">
+                            <div class="suggestion-list" id="suggest_store"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary d-flex align-items-center gap-2" style="border-radius: 12px; padding: 10px 25px; font-weight: 700;">
+                            <i class="fas fa-filter"></i> Apply Filters
+                        </button>
+                        <a href="{% url 'PBSWise_History:pbswise_history' %}" class="btn btn-outline-secondary d-flex align-items-center gap-2" style="border-radius: 12px; padding: 10px 25px; font-weight: 700;">
+                            <i class="fas fa-sync-alt"></i> Reset
+                        </a>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="export-btn btn-print" onclick="printFullResults()">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <button type="button" class="export-btn btn-excel" id="exportFullExcel" onclick="exportToExcelGeneric()">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
+                        <a id="downloadDocx" href="{% url 'PBSWise_History:export_history_docx' %}?pbs_name={{ pbs_name }}&item_name={{ item_name }}" class="export-btn btn-docx">
+                            <i class="fas fa-file-word"></i> Download Doc
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Table Section -->
+        <div class="table-responsive">
+            <table class="table history-table table-hover" id="historyTable">
+                <thead>
+                    <tr>
+                        <th style="min-width: 150px;">PBS Name</th>
+                        <th style="min-width: 100px;">Date</th>
+                        <th style="min-width: 180px;">Item</th>
+                        <th style="min-width: 80px;">Qty</th>
+                        <th style="min-width: 120px;">Action</th>
+                        <th style="min-width: 130px;">Zonal From</th>
+                        <th style="min-width: 130px;">Store From</th>
+                        <th style="min-width: 130px;">Zonal To</th>
+                        <th style="min-width: 130px;">Store To</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in items %}
+                    <tr>
+                        <td class="font-weight-bold">{{ rec.pbs.pbs_name }}</td>
+                        <td>{{ rec.date|date:"d-m-Y" }}</td>
+                        <td class="font-weight-bold text-primary">{{ rec.item.item_name }}</td>
+                        <td class="font-weight-bold">{{ rec.quantity|floatformat:2 }}</td>
+                        <td>
+                            <span class="badge-pills {% if rec.action == 'Transfer Item' %}bg-transfer{% else %}bg-withdraw{% endif %}">
+                                {{ rec.action }}
+                            </span>
+                        </td>
+                        <td>{{ rec.zonal_from.zonal_name }}</td>
+                        <td>{{ rec.store_from|replace_underscore }}</td>
+                        <td>
+                            {% if rec.action == "Withdraw Item" %}
+                                <span class="na-text">N/A</span>
+                            {% else %}
+                                {{ rec.zonal_to.zonal_name }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if rec.action == "Withdraw Item" %}
+                                <span class="na-text">N/A</span>
+                            {% else %}
+                                {{ rec.store_to|replace_underscore }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="fas fa-history fa-3x mb-3 opacity-10"></i>
+                            <p>No inventory history records matching your criteria.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if items.has_other_pages and not is_print_view %}
+        <div class="card-footer bg-white border-0 py-4">
+            <ul class="custom-pagination">
+                <li class="page-item {% if not items.has_previous %}disabled{% endif %}">
+                    <a class="page-link btn-nav btn-first-last" href="#" onclick="goToPage(1); return false;">
+                        <i class="fas fa-angle-double-left"></i> First
+                    </a>
+                </li>
+                <li class="page-item {% if not items.has_previous %}disabled{% endif %}">
+                    <a class="page-link btn-nav btn-prev-next" href="#" onclick="{% if items.has_previous %}goToPage({{ items.previous_page_number }});{% endif %} return false;">
+                        <i class="fas fa-angle-left"></i> Prev
+                    </a>
+                </li>
+                
+                {% for n in items.paginator.page_range %}
+                    {% if items.number == n %}
+                    <li class="page-item active"><span class="page-link">{{ n }}</span></li>
+                    {% elif n > items.number|add:'-3' and n < items.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="goToPage({{ n }}); return false;">{{ n }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                <li class="page-item {% if not items.has_next %}disabled{% endif %}">
+                    <a class="page-link btn-nav btn-prev-next" href="#" onclick="{% if items.has_next %}goToPage({{ items.next_page_number }});{% endif %} return false;">
+                        Next <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item {% if not items.has_next %}disabled{% endif %}">
+                    <a class="page-link btn-nav btn-first-last" href="#" onclick="goToPage({{ items.paginator.num_pages }}); return false;">
+                        Last <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- SheetJS for Excel Export -->
+<script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+
+<script>
+    // --- Smart Suggestion Logic ---
+    function setupSuggestions(inputId, suggestId, field) {
+        const input = document.getElementById(inputId);
+        const suggestionBox = document.getElementById(suggestId);
+
+        input.addEventListener('input', function() {
+            const query = this.value;
+            if (query.length < 1) {
+                suggestionBox.style.display = 'none';
+                return;
+            }
+
+            const pbs = document.getElementById('search_pbs').value;
+            const zonal = document.getElementById('search_zonal').value;
+
+            fetch(`{% url 'PBSWise_History:history_suggestions_ajax' %}?field=${field}&query=${query}&pbs_name=${pbs}&zonal_from=${zonal}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.suggestions.length > 0) {
+                        suggestionBox.innerHTML = data.suggestions.map(s => `<div class="suggestion-item">${s}</div>`).join('');
+                        suggestionBox.style.display = 'block';
+                    } else {
+                        suggestionBox.style.display = 'none';
+                    }
+                });
+        });
+
+        suggestionBox.addEventListener('click', function(e) {
+            if (e.target.classList.contains('suggestion-item')) {
+                input.value = e.target.textContent;
+                suggestionBox.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target !== input && e.target !== suggestionBox) {
+                suggestionBox.style.display = 'none';
+            }
+        });
+    }
+
+    setupSuggestions('search_pbs', 'suggest_pbs', 'pbs_name');
+    setupSuggestions('search_item', 'suggest_item', 'item_name');
+    setupSuggestions('search_zonal', 'suggest_zonal', 'zonal_from');
+    setupSuggestions('search_store', 'suggest_store', 'store_from');
+
+    // --- Pagination Controller ---
+    function goToPage(page) {
+        let url = new URL(window.location.href);
+        url.searchParams.set('page', page);
+        window.location.href = url.toString();
+    }
+
+    // --- High-Fidelity Print Engine ---
+    function printFullResults() {
+        const p = new URLSearchParams(window.location.search);
+        p.set('print_view', 'true');
+        window.open('?' + p.toString(), '_blank');
+    }
+
+    {% if is_print_view %}
+    window.onload = function() {
+        window.print();
+    };
+    {% endif %}
+
+    // --- Absolute Excel Export Engine ---
+    function exportToExcelGeneric() {
+        const p = new URLSearchParams(window.location.search);
+        // Ensure we fetch all filtered records matching current criteria
+        p.set('print_view', 'true');
+        
+        const btn = document.getElementById('exportFullExcel');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Exporting...';
+        btn.disabled = true;
+
+        fetch('?' + p.toString())
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                const table = doc.querySelector('#historyTable');
+                if (table) {
+                    performExcelExport(table);
+                } else {
+                    alert("Registry table not found in absolute dataset.");
+                }
+            })
+            .catch(err => alert("Regional export failure: " + err))
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+    }
+
+    function performExcelExport(sourceTable) {
+        if (typeof XLSX === 'undefined') {
+            alert('Regional auditing suite requires SheetJS (XLSX). Please verify connectivity.');
+            return;
+        }
+
+        const wb = XLSX.utils.table_to_book(sourceTable, {sheet: "PBS History"});
+        const ws = wb.Sheets["PBS History"];
+
+        // Apply Premium Borders & Header Styles
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cell_address = { c: C, r: R };
+                const cell_ref = XLSX.utils.encode_cell(cell_address);
+                if (!ws[cell_ref]) continue;
+
+                if (!ws[cell_ref].s) ws[cell_ref].s = {};
+                
+                // Professional Auditing Borders
+                ws[cell_ref].s.border = {
+                    top: { style: "thin", color: { rgb: "000000" } },
+                    bottom: { style: "thin", color: { rgb: "000000" } },
+                    left: { style: "thin", color: { rgb: "000000" } },
+                    right: { style: "thin", color: { rgb: "000000" } }
+                };
+
+                // Bold Registry Headers
+                if (R === 0) {
+                    ws[cell_ref].s.font = { bold: true };
+                    ws[cell_ref].s.fill = { fgColor: { rgb: "F1F5F9" } };
+                }
+            }
+        }
+
+        // Optimized Registry Column Widths
+        ws['!cols'] = [
+            { wch: 25 }, { wch: 15 }, { wch: 30 }, { wch: 10 },
+            { wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }
+        ];
+
+        XLSX.writeFile(wb, "PBS_Inventory_Full_History.xlsx");
+    }
+
+    // Update Docx link to include all filters
+    document.getElementById('downloadDocx').addEventListener('click', function(e) {
+        const p = new URLSearchParams(window.location.search);
+        this.href = "{% url 'PBSWise_History:export_history_docx' %}?" + p.toString();
+    });
+
+</script>
+{% endblock %}

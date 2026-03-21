@@ -149,7 +149,11 @@
                             <i class="fas fa-boxes"></i> Inventory
                         </a>
                     </li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-history"></i> History</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'PBSWise_History:pbswise_history' %}">
+                            <i class="fas fa-history"></i> History
+                        </a>
+                    </li>
                 {% endif %}
             </ul>
 
