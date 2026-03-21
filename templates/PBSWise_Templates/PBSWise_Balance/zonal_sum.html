@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title_block %} {{ pbs.pbs_name }} Zonal Sum {% endblock %}
+
+{% block css_block %}
+<style>
+    body {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        min-height: 100vh;
+    }
+
+    .back-btn-container {
+        margin: 5px 10px;
+    }
+
+    .container, .container-fluid {
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    .back-btn {
+        padding: 10px 24px;
+        background: white;
+        color: #1e3a8a;
+        border-radius: 50px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+
+    .back-btn:hover {
+        background: #1e3a8a;
+        color: white;
+        transform: translateX(-5px);
+        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        text-decoration: none;
+    }
+
+    .page-header {
+        text-align: center;
+        padding: 10px 20px;
+    }
+
+    .pbs-title {
+        color: #14532d;
+        font-size: 40px;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .store-subtitle {
+        color: #166534;
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .search-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+        border: 1px solid #bbf7d0;
+    }
+
+    /* Table Styles (Matched to zonal_details) */
+    .table-responsive {
+        max-height: 80vh;
+        overflow-y: auto;
+        overflow-x: auto;
+        position: relative;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid #f1f5f9;
+        background: white;
+    }
+
+    .table { margin-bottom: 0; min-width: 1500px; border-collapse: separate; border-spacing: 0; }
+    
+    .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: #334155;
+        color: white !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 1px;
+        padding: 15px 10px;
+        border: 1px solid #475569;
+        text-align: center;
+    }
+
+    /* Fixed Columns: Item (1st) */
+    .table td:nth-child(1), .table th:nth-child(1) {
+        position: sticky;
+        left: 0;
+        z-index: 10;
+        background: #f8fafc;
+        border-right: 2px solid #e2e8f0;
+    }
+    .table th:nth-child(1) { z-index: 110 !important; background: #334155 !important; }
+
+    /* Total is 11th */
+    .table td:nth-child(11), .table th:nth-child(11) {
+        position: sticky;
+        right: 0;
+        z-index: 10;
+        background: #f1f5f9;
+        border-left: 2px solid #e2e8f0;
+        font-weight: 800;
+        color: #1e293b;
+    }
+    .table th:nth-child(11) { z-index: 110 !important; background: #334155 !important; color: white !important; }
+
+    .table tbody td {
+        padding: 15px 20px;
+        vertical-align: middle;
+        color: #475569;
+        font-weight: 500;
+        border-bottom: 1px solid #f1f5f9;
+        text-align: center;
+    }
+
+    .table tbody tr:hover td { background-color: #f1f5f9 !important; }
+
+    /* Pagination */
+    .custom-pagination {
+        background: #ffffff;
+        padding: 10px 20px;
+        border-radius: 50px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: center;
+        list-style: none;
+        max-width: fit-content;
+        margin: 30px auto;
+    }
+    .custom-pagination .page-item { margin: 0 3px; }
+    .custom-pagination .page-link {
+        border: none;
+        border-radius: 50px;
+        min-width: 40px;
+        height: 40px;
+        line-height: 40px;
+        text-align: center;
+        padding: 0 10px;
+        color: #555;
+        font-weight: 600;
+        transition: 0.3s;
+        text-decoration: none;
+        display: block;
+    }
+    .custom-pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #6366f1, #4338ca);
+        color: white;
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+    }
+
+    @media print {
+        .navbar, .footer-wrapper, .back-btn-container, .search-card, .custom-pagination, .footer-logo-section {
+            display: none !important;
+        }
+        .container-fluid { width: 100% !important; padding: 0 !important; }
+        .table-responsive { max-height: none !important; overflow: visible !important; }
+        .table th, .table td { position: static !important; border: 1px solid #ddd !important; background: white !important; }
+        .table thead th { background: #f1f5f9 !important; color: black !important; font-weight: 800 !important; }
+    }
+</style>
+{% endblock %}
+
+{% block body_block %}
+{% if not is_print_view %}
+<div class="back-btn-container">
+    <a href="{% url 'PBSWise_Balance:pbs_zonals_view' pbs.id %}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Units
+    </a>
+</div>
+{% endif %}
+
+<div class="page-header">
+    <h1 class="pbs-title">PBS: {{ pbs.pbs_name }}</h1>
+    <h2 class="store-subtitle">Aggregate Zonal Summary (All Units)</h2>
+</div>
+
+<div class="container-fluid px-4">
+    {% if not is_print_view %}
+    <div class="search-card">
+        <form method="GET" class="row g-3">
+            <div class="col-md-6">
+                <label class="font-weight-bold text-muted small text-uppercase mb-2">Search Item Name</label>
+                <input type="text" name="search" value="{{ search_query }}" class="form-control rounded-pill" placeholder="Type item name to filter...">
+            </div>
+            <div class="col-md-3 mt-auto">
+                <button type="submit" class="btn btn-primary btn-block font-weight-bold rounded-pill py-2">
+                    <i class="fas fa-search mr-2"></i> Search Item
+                </button>
+            </div>
+            <div class="col-md-12 mt-4 d-flex gap-3">
+                <button type="button" class="btn btn-secondary rounded-pill px-4 font-weight-bold shadow-sm" onclick="printResults()" style="background-color: #64748b; border: none;">
+                    <i class="fas fa-print mr-2"></i> Print Summary
+                </button>
+                <button type="button" class="btn btn-success rounded-pill px-4 font-weight-bold shadow-sm" onclick="exportToExcelGeneric()" style="background: #15803d; border: none;">
+                    <i class="fas fa-file-excel mr-2"></i> Export Aggregate Excel
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <div class="table-responsive" id="printableArea">
+        <table class="table table-hover" id="summaryTable">
+            <thead>
+                <tr>
+                    <th style="min-width: 250px;">Zonal Master Item</th>
+                    <th style="min-width: 100px;">Unit</th>
+                    <th>Aggregate Deposit Work</th>
+                    <th>Aggregate MCEP-DMD</th>
+                    <th>Aggregate MCEP-KD</th>
+                    <th>Aggregate MCEP-BD</th>
+                    <th>Aggregate Other</th>
+                    <th>Aggregate O&M Store</th>
+                    <th>Aggregate Own Stock</th>
+                    <th style="min-width: 150px;">PBS Global Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in summary %}
+                <tr>
+                    <td class="font-weight-bold text-dark text-left px-4">{{ row.item_name }}</td>
+                    <td><span class="badge px-3 py-2 rounded-pill" style="background: #334155; color: white;">{{ row.unit }}</span></td>
+                    <td>{{ row.deposit_work|floatformat:2 }}</td>
+                    <td>{{ row.mcep_dmd|floatformat:2 }}</td>
+                    <td>{{ row.mcep_kd|floatformat:2 }}</td>
+                    <td>{{ row.mcep_bd|floatformat:2 }}</td>
+                    <td>{{ row.other|floatformat:2 }}</td>
+                    <td>{{ row.om_store|floatformat:2 }}</td>
+                    <td>{{ row.own_stock|floatformat:2 }}</td>
+                    <td class="font-weight-bold" style="background: #f1f5f9; color: #1e293b;">{{ row.total|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" class="py-5 text-muted text-center">
+                        <i class="fas fa-search fa-3x mb-3 opacity-25"></i><br>
+                        No inventory data found for this PBS.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if summary.has_other_pages and not is_print_view %}
+    <ul class="custom-pagination">
+        <li class="page-item {% if not summary.has_previous %}disabled{% endif %}">
+            <a class="page-link" href="#" onclick="goToPage(1); return false;"><i class="fas fa-angle-double-left"></i> First</a>
+        </li>
+        <li class="page-item {% if not summary.has_previous %}disabled{% endif %}">
+             <a class="page-link" href="#" onclick="{% if summary.has_previous %}goToPage({{ summary.previous_page_number }});{% endif %} return false;"><i class="fas fa-angle-left"></i> Prev</a>
+        </li>
+        {% for i in summary.paginator.page_range %}
+            {% if i > summary.number|add:'-3' and i < summary.number|add:'3' %}
+                <li class="page-item {% if summary.number == i %}active{% endif %}">
+                    <a class="page-link" href="#" onclick="goToPage({{ i }}); return false;">{{ i }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        <li class="page-item {% if not summary.has_next %}disabled{% endif %}">
+             <a class="page-link" href="#" onclick="{% if summary.has_next %}goToPage({{ summary.next_page_number }});{% endif %} return false;">Next <i class="fas fa-angle-right"></i></a>
+        </li>
+        <li class="page-item {% if not summary.has_next %}disabled{% endif %}">
+             <a class="page-link" href="#" onclick="goToPage({{ summary.paginator.num_pages }}); return false;">Last <i class="fas fa-angle-double-right"></i></a>
+        </li>
+    </ul>
+    {% endif %}
+</div>
+
+<script>
+    function goToPage(page) {
+        let url = new URL(window.location.href);
+        url.searchParams.set('page', page);
+        window.location.href = url.toString();
+    }
+
+    function printResults() { 
+        const p = new URLSearchParams(window.location.search);
+        p.set('print_view', 'true');
+        window.open('?' + p.toString(), '_blank');
+    }
+
+    {% if is_print_view %}
+    window.onload = function() { window.print(); };
+    {% endif %}
+
+    function exportToExcelGeneric() {
+        const p = new URLSearchParams(window.location.search);
+        p.set('print_view', 'true');
+        
+        const btn = document.querySelector('button[onclick="exportToExcelGeneric()"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+        btn.disabled = true;
+
+        fetch('?' + p.toString())
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                const table = doc.getElementById('summaryTable');
+                exportToExcel(table);
+            })
+            .catch(err => alert("Export failed: " + err))
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+    }
+
+    function exportToExcel(sourceTable) {
+        if (typeof XLSX === 'undefined') {
+            alert('SheetJS (XLSX) library not loaded.');
+            return;
+        }
+        
+        const ws = XLSX.utils.table_to_sheet(sourceTable);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Zonal Aggregate");
+        XLSX.writeFile(wb, "PBS_Aggregate_Sum_{{ pbs.pbs_name }}.xlsx");
+    }
+</script>
+{% endblock %}

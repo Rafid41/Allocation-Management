@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import all_pbs_list_page, PBS_Zonals, manage_zonal_items, Zonal_Balance, zonal_details, individual_pbs_balance, individual_zonal_balance
+from .views import all_pbs_list_page, PBS_Zonals, manage_zonal_items, Zonal_Balance, zonal_details, individual_pbs_balance, individual_zonal_balance, zonal_sum
 
 app_name = "PBSWise_Balance"
 
@@ -42,4 +42,7 @@ urlpatterns = [
     path("pbswise_balance/pbs_zonals/<uuid:pbs_id>/manage_balance/add/", individual_zonal_balance.manage_balance_add, name="manage_balance_add"),
     path("pbswise_balance/pbs_zonals/<uuid:pbs_id>/manage_balance/edit/<uuid:record_id>/", individual_zonal_balance.manage_balance_edit, name="manage_balance_edit"),
     path("pbswise_balance/pbs_zonals/<uuid:pbs_id>/manage_balance/delete/<uuid:record_id>/", individual_zonal_balance.manage_balance_delete, name="manage_balance_delete"),
+    
+    # Aggregate PBS Sum
+    path("pbswise_balance/pbs_zonals/<uuid:pbs_id>/zonal_sum/", zonal_sum.zonal_sum_view, name="zonal_sum_view"),
 ]

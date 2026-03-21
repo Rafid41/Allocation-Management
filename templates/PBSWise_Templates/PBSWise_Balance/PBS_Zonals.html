@@ -296,8 +296,8 @@
     {% endif %}
 
     <div style="display: flex; justify-content: center; margin-bottom: 30px;">
-        <a href="#" class="sum-btn">
-            <i class="fas fa-calculator"></i> Sum
+        <a href="{% url 'PBSWise_Balance:zonal_sum_view' pbs.id %}" class="sum-btn">
+            <i class="fas fa-calculator"></i> Zonal Sum
         </a>
     </div>
 
