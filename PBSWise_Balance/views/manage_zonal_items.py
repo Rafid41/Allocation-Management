@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .all_pbs_list_page import check_editor_permission
 from ..models import Zonal_Items
+from App_Entry.models import Item as MainItem
 
 def manage_zonal_home(request):
     """Home page for managing all zonal items and balance."""
@@ -50,6 +51,7 @@ def manage_zonal_items(request):
         'items': page_obj,
         'search_query': search_query,
         'can_modify': True,
+        'units': MainItem.UNIT_CHOICES,
     }
     return render(request, "PBSWise_Templates/PBSWise_Balance/manage_zonals_items.html", context)
 
@@ -60,13 +62,14 @@ def zonal_item_add(request):
     
     if request.method == "POST":
         item_name = request.POST.get('item_name', '').strip()
+        unit = request.POST.get('unit', 'Mtr.')
         if item_name:
             # Duplicate check
             if Zonal_Items.objects.filter(item_name__iexact=item_name).exists():
                 messages.error(request, "This Zonal Item already exists")
                 return redirect("PBSWise_Balance:manage_zonal_items")
 
-            Zonal_Items.objects.create(item_name=item_name)
+            Zonal_Items.objects.create(item_name=item_name, unit=unit)
             messages.success(request, f"Item '{item_name}' added successfully.")
         else:
             messages.error(request, "Item name cannot be empty.")
@@ -81,6 +84,7 @@ def zonal_item_edit(request, item_id):
     item = get_object_or_404(Zonal_Items, id=item_id)
     if request.method == "POST":
         item_name = request.POST.get('item_name', '').strip()
+        unit = request.POST.get('unit', 'Mtr.')
         if item_name:
             # Duplicate check (excluding current item)
             if Zonal_Items.objects.filter(item_name__iexact=item_name).exclude(id=item_id).exists():
@@ -88,6 +92,7 @@ def zonal_item_edit(request, item_id):
                 return redirect("PBSWise_Balance:manage_zonal_items")
 
             item.item_name = item_name
+            item.unit = unit
             item.save()
             messages.success(request, "Item updated successfully.")
         else:

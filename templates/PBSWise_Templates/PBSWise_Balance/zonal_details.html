@@ -259,7 +259,7 @@
                 <tr>
                     <td class="font-weight-bold text-dark">{{ record.item.item_name }}</td>
                     <td class="text-left small">{{ record.description|default:"-" }}</td>
-                    <td><span class="badge px-3 py-2 rounded-pill" style="background: #334155; color: white;">{{ record.unit }}</span></td>
+                    <td><span class="badge px-3 py-2 rounded-pill" style="background: #334155; color: white;">{{ record.item.unit }}</span></td>
                     <td>{{ record.deposit_work|floatformat:2 }}</td>
                     <td>{{ record.mcep_dmd|floatformat:2 }}</td>
                     <td>{{ record.mcep_kd|floatformat:2 }}</td>

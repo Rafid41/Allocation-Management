@@ -377,7 +377,7 @@
                     <td>{{ record.zonal.zonal_name }}</td>
                     <td class="font-weight-bold text-dark">{{ record.item.item_name }}</td>
                     <td class="text-left small">{{ record.description|default:"-" }}</td>
-                    <td><span class="badge px-3 py-2 rounded-pill" style="background: #334155 !important; color: white !important;">{{ record.unit }}</span></td>
+                    <td><span class="badge px-3 py-2 rounded-pill" style="background: #334155 !important; color: white !important;">{{ record.item.unit }}</span></td>
                     <td>{{ record.deposit_work|floatformat:2 }}</td>
                     <td>{{ record.mcep_dmd|floatformat:2 }}</td>
                     <td>{{ record.mcep_kd|floatformat:2 }}</td>
@@ -456,11 +456,9 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label class="font-weight-bold small text-muted text-uppercase">Unit</label>
-                                                <select name="unit" class="form-control rounded-pill">
-                                                    {% for u_val, u_text in units %}
-                                                    <option value="{{ u_val }}" {% if u_val == record.unit %}selected{% endif %}>{{ u_text }}</option>
-                                                    {% endfor %}
-                                                </select>
+                                                <div class="unit-display rounded-pill bg-light px-3 py-2 text-dark font-weight-bold" style="border: 1px solid #e2e8f0; text-align: center;">
+                                                    {{ record.item.unit }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -643,11 +641,9 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label class="font-weight-bold small text-muted text-uppercase">Unit</label>
-                                <select name="unit" class="form-control rounded-pill">
-                                    {% for u_val, u_text in units %}
-                                    <option value="{{ u_val }}">{{ u_text }}</option>
-                                    {% endfor %}
-                                </select>
+                                <div id="add-unit-display" class="unit-display rounded-pill bg-light px-3 py-2 text-dark font-weight-bold" style="border: 1px solid #e2e8f0; text-align: center;">
+                                    -
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -673,6 +669,29 @@
 </div>
 
 <script>
+    // Global Item-Unit Mapping
+    const itemUnits = {
+        {% for it in items_all %}
+        "{{ it.id }}": "{{ it.unit }}",
+        {% endfor %}
+    };
+
+    $(document).ready(function() {
+        // Update unit display on item change (Add Modal)
+        $('#add_item').on('change', function() {
+            const itemId = $(this).val();
+            const unit = itemUnits[itemId] || '-';
+            $('#add-unit-display').text(unit);
+        });
+
+        // Update unit display on item change (Edit Modals)
+        $('.modal-item').on('change', function() {
+            const itemId = $(this).val();
+            const unit = itemUnits[itemId] || '-';
+            $(this).closest('.modal-content').find('.unit-display').text(unit);
+        });
+    });
+
     // Helper to fetch zonals for a PBS
     function loadZonalsForSearch(pbsId, selectedZonalId = null) {
         const dropdown = $('#search_zonal');

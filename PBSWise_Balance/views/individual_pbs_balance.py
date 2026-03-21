@@ -4,6 +4,7 @@ from ..models import PBS_List, Zonal_Items
 from .all_pbs_list_page import check_pbs_management_permission, get_pbs_username
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from App_Admin_Panel.models import PaginationManager
+from App_Entry.models import Item as MainItem
 
 def manage_individual_pbs_zonal_home(request, pbs_id):
     """Home landing page for managing a specific PBS balance tools."""
@@ -66,11 +67,12 @@ def manage_individual_pbs_zonal_items(request, pbs_id):
     # Handle Global Items Addition (Regional users can only ADD)
     if request.method == "POST" and can_manage:
         item_name = request.POST.get('item_name', '').strip()
+        unit = request.POST.get('unit', 'Mtr.')
         if item_name:
             if Zonal_Items.objects.filter(item_name__iexact=item_name).exists():
                 messages.error(request, f"Conflict: '{item_name}' already exists in the system.")
             else:
-                Zonal_Items.objects.create(item_name=item_name)
+                Zonal_Items.objects.create(item_name=item_name, unit=unit)
                 messages.success(request, f"Item '{item_name}' has been added to the master inventory list.")
         else:
             messages.error(request, "Item name cannot be blank.")
@@ -84,5 +86,6 @@ def manage_individual_pbs_zonal_items(request, pbs_id):
         'can_edit': False, 
         'can_modify': False,
         'can_delete': False, 
+        'units': MainItem.UNIT_CHOICES,
     }
     return render(request, "PBSWise_Templates/PBSWise_Balance/manage_individual_pbs_zonals_items.html", context)

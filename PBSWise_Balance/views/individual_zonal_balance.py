@@ -92,7 +92,6 @@ def manage_balance_add(request, pbs_id):
                 zonal_id=zonal_id,
                 item_id=item_id,
                 description=request.POST.get('description', '').strip(),
-                unit=request.POST.get('unit', 'Nos.'),
                 deposit_work=float(request.POST.get('deposit_work', 0) or 0),
                 mcep_dmd=float(request.POST.get('mcep_dmd', 0) or 0),
                 mcep_kd=float(request.POST.get('mcep_kd', 0) or 0),
@@ -131,7 +130,6 @@ def manage_balance_edit(request, pbs_id, record_id):
             record.zonal_id = zonal_id
             record.item_id = item_id
             record.description = request.POST.get('description', '').strip()
-            record.unit = request.POST.get('unit', 'Nos.')
             record.deposit_work = float(request.POST.get('deposit_work', 0) or 0)
             record.mcep_dmd = float(request.POST.get('mcep_dmd', 0) or 0)
             record.mcep_kd = float(request.POST.get('mcep_kd', 0) or 0)

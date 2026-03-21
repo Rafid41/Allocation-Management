@@ -267,6 +267,7 @@
             <thead>
                 <tr>
                     <th>Item Name</th>
+                    <th>Unit</th>
                     <th style="width: 150px; text-align: center;">Actions</th>
                 </tr>
             </thead>
@@ -274,6 +275,7 @@
                 {% for item in items %}
                 <tr>
                     <td>{{ item.item_name }}</td>
+                    <td><span class="badge badge-dark rounded-pill px-3" style="background:#334155; color:white;">{{ item.unit }}</span></td>
                     <td class="text-center">
                         {% if can_modify %}
                             <button class="action-icon edit-icon" data-toggle="modal" data-target="#editItem{{ forloop.counter }}">
@@ -296,12 +298,23 @@
                                     <h5 class="modal-title"><i class="fas fa-edit text-info mr-2"></i> Edit Item</h5>
                                 </div>
                                 <div class="modal-body px-4 py-4">
-                                    <div class="form-group mb-0">
+                                    <div class="form-group mb-3">
                                         <label class="font-weight-bold text-muted small text-uppercase">New Item Name</label>
                                         <input type="text" name="item_name" value="{{ item.item_name }}" 
                                                data-original="{{ item.item_name }}"
-                                               oninput="validateEdit(this, 'editBtn{{ forloop.counter }}')"
+                                               oninput="validateEdit(this, 'unitEdit{{ forloop.counter }}', 'editBtn{{ forloop.counter }}')"
                                                class="form-control form-control-lg rounded-pill border-0 bg-light" required>
+                                    </div>
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold text-muted small text-uppercase">Measurement Unit</label>
+                                        <select name="unit" id="unitEdit{{ forloop.counter }}"
+                                                data-original="{{ item.unit }}"
+                                                onchange="validateEdit(document.querySelector('[name=item_name]'), this, 'editBtn{{ forloop.counter }}')"
+                                                class="form-control form-control-lg rounded-pill border-0 bg-light" required>
+                                            {% for u_val, u_text in units %}
+                                            <option value="{{ u_val }}" {% if item.unit == u_val %}selected{% endif %}>{{ u_text }}</option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="modal-footer border-top-0 px-4 pb-4">
@@ -399,9 +412,17 @@
                     <h5 class="modal-title font-weight-bold"><i class="fas fa-plus-circle text-success mr-2"></i> Add New Item</h5>
                 </div>
                 <div class="modal-body px-4 py-4">
-                    <div class="form-group mb-0">
+                    <div class="form-group mb-3">
                         <label class="font-weight-bold text-muted small text-uppercase">Item Name</label>
                         <input type="text" name="item_name" placeholder="Enter inventory item name..." class="form-control form-control-lg rounded-pill border-0 bg-light" required>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="font-weight-bold text-muted small text-uppercase">Measurement Unit</label>
+                        <select name="unit" class="form-control form-control-lg rounded-pill border-0 bg-light" required>
+                            {% for u_val, u_text in units %}
+                            <option value="{{ u_val }}" {% if u_val == "Mtr." %}selected{% endif %}>{{ u_text }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 px-4 pb-4">
@@ -427,12 +448,24 @@
         }
     }
 
-    function validateEdit(input, btnId) {
+    function validateEdit(nameInput, unitInput, btnId) {
         const btn = document.getElementById(btnId);
-        const current = input.value.trim().toLowerCase();
-        const original = input.getAttribute('data-original').trim().toLowerCase();
         
-        if (current !== "" && current !== original) {
+        // Find inputs correctly regardless of which one triggered the call
+        const modal = btn.closest('.modal-content');
+        const nameIn = modal.querySelector('input[name="item_name"]');
+        const unitIn = modal.querySelector('select[name="unit"]');
+
+        const currentName = nameIn.value.trim().toLowerCase();
+        const originalName = nameIn.getAttribute('data-original').trim().toLowerCase();
+        
+        const currentUnit = unitIn.value;
+        const originalUnit = unitIn.getAttribute('data-original');
+        
+        const nameChanged = (currentName !== "" && currentName !== originalName);
+        const unitChanged = (currentUnit !== originalUnit);
+
+        if (nameChanged || unitChanged) {
             btn.classList.remove('disabled');
             btn.style.pointerEvents = 'auto';
             btn.style.opacity = '1';

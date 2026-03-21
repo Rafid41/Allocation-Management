@@ -18,8 +18,8 @@ def zonal_sum_view(request, pbs_id):
         balances = balances.filter(item__item_name__icontains=search_query)
         
     # Group by item and unit, sum all categories
-    # item__item_name and unit are the grouping keys
-    summary = balances.values('item__item_name', 'unit').annotate(
+    # item__item_name and item__unit are the grouping keys
+    summary = balances.values('item__item_name', 'item__unit').annotate(
         total_deposit_work=Sum('deposit_work'),
         total_mcep_dmd=Sum('mcep_dmd'),
         total_mcep_kd=Sum('mcep_kd'),
@@ -44,7 +44,7 @@ def zonal_sum_view(request, pbs_id):
         )
         processed_summary.append({
             'item_name': entry['item__item_name'],
-            'unit': entry['unit'],
+            'unit': entry['item__unit'],
             'deposit_work': entry['total_deposit_work'] or 0,
             'mcep_dmd': entry['total_mcep_dmd'] or 0,
             'mcep_kd': entry['total_mcep_kd'] or 0,
