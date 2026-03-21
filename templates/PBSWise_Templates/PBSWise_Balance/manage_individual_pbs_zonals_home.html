@@ -152,7 +152,7 @@
             </a>
 
             <!-- Manage Zonal Balance -->
-            <a href="{% url 'PBSWise_Balance:zonal_balance_view' %}?pbs_id={{ pbs.id }}" class="option-card">
+            <a href="{% url 'PBSWise_Balance:manage_balance_view' pbs.id %}" class="option-card">
                 <i class="fas fa-balance-scale"></i>
                 <span>Manage Zonal Balance</span>
             </a>

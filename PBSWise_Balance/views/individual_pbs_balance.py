@@ -61,25 +61,28 @@ def manage_individual_pbs_zonal_items(request, pbs_id):
     except:
         page_obj = paginator.get_page(page_number)
     
-    # Handle 'Add Item' action
-    if request.method == "POST":
+    can_manage = check_pbs_management_permission(request.user)
+    
+    # Handle Global Items Addition (Regional users can only ADD)
+    if request.method == "POST" and can_manage:
         item_name = request.POST.get('item_name', '').strip()
         if item_name:
             if Zonal_Items.objects.filter(item_name__iexact=item_name).exists():
-                messages.error(request, f"Entry Error: '{item_name}' is already registered in the system.")
+                messages.error(request, f"Conflict: '{item_name}' already exists in the system.")
             else:
                 Zonal_Items.objects.create(item_name=item_name)
-                messages.success(request, f"Inventory Item '{item_name}' has been added to the master list.")
+                messages.success(request, f"Item '{item_name}' has been added to the master inventory list.")
         else:
-            messages.error(request, "Error: Item Name field cannot be blank.")
+            messages.error(request, "Item name cannot be blank.")
         return redirect("PBSWise_Balance:manage_individual_pbs_zonal_items", pbs_id=pbs_id)
 
     context = {
         'pbs': pbs,
         'items': page_obj,
         'search_query': search_query,
-        'can_add': True,
-        'can_edit': False, # Permission strictly enforced via view-only rendering
+        'can_add': can_manage,
+        'can_edit': False, 
+        'can_modify': False,
         'can_delete': False, 
     }
     return render(request, "PBSWise_Templates/PBSWise_Balance/manage_individual_pbs_zonals_items.html", context)

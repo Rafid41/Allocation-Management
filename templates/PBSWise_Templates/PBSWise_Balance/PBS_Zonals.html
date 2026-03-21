@@ -217,7 +217,7 @@
         z-index: 10;
     }
 
-    .zonal-unit-card:hover .unit-actions {
+    .zonal-item-wrapper:hover .unit-actions {
         opacity: 1;
     }
 
@@ -360,7 +360,7 @@
                             <input type="text" name="zonal_name" class="form-control form-control-custom" placeholder="e.g. Head Quarters" required>
                         </div>
                         <div class="form-group">
-                            <label class="font-weight-bold">Unit Type</label>
+                            <label class="font-weight-bold">Office Type</label>
                             <select name="zonal_type" class="form-control form-control-custom" required>
                                 {% if not has_hq %}
                                 <option value="HQ">HQ</option>
@@ -414,13 +414,21 @@
         }
     }
 
-    // Edit Confirmation Logic
-    function validateZonalEdit(input, btnId) {
-        const btn = document.getElementById(btnId);
-        const current = input.value.trim().toLowerCase();
-        const original = input.getAttribute('data-original').trim().toLowerCase();
-        
-        if (current !== "" && current !== original) {
+    // Edit Confirmation Logic - Checks both name and type
+    function validateZonalEdit(id) {
+        const btn = document.getElementById('editBtn' + id);
+        const nameInput = document.getElementById('editName' + id);
+        const typeSelect = document.getElementById('editType' + id);
+
+        const currentName = nameInput.value.trim();
+        const originalName = nameInput.getAttribute('data-original').trim();
+        const currentType = typeSelect.value;
+        const originalType = typeSelect.getAttribute('data-original');
+
+        const nameChanged = (currentName !== "" && currentName.toLowerCase() !== originalName.toLowerCase());
+        const typeChanged = (currentType !== originalType);
+
+        if (currentName !== "" && (nameChanged || typeChanged)) {
             btn.classList.remove('disabled');
             btn.style.pointerEvents = 'auto';
             btn.style.opacity = '1';
