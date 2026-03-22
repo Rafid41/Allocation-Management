@@ -57,6 +57,10 @@ class UserGroupAccessMiddleware:
 
             elif group_type in ["Only_View_History_and_Edit_CS&M_Column",
                                 "Only_View_History_and_Edit_Carry_From_Warehouse_Column"]:
+                # Block absolute access to /pbswise/
+                if path.startswith("/pbswise/"):
+                    return redirect("App_User_Group:access-denied")
+
                 restricted_subpaths = [               
                     "/project/project_allocation/",
                     "/project/project_status/",

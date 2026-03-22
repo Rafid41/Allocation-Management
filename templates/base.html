@@ -54,7 +54,9 @@
         {% block css_block %} {% endblock %}
     </head>
     <body style="background-color: #f0f2f5;">
-        {% include "partials/navbar.html" %}
+        {% if request.resolver_match.url_name != "access-denied" %}
+            {% include "partials/navbar.html" %}
+        {% endif %}
 
         
 
