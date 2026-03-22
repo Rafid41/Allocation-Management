@@ -35,16 +35,14 @@ def orchestrate_seeding():
 
     try:
         # Step 1: Master Inventory Migration
-        # We load '1.items.py' dynamically as it's not a standard python identifier.
         print("\n[STEP 1] Executing 1.items.py (Inventory Master Data)...")
         items_seed = load_seed_module("1.items.py")
         items_seed.run_seed()
 
-        # Step 2 Example (Once you create it):
-        # if os.path.exists(os.path.join(os.path.dirname(__file__), "2.pbs_units.py")):
-        #    print("\n[STEP 2] Executing 2.pbs_units.py...")
-        #    pbs_seed = load_seed_module("2.pbs_units.py")
-        #    pbs_seed.run_seed()
+        # Step 2: Regional Infrastructure (PBS & Zonals)
+        print("\n[STEP 2] Executing 2.pbs_pbsAcc_HQ_ZO_SZO.py (PBS & Regional Accounts)...")
+        pbs_seed = load_seed_module("2.pbs_pbsAcc_HQ_ZO_SZO.py")
+        pbs_seed.run_seed()
 
         print("\n" + "="*50)
         print("SUCCESS: SYSTEM INITIALIZATION COMPLETED.")
