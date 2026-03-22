@@ -1,6 +1,6 @@
-Custom Non-Commercial License (2025)
+Custom Non-Commercial License (2025-2026)
 
-Copyright (c) 2025 Rafid Al Nahiyan
+Copyright (c) 2025-2026 Rafid Al Nahiyan (Email: wap.alnahiyan425@gmail.com)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to use,
@@ -10,16 +10,20 @@ the following conditions:
 1. Commercial Use Restriction:
    The Software, or any derivative works based on it, **must NOT be sold,
    sublicensed, leased, rented, or distributed for commercial gain** without
-   prior explicit written permission from the copyright holder.
+   prior explicit written permission from the copyright holder. 
+   **Note:** Commercial use includes, but is not limited to, using the 
+   Software for internal business operations, paid services, or revenue-generating 
+   activities by any entity other than the copyright holder.
 
 2. Attribution:
    Any copy or substantial portion of the Software, including modified
    versions, must retain the above copyright notice, this permission notice,
    and this restriction.
 
-3. Modification Notice:
+3. Modification Notice & Share-Alike:
    Any modifications or derivative works must be clearly marked as such and
-   not misrepresented as the original Software.
+   must be released under this same Custom Non-Commercial License. Derivative
+   works must not be misrepresented as the original Software.
 
 4. Warranty Disclaimer:
    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -29,6 +33,10 @@ the following conditions:
    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
+
+5. Governing Law:
+   This license and any disputes arising from the use of the Software shall be 
+   governed by the laws of Bangladesh.
 
 By using, copying, modifying, or distributing this Software, you agree to
 abide by the above terms.
