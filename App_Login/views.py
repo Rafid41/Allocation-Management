@@ -46,7 +46,13 @@ def login_page(request):
             if user is not None:
                 login(request, user)
 
-                # send to another page
+                # Redirect Specific_PBS_Account to PBSWise Home
+                try:
+                    if hasattr(user, 'user_group') and user.user_group.user_group_type == "Specific_PBS_Account":
+                        return HttpResponseRedirect(reverse("PBSWise_Home:home_page"))
+                except Exception:
+                    pass
+
                 return HttpResponseRedirect(reverse("App_Home:home_page"))
 
     return render(request, "App_Login/login.html", context={"form": form})

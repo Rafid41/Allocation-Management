@@ -16,6 +16,10 @@ class UserGroupAccessMiddleware:
             return redirect("App_User_Group:access-denied")
 
         if request.user.is_authenticated:
+            # Superusers have full institutional access across all portals
+            if request.user.is_superuser:
+                return self.get_response(request)
+
             try:
                 user_group = User_Group.objects.get(user=request.user)
                 group_type = user_group.user_group_type
@@ -68,8 +72,18 @@ class UserGroupAccessMiddleware:
                 if not any(path.startswith(p) for p in common_allowed_paths):
                     return redirect("App_User_Group:access-denied")
 
-            elif group_type == "Editor":
-                # Editor has full access → no restriction
+            elif group_type == "Specific_PBS_Account":
+                # Strictly PBSWise only
+                allowed_prefixes = [
+                    "/pbswise/",
+                    "/accounts/logout/", # Required for exit
+                    "/user_group/access-denied/", # Required for the error page itself
+                ]
+                if not any(path.startswith(p) for p in allowed_prefixes):
+                    return redirect("App_User_Group:access-denied")
+
+            elif group_type == "Editor" or request.user.is_superuser:
+                # Editor and Superuser have full access → no restriction
                 pass
 
         return self.get_response(request)
