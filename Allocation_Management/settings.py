@@ -71,7 +71,7 @@ INSTALLED_APPS = [
     "PBSWise_Inventory",
     "PBSWise_History",
     'PBSWise_Summary',
-    "PBSWise_StoreWise_Balance",
+    'PBSWise_StoreWise_Balance',
 ]
 
 # bootstrap, bootstrap3, bootstrap4, uni-form

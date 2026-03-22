@@ -35,6 +35,7 @@ urlpatterns = [
     path("pbswise/", include("PBSWise_Inventory.urls")),
     path("pbswise/", include("PBSWise_History.urls")),
     path('pbswise/', include('PBSWise_Summary.urls')),
+    path('pbswise/', include('PBSWise_StoreWise_Balance.urls')),
 ]
 
 
