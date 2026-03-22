@@ -290,14 +290,14 @@
     {% if can_manage_pbs %}
     <div style="display: flex; justify-content: center; margin-bottom: 20px;">
         <a href="{% url 'PBSWise_Balance:manage_individual_pbs_zonal_home' pbs.id %}" class="btn btn-primary font-weight-bold px-5 py-3 rounded-pill shadow" style="font-size: 18px; background: #1e40af; border: none;">
-            <i class="fas fa-tools mr-2"></i> Manage Zonal Balance
+            <i class="fas fa-tools mr-2"></i> Manage PBS Balance
         </a>
     </div>
     {% endif %}
 
     <div style="display: flex; justify-content: center; margin-bottom: 30px;">
         <a href="{% url 'PBSWise_Balance:zonal_sum_view' pbs.id %}" class="sum-btn">
-            <i class="fas fa-calculator"></i> Zonal Sum
+            <i class="fas fa-calculator"></i> {{ pbs.pbs_name }} Sum
         </a>
     </div>
 
