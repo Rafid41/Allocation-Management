@@ -1,11 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from ..models import PBS_List, PBS_Zonals
-from .all_pbs_list_page import check_editor_permission, check_pbs_management_permission
+from .all_pbs_list_page import check_editor_permission, check_pbs_management_permission, get_pbs_username
 
 def pbs_zonals_view(request, pbs_id):
     """View to list all Zonal units for a specific PBS."""
     pbs = get_object_or_404(PBS_List, id=pbs_id)
+    
+    # 🕵️ Security: For Specific_PBS_Account, only allow access to their own PBS
+    if request.user.is_authenticated and not request.user.is_superuser:
+        if request.user.user_group.user_group_type == "Specific_PBS_Account":
+            if request.user.username != get_pbs_username(pbs.pbs_name):
+                return redirect("App_User_Group:access-denied")
+
     zonals = PBS_Zonals.objects.filter(pbs=pbs).order_by('zonal_name')
     
     # Check if HQ already exists to constrain new selections
@@ -30,10 +37,15 @@ def pbs_zonals_view(request, pbs_id):
 def pbs_zonal_add(request, pbs_id):
     """Handle adding a new Zonal unit."""
     if not check_editor_permission(request.user):
-        messages.error(request, "Access Denied: You don't have permission to add.")
-        return redirect("PBSWise_Balance:pbs_zonals_view", pbs_id=pbs_id)
+        return redirect("App_User_Group:access-denied")
     
     pbs = get_object_or_404(PBS_List, id=pbs_id)
+
+    # 🕵️ Security: For Specific_PBS_Account, only allow access to their own PBS
+    if request.user.is_authenticated and not request.user.is_superuser:
+        if request.user.user_group.user_group_type == "Specific_PBS_Account":
+            if request.user.username != get_pbs_username(pbs.pbs_name):
+                return redirect("App_User_Group:access-denied")
     
     if request.method == "POST":
         zonal_name = request.POST.get('zonal_name', '').strip()
@@ -59,10 +71,17 @@ def pbs_zonal_add(request, pbs_id):
 def pbs_zonal_edit(request, pbs_id, zonal_id):
     """Handle editing a Zonal unit."""
     if not check_editor_permission(request.user):
-        messages.error(request, "Access Denied: You don't have permission to edit.")
-        return redirect("PBSWise_Balance:pbs_zonals_view", pbs_id=pbs_id)
+        return redirect("App_User_Group:access-denied")
     
-    zonal = get_object_or_404(PBS_Zonals, id=zonal_id, pbs_id=pbs_id)
+    pbs = get_object_or_404(PBS_List, id=pbs_id)
+
+    # 🕵️ Security: For Specific_PBS_Account, only allow access to their own PBS
+    if request.user.is_authenticated and not request.user.is_superuser:
+        if request.user.user_group.user_group_type == "Specific_PBS_Account":
+            if request.user.username != get_pbs_username(pbs.pbs_name):
+                return redirect("App_User_Group:access-denied")
+
+    zonal = get_object_or_404(PBS_Zonals, id=zonal_id, pbs=pbs)
     
     if request.method == "POST":
         zonal_name = request.POST.get('zonal_name', '').strip()
@@ -90,10 +109,17 @@ def pbs_zonal_edit(request, pbs_id, zonal_id):
 def pbs_zonal_delete(request, pbs_id, zonal_id):
     """Handle deleting a Zonal unit."""
     if not check_editor_permission(request.user):
-        messages.error(request, "Access Denied: You don't have permission to delete.")
-        return redirect("PBSWise_Balance:pbs_zonals_view", pbs_id=pbs_id)
-    
-    zonal = get_object_or_404(PBS_Zonals, id=zonal_id, pbs_id=pbs_id)
+        return redirect("App_User_Group:access-denied")
+
+    pbs = get_object_or_404(PBS_List, id=pbs_id)
+
+    # 🕵️ Security: For Specific_PBS_Account, only allow access to their own PBS
+    if request.user.is_authenticated and not request.user.is_superuser:
+        if request.user.user_group.user_group_type == "Specific_PBS_Account":
+            if request.user.username != get_pbs_username(pbs.pbs_name):
+                return redirect("App_User_Group:access-denied")
+
+    zonal = get_object_or_404(PBS_Zonals, id=zonal_id, pbs=pbs)
     zonal_name = zonal.zonal_name
     zonal.delete()
     messages.success(request, f"{zonal_name} deleted successfully.")

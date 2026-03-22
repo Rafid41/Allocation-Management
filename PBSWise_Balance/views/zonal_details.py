@@ -1,5 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from ..models import PBS_Zonals, Zonals_Balance, Zonal_Items, PBS_List
+from .all_pbs_list_page import get_pbs_username
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from App_Admin_Panel.models import PaginationManager
 from django.http import JsonResponse
@@ -8,6 +9,12 @@ from App_Entry.models import Item as MainItem
 def zonal_details_view(request, zonal_id):
     zonal = get_object_or_404(PBS_Zonals, id=zonal_id)
     pbs = zonal.pbs
+    
+    # 🕵️ Security: For Specific_PBS_Account, only allow access to their own PBS zonals
+    if request.user.is_authenticated and not request.user.is_superuser:
+        if request.user.user_group.user_group_type == "Specific_PBS_Account":
+            if request.user.username != get_pbs_username(pbs.pbs_name):
+                return redirect("App_User_Group:access-denied")
     
     # Initial queryset
     queryset = Zonals_Balance.objects.filter(pbs=pbs, zonal=zonal).select_related('item').order_by('item__item_name')

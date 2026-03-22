@@ -8,12 +8,20 @@ from PBSWise_Balance.models import PBS_List, PBS_Zonals, Zonal_Items, Zonals_Bal
 from PBSWise_History.models import PBS_History
 from App_Admin_Panel.models import PaginationManager
 
+from PBSWise_Balance.views.all_pbs_list_page import get_pbs_username
+
 def inventory_management_view(request, pbs_id):
     """
     Main view for Transfer and Withdrawal of items across Zones within a PBS.
     Also shows a searchable list of current balances.
     """
     pbs = get_object_or_404(PBS_List, id=pbs_id)
+    
+    # 🕵️ Security: For Specific_PBS_Account, only allow access to their own PBS
+    if request.user.is_authenticated and not request.user.is_superuser:
+        if request.user.user_group.user_group_type == "Specific_PBS_Account":
+            if request.user.username != get_pbs_username(pbs.pbs_name):
+                return redirect("App_User_Group:access-denied")
     
     # Store Choices
     STORE_CHOICES = [

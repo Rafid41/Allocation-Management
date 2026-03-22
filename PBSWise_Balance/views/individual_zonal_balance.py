@@ -18,8 +18,7 @@ def manage_balance_view(request, pbs_id):
     # Regional security check
     if request.user.user_group.user_group_type == "Specific_PBS_Account":
         if request.user.username != get_pbs_username(pbs.pbs_name):
-            messages.error(request, "Access Denied.")
-            return redirect("PBSWise_Balance:pbs_list_view")
+            return redirect("App_User_Group:access-denied")
 
     # Initial queryset - strictly filtered by the current PBS
     queryset = Zonals_Balance.objects.filter(pbs=pbs).select_related('zonal', 'item')
@@ -72,9 +71,15 @@ def manage_balance_view(request, pbs_id):
 def manage_balance_add(request, pbs_id):
     """Add a balance record pre-locked to a specific PBS."""
     if not check_pbs_management_permission(request.user):
-        return redirect("App_Home:home_page")
+        return redirect("App_User_Group:access-denied")
 
     pbs = get_object_or_404(PBS_List, id=pbs_id)
+    
+    # 🕵️ Security: For Specific_PBS_Account, only allow access to their own PBS
+    if request.user.is_authenticated and not request.user.is_superuser:
+        if request.user.user_group.user_group_type == "Specific_PBS_Account":
+            if request.user.username != get_pbs_username(pbs.pbs_name):
+                return redirect("App_User_Group:access-denied")
     if request.method == "POST":
         zonal_id = request.POST.get('zonal')
         item_id = request.POST.get('item')
@@ -113,9 +118,16 @@ def manage_balance_add(request, pbs_id):
 def manage_balance_edit(request, pbs_id, record_id):
     """Edit a balance record pre-locked to a specific PBS."""
     if not check_pbs_management_permission(request.user):
-        return redirect("App_Home:home_page")
+        return redirect("App_User_Group:access-denied")
 
     record = get_object_or_404(Zonals_Balance, id=record_id, pbs_id=pbs_id)
+    pbs = record.pbs
+
+    # 🕵️ Security: For Specific_PBS_Account, only allow access to their own PBS
+    if request.user.is_authenticated and not request.user.is_superuser:
+        if request.user.user_group.user_group_type == "Specific_PBS_Account":
+            if request.user.username != get_pbs_username(pbs.pbs_name):
+                return redirect("App_User_Group:access-denied")
     if request.method == "POST":
         zonal_id = request.POST.get('zonal')
         item_id = request.POST.get('item')
@@ -151,9 +163,16 @@ def manage_balance_edit(request, pbs_id, record_id):
 def manage_balance_delete(request, pbs_id, record_id):
     """Delete a balance record pre-locked to a specific PBS."""
     if not check_pbs_management_permission(request.user):
-        return redirect("App_Home:home_page")
+        return redirect("App_User_Group:access-denied")
 
     record = get_object_or_404(Zonals_Balance, id=record_id, pbs_id=pbs_id)
+    pbs = record.pbs
+
+    # 🕵️ Security: For Specific_PBS_Account, only allow access to their own PBS
+    if request.user.is_authenticated and not request.user.is_superuser:
+        if request.user.user_group.user_group_type == "Specific_PBS_Account":
+            if request.user.username != get_pbs_username(pbs.pbs_name):
+                return redirect("App_User_Group:access-denied")
     record.delete()
     messages.success(request, "Record removed from regional balance.")
     return redirect("PBSWise_Balance:manage_balance_view", pbs_id=pbs_id)

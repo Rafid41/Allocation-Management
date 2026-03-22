@@ -1,8 +1,9 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Sum
 from django.core.paginator import Paginator
 from ..models import PBS_List, Zonals_Balance
 from App_Admin_Panel.models import PaginationManager
+from .all_pbs_list_page import get_pbs_username
 
 def zonal_sum_view(request, pbs_id):
     """
@@ -10,6 +11,12 @@ def zonal_sum_view(request, pbs_id):
     summing up all storage/category columns.
     """
     pbs = get_object_or_404(PBS_List, id=pbs_id)
+    
+    # 🕵️ Security: For Specific_PBS_Account, only allow access to their own PBS
+    if request.user.is_authenticated and not request.user.is_superuser:
+        if request.user.user_group.user_group_type == "Specific_PBS_Account":
+            if request.user.username != get_pbs_username(pbs.pbs_name):
+                return redirect("App_User_Group:access-denied")
     search_query = request.GET.get('search', '').strip()
     
     # Filter by PBS

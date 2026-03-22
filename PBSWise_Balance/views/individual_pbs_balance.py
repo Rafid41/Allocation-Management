@@ -17,8 +17,7 @@ def manage_individual_pbs_zonal_home(request, pbs_id):
     # Security: Specific PBS Accounts can only access their own PBS
     if request.user.user_group.user_group_type == "Specific_PBS_Account":
         if request.user.username != get_pbs_username(pbs.pbs_name):
-            messages.error(request, "Access Denied: Regional accounts cannot access other PBS data.")
-            return redirect("PBSWise_Balance:pbs_list_view")
+            return redirect("App_User_Group:access-denied")
 
     context = {'pbs': pbs}
     return render(request, "PBSWise_Templates/PBSWise_Balance/manage_individual_pbs_zonals_home.html", context)
@@ -34,8 +33,7 @@ def manage_individual_pbs_zonal_items(request, pbs_id):
     # Security: Validate regional account ownership
     if request.user.user_group.user_group_type == "Specific_PBS_Account":
         if request.user.username != get_pbs_username(pbs.pbs_name):
-            messages.error(request, "Access Denied.")
-            return redirect("PBSWise_Balance:pbs_list_view")
+            return redirect("App_User_Group:access-denied")
 
     # Fetch items for viewing
     search_query = request.GET.get('search', '').strip()

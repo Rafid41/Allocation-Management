@@ -69,6 +69,16 @@ def pbs_list_view(request):
     else:
         pbs_items = PBS_List.objects.all().order_by('pbs_name')
     
+    # 🕵️ Security: For Specific_PBS_Account, only show their own PBS entry
+    if request.user.is_authenticated and not request.user.is_superuser:
+        try:
+            user_group = User_Group.objects.get(user=request.user)
+            if user_group.user_group_type == "Specific_PBS_Account":
+                # Filter locally to match the generated username pattern
+                pbs_items = [pbs for pbs in pbs_items if get_pbs_username(pbs.pbs_name) == request.user.username]
+        except User_Group.DoesNotExist:
+            pass
+
     can_modify = check_editor_permission(request.user)
     
     context = {
