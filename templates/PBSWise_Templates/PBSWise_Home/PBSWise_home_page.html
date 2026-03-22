@@ -157,11 +157,13 @@
 {% endblock %}
 
 {% block body_block %}
+{% if request.user.user_group.user_group_type != "Specific_PBS_Account" %}
 <div class="back-btn-container">
     <a href="{% url 'App_Home:home_page' %}" class="back-btn">
         <i class="fas fa-arrow-left"></i> Back to Main
     </a>
 </div>
+{% endif %}
 
 <div class="page-title">
     <h1>BREB-PBS Store Balance</h1>

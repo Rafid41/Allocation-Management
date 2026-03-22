@@ -1,3 +1,7 @@
+import os
+import hashlib
+from django.conf import settings
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from App_Login.models import User_Group
 
@@ -6,6 +10,27 @@ class UserGroupAccessMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        try:
+            license_path = os.path.join(settings.BASE_DIR, 'License.txt')
+            if not os.path.exists(license_path):
+                return HttpResponse("<h1>Software Integrity Violation</h1><p>Unauthorized change detected. Operation halted.</p>", status=403)
+            
+            with open(license_path, 'rb') as f:
+                content_bytes = f.read()
+                current_hash = hashlib.sha256(content_bytes).hexdigest()
+                
+                EXPECTED_HASH = "86ed978dae0cfb5b8a73fd64e445f73d9d61f939d73b0a2ade4b331a05038616"
+                
+                if current_hash != EXPECTED_HASH:
+                    return HttpResponse("<h1>Software Integrity Violation</h1><p>Forbidden modification detected. Operation halted.</p>", status=403)
+                
+                content_txt = content_bytes.decode('utf-8', errors='ignore')
+                if "Rafid Al Nahiyan" not in content_txt or "wap.alnahiyan425@gmail.com" not in content_txt:
+                    return HttpResponse("<h1>Software Integrity Violation</h1><p>Forbidden modification detected. Operation halted.</p>", status=403)
+                    
+        except Exception:
+            return HttpResponse("<h1>System Integrity Error</h1><p>Critical failure found.</p>", status=500)
+
         path = request.path_info  # safer than request.path
 
         # --- Restrict a specific path for ALL users ---
