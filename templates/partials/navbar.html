@@ -145,6 +145,8 @@
                         </a>
                     </li>
                     {% endif %}
+
+                    {% if request.user.user_group.user_group_type != "Specific_PBS_Account" %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'PBSWise_Summary:pbs_summary' %}">
                             <i class="fas fa-chart-pie"></i> Summary
@@ -155,6 +157,8 @@
                             <i class="fas fa-warehouse"></i> Storewise
                         </a>
                     </li>
+                    {% endif %}
+
                     {% if request.user.user_group.user_group_type != "View History and Status only" %}
                     <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-file-invoice-dollar"></i> Demand</a></li>
                     <li class="nav-item">
@@ -162,6 +166,9 @@
                             <i class="fas fa-boxes"></i> Inventory
                         </a>
                     </li>
+                    {% endif %}
+
+                    {% if request.user.user_group.user_group_type != "View History and Status only" and request.user.user_group.user_group_type != "Specific_PBS_Account" %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'PBSWise_History:pbswise_history' %}">
                             <i class="fas fa-history"></i> History
@@ -183,10 +190,6 @@
                                     <i class="fas fa-tools"></i> <strong>Admin Panel</strong>
                                 </a>
                             {% endif %}
-                            <div class="dropdown-divider"></div>
-                             <a class="dropdown-item" href="{% url 'App_Home:home_page' %}">
-                                <i class="fas fa-home"></i> Main Home
-                            </a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item text-danger" href="{% url 'App_Login:logout' %}">
                                 <i class="fas fa-sign-out-alt"></i> <strong>Logout</strong>

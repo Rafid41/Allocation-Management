@@ -170,7 +170,7 @@
 
 <div class="main-wrapper">
     {% if user.is_authenticated %}
-        <div class="option-grid">
+            <div class="option-grid">
             {% if request.user.user_group.user_group_type != "View History and Status only" %}
             <a href="{% url 'PBSWise_Balance:pbs_list_view' %}" class="option-card">
                 <i class="fas fa-balance-scale"></i>
@@ -178,6 +178,7 @@
             </a>
             {% endif %}
             
+            {% if request.user.user_group.user_group_type != "Specific_PBS_Account" %}
             <a href="{% url 'PBSWise_Summary:pbs_summary' %}" class="option-card">
                 <i class="fas fa-chart-pie"></i>
                 <span>Summary of PBS Balance</span>
@@ -186,6 +187,7 @@
                 <i class="fas fa-warehouse"></i>
                 <span>Storewise Balance</span>
             </a>
+            {% endif %}
 
             {% if request.user.user_group.user_group_type != "View History and Status only" %}
             <a href="#" class="option-card">
@@ -196,6 +198,9 @@
                 <i class="fas fa-boxes"></i>
                 <span>Inventory Management</span>
             </a>
+            {% endif %}
+
+            {% if request.user.user_group.user_group_type != "View History and Status only" and request.user.user_group.user_group_type != "Specific_PBS_Account" %}
             <a href="{% url 'PBSWise_History:pbswise_history' %}" class="option-card">
                 <i class="fas fa-history"></i>
                 <span>History</span>

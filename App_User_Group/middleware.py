@@ -91,7 +91,16 @@ class UserGroupAccessMiddleware:
                     return redirect("App_User_Group:access-denied")
 
             elif group_type == "Specific_PBS_Account":
-                # Strictly PBSWise only
+                # Block institutional reporting sectors
+                blocked_pbswise_paths = [
+                    "/pbswise/PBS_Summary/",
+                    "/pbswise/storeWise_balance/",
+                    "/pbswise/pbswise_history/",
+                ]
+                if any(path.startswith(p) for p in blocked_pbswise_paths):
+                    return redirect("App_User_Group:access-denied")
+
+                # Strictly PBSWise Home & Regional Tools only
                 allowed_prefixes = [
                     "/pbswise/",
                     "/accounts/logout/", # Required for exit
