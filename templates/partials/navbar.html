@@ -141,8 +141,16 @@
                             <i class="fas fa-balance-scale"></i> Balance
                         </a>
                     </li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-chart-pie"></i> Summary</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-warehouse"></i> Storewise</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'PBSWise_Summary:pbs_summary' %}">
+                            <i class="fas fa-chart-pie"></i> Summary
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'PBSWise_StoreWise_Balance:storewise_balance_home' %}">
+                            <i class="fas fa-warehouse"></i> Storewise
+                        </a>
+                    </li>
                     <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-file-invoice-dollar"></i> Demand</a></li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'PBSWise_Inventory:pbs_list_view' %}">
