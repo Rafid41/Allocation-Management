@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title_block %} 80 PBS {{ store_label }} STORE Summary {% endblock %}
+
+{% block css_block %}
+<style>
+    /* Premium Olive & Citron Auditing Theme */
+    body {
+        background: linear-gradient(135deg, #fefef2 0%, #f9fbd7 100%);
+        min-height: 100vh;
+    }
+
+    .container, .container-fluid {
+        max-width: 99% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0.5% !important;
+        margin-right: 0.5% !important;
+    }
+
+    .page-header {
+        text-align: center;
+        padding-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    .pbs-title {
+        color: #3a3e12;
+        font-size: 38px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: -0.5px;
+    }
+
+    .back-btn-container {
+        margin: -10px 0 10px 0;
+    }
+
+    .back-btn {
+        padding: 10px 24px;
+        background: #848b3c; /* Muted Moss */
+        color: white;
+        border-radius: 50px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: 0.3s;
+        border: 1px solid #717d33;
+    }
+
+    .back-btn:hover {
+        background: #4f541c;
+        color: white;
+        transform: translateX(-5px);
+        text-decoration: none;
+    }
+
+    /* Selection Card Suite */
+    .summary-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(164, 173, 65, 0.15);
+        margin-bottom: 10px;
+        border: 1px solid #e7f272;
+    }
+
+    /* Search & Filter Panel - Lime Focus */
+    .search-panel {
+        padding: 25px 30px;
+        border-bottom: 1px solid #f2f6bf;
+        background: #fdfdfd;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .form-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #4f541c;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        border: 1.5px solid #e7f272;
+        padding: 12px 18px;
+        font-size: 14px;
+        background: #fefefc;
+    }
+
+    .form-control:focus {
+        border-color: #a4ad41;
+        box-shadow: 0 0 0 4px rgba(164, 173, 65, 0.1);
+    }
+
+    /* Data Matrix - Double Sticky Lime Engine */
+    .table-wrapper {
+        max-height: 70vh;
+        overflow: auto;
+        position: relative;
+        border: 1px solid #f2f6bf;
+    }
+
+    .summary-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    /* Sticky Headers - Moss & Olive */
+    .summary-table thead th {
+        position: sticky;
+        top: 0;
+        background-color: #a4ad41; 
+        color: white;
+        padding: 15px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: 1px solid #4f541c;
+        z-index: 100;
+        text-align: center;
+        vertical-align: middle;
+        word-wrap: break-word;
+        max-width: 130px;
+    }
+
+    /* 1st Column: Item - Sticky Moss Left */
+    .summary-table td:nth-child(1), .summary-table th:nth-child(1) {
+        position: sticky;
+        left: 0;
+        z-index: 120;
+        background-color: #fefef2;
+        border-right: 2px solid #e7f272;
+        min-width: 180px;
+        max-width: 250px;
+        text-align: left;
+        font-weight: 700;
+        color: #3a3e12;
+        word-wrap: break-word;
+        white-space: normal;
+    }
+    .summary-table th:nth-child(1) { 
+        z-index: 250; 
+        background-color: #4f541c !important; 
+        color: white !important;
+    }
+
+    /* Last Column: Summary - Sticky Citron Right */
+    .summary-table td:last-child, .summary-table th:last-child {
+        position: sticky;
+        right: 0;
+        z-index: 120;
+        background-color: #fbfee3;
+        border-left: 2px solid #e7f272;
+        min-width: 140px;
+        font-weight: 800;
+        color: #3a3e12;
+        text-align: center;
+    }
+    .summary-table th:last-child { 
+        z-index: 250; 
+        background-color: #9ba438 !important; 
+        color: white !important;
+    }
+
+    .summary-table tbody td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #f2f6bf;
+        font-size: 13px;
+        color: #434720;
+        text-align: center;
+        vertical-align: middle;
+        word-wrap: break-word;
+        max-width: 140px;
+    }
+
+    .summary-table tbody tr:hover td {
+        background-color: #f6f9c9;
+    }
+
+    /* Maintain Summary Column Background on Hover */
+    .summary-table tbody tr:hover td:last-child {
+        background-color: #f0f4b3 !important;
+    }
+
+    /* Unit Marker Branding */
+    .unit-badge {
+        background: #4f541c; color: white; border-radius: 50px; font-size: 11px; padding: 4px 12px;
+    }
+
+    /* Suggestion logic */
+    .suggestion-container { position: relative; }
+    .suggestion-list {
+        position: absolute; top: 100%; left: 0; right: 0;
+        background: white; border: 1px solid #e7f272; border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1000;
+        display: none; max-height: 200px; overflow-y: auto;
+    }
+    .suggestion-item { padding: 10px 15px; cursor: pointer; font-size: 14px; color: #4f541c; }
+    .suggestion-item:hover { background: #f9fbd7; color: #a4ad41; }
+
+    /* Custom Pagination (Match Global Standards) */
+    .custom-pagination {
+        background: #ffffff; padding: 10px 20px; border-radius: 50px;
+        display: flex; justify-content: center; list-style: none;
+        max-width: fit-content; margin: 30px auto; align-items: center;
+        box-shadow: 0 5px 15px rgba(164, 173, 65, 0.1);
+    }
+    .custom-pagination .page-link {
+        border: none; border-radius: 50px; min-width: 40px; height: 40px;
+        line-height: 40px; text-align: center; color: #4f541c; font-weight: 600; text-decoration: none; display: block;
+    }
+    .custom-pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #4f541c, #a4ad41); color: white;
+    }
+
+    @media print {
+        .navbar, .back-btn-container, .search-panel, .card-footer, .footer-wrapper { display: none !important; }
+        .summary-table { border-collapse: collapse !important; }
+        .summary-table th, .summary-table td { position: static !important; border: 1px solid #ddd !important; }
+        .container, .container-fluid { margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+    }
+</style>
+{% endblock %}
+
+{% block body_block %}
+<div class="container-fluid pt-0 pb-4">
+    
+    {% if not is_print_view %}
+    <div class="back-btn-container mb-0">
+        <a href="{% url 'PBSWise_StoreWise_Balance:storewise_balance_home' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Categories
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="page-header">
+        <h1 class="pbs-title">80 PBS {{ store_label }} STORE Summary</h1>
+        <p class="text-secondary small">Regional administrative registry for absolute CATEGORICAL inventory auditing</p>
+    </div>
+
+    <div class="summary-card mt-4">
+        {% if not is_print_view %}
+        <div class="search-panel">
+            <form method="GET" id="storeFilterForm">
+                <div class="row align-items-end g-3">
+                    <div class="col-md-5">
+                        <label class="form-label">Search Inventory Item</label>
+                        <div class="suggestion-container">
+                            <input type="text" name="item_name" value="{{ item_name }}" class="form-control" placeholder="Type item name..." autocomplete="off" id="search_item_store">
+                            <div class="suggestion-list" id="suggest_item_store"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-dark w-100 py-2 font-weight-bold rounded-pill shadow-sm" style="background: #4f541c;">
+                            <i class="fas fa-search mr-2"></i> Filter
+                        </button>
+                    </div>
+                    <div class="col-md-5 d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-print btn-outline-secondary px-4 py-2 rounded-pill font-weight-bold" onclick="printStoreSummary()">
+                            <i class="fas fa-print mr-2"></i> Print Table
+                        </button>
+                        <button type="button" class="btn btn-excel btn-success px-4 py-2 rounded-pill font-weight-bold" id="exportStoreExcel" onclick="exportStoreToExcel()">
+                            <i class="fas fa-file-excel mr-2"></i> Export XLSX
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="table-wrapper">
+            <table class="table summary-table" id="storeTable">
+                <thead>
+                    <tr>
+                        <th style="min-width: 250px;">Item</th>
+                        <th>Unit</th>
+                        {% for pbs in pbs_list %}
+                        <th style="min-width: 120px;">{{ pbs.pbs_name }}</th>
+                        {% endfor %}
+                        <th style="min-width: 140px;">Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in summary_data %}
+                    <tr>
+                        <td class="text-left font-weight-bold">{{ row.item.item_name }}</td>
+                        <td class="text-center font-weight-bold"><span class="unit-badge">{{ row.unit }}</span></td>
+                        {% for val in row.pbs_values %}
+                        <td>{{ val|floatformat:2 }}</td>
+                        {% endfor %}
+                        <td class="font-weight-bold">{{ row.row_total|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{{ pbs_list|length|add:3 }}" class="text-center py-5 text-muted text-uppercase font-weight-bold">
+                            Absolute Category Empty
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if items.has_other_pages and not is_print_view %}
+        <div class="card-footer bg-white border-0 py-4">
+            <ul class="custom-pagination">
+                <li class="page-item {% if not items.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="#" onclick="goToPage(1); return false;"><i class="fas fa-angle-double-left"></i></a>
+                </li>
+                <li class="page-item {% if not items.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="#" onclick="{% if items.has_previous %}goToPage({{ items.previous_page_number }});{% endif %} return false;"><i class="fas fa-angle-left"></i></a>
+                </li>
+                {% for n in items.paginator.page_range %}
+                    {% if items.number == n %}
+                    <li class="page-item active"><span class="page-link">{{ n }}</span></li>
+                    {% elif n > items.number|add:'-3' and n < items.number|add:'3' %}
+                    <li class="page-item"><a class="page-link" href="#" onclick="goToPage({{ n }}); return false;">{{ n }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item {% if not items.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="#" onclick="{% if items.has_next %}goToPage({{ items.next_page_number }});{% endif %} return false;"><i class="fas fa-angle-right"></i></a>
+                </li>
+                <li class="page-item {% if not items.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="#" onclick="goToPage({{ items.paginator.num_pages }}); return false;"><i class="fas fa-angle-double-right"></i></a>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- SheetJS -->
+<script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+
+<script>
+    // --- Dynamic Search Suggestions (Categorical Scope) ---
+    function setupStoreSuggestions() {
+        const input = document.getElementById('search_item_store');
+        const box = document.getElementById('suggest_item_store');
+
+        input.addEventListener('input', function() {
+            const query = this.value;
+            if (query.length < 1) { box.style.display = 'none'; return; }
+
+            // Reuse the existing summary suggestions endpoint
+            fetch(`{% url 'PBSWise_Summary:summary_suggestions_ajax' %}?query=${query}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.suggestions.length > 0) {
+                        box.innerHTML = data.suggestions.map(s => `<div class="suggestion-item">${s}</div>`).join('');
+                        box.style.display = 'block';
+                    } else { box.style.display = 'none'; }
+                });
+        });
+
+        box.addEventListener('click', function(e) {
+            if (e.target.classList.contains('suggestion-item')) {
+                input.value = e.target.textContent;
+                box.style.display = 'none';
+                input.form.submit();
+            }
+        });
+
+        document.addEventListener('click', e => { if (e.target !== input && e.target !== box) box.style.display = 'none'; });
+    }
+    setupStoreSuggestions();
+
+    function goToPage(page) {
+        let url = new URL(window.location.href);
+        url.searchParams.set('page', page);
+        window.location.href = url.toString();
+    }
+
+    function printStoreSummary() {
+        const p = new URLSearchParams(window.location.search);
+        p.set('print_view', 'true');
+        window.open('?' + p.toString(), '_blank');
+    }
+
+    {% if is_print_view %}
+    window.addEventListener('load', function() {
+        setTimeout(function() { window.print(); }, 500);
+    });
+    {% endif %}
+
+    function exportStoreToExcel() {
+        const p = new URLSearchParams(window.location.search);
+        p.set('print_view', 'true');
+        const btn = document.getElementById('exportStoreExcel');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Exporting...';
+        btn.disabled = true;
+
+        fetch('?' + p.toString())
+            .then(r => r.text())
+            .then(html => {
+                const doc = new DOMParser().parseFromString(html, "text/html");
+                const table = doc.querySelector('#storeTable');
+                if (table) processExcelExport(table);
+            })
+            .finally(() => { btn.innerHTML = originalText; btn.disabled = false; });
+    }
+
+    function processExcelExport(sourceTable) {
+        if (typeof XLSX === 'undefined') return alert('XLSX module missing.');
+        const wb = XLSX.utils.table_to_book(sourceTable, {sheet: "Store Summary"});
+        const ws = wb.Sheets["Store Summary"];
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cell = ws[XLSX.utils.encode_cell({c:C, r:R})];
+                if (!cell) continue;
+                if (!cell.s) cell.s = {};
+                cell.s.border = { top: {style:"thin"}, bottom: {style:"thin"}, left: {style:"thin"}, right: {style:"thin"} };
+                if (R === 0) { cell.s.font = {bold:true}; cell.s.fill = {fgColor:{rgb:"A4AD41"}}; }
+            }
+        }
+        XLSX.writeFile(wb, "80_PBS_{{ store_label }}_Summary.xlsx");
+    }
+</script>
+{% endblock %}
