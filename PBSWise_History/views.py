@@ -146,7 +146,7 @@ def export_history_docx(request):
     col_widths = [1.1, 0.7, 1.2, 0.4, 0.7, 0.7, 0.7, 0.7, 0.7]
     
     hdr_cells = table.rows[0].cells
-    headers = ['PBS Name', 'Date', 'Item', 'Qty', 'Action', 'Zonal From', 'Store From', 'Zonal To', 'Store To']
+    headers = ['PBS Name', 'Date', 'Item', 'Qty', 'Action', 'From', 'Store From', 'To', 'Store To']
     
     for i, header_text in enumerate(headers):
         cell = hdr_cells[i]
@@ -166,9 +166,9 @@ def export_history_docx(request):
             str(f"{rec.quantity:g}"),
             str(rec.action),
             str(rec.zonal_from.zonal_name),
-            str(rec.store_from).replace('_', ' ').title(),
+            str(rec.store_from).replace('_', ' ').upper(),
             str(rec.zonal_to.zonal_name) if rec.zonal_to else 'N/A',
-            str(rec.store_to).replace('_', ' ').title() if rec.store_to else 'N/A'
+            str(rec.store_to).replace('_', ' ').upper() if rec.store_to else 'N/A'
         ]
         for i, val in enumerate(data):
             cell = row_cells[i]

@@ -323,9 +323,9 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">Zonal From</label>
+                        <label class="form-label">From</label>
                         <div class="suggestion-container">
-                            <input type="text" name="zonal_from" value="{{ zonal_from_val }}" class="form-control" placeholder="Select Zonal..." autocomplete="off" id="search_zonal">
+                            <input type="text" name="zonal_from" value="{{ zonal_from_val }}" class="form-control" placeholder="Select HQ/Zonal/Sub-Zonal..." autocomplete="off" id="search_zonal">
                             <div class="suggestion-list" id="suggest_zonal"></div>
                         </div>
                     </div>
@@ -374,9 +374,9 @@
                         <th style="min-width: 180px;">Item</th>
                         <th style="min-width: 80px;">Qty</th>
                         <th style="min-width: 120px;">Action</th>
-                        <th style="min-width: 130px;">Zonal From</th>
+                        <th style="min-width: 130px;">From</th>
                         <th style="min-width: 130px;">Store From</th>
-                        <th style="min-width: 130px;">Zonal To</th>
+                        <th style="min-width: 130px;">To</th>
                         <th style="min-width: 130px;">Store To</th>
                     </tr>
                 </thead>
@@ -393,7 +393,7 @@
                             </span>
                         </td>
                         <td>{{ rec.zonal_from.zonal_name }}</td>
-                        <td>{{ rec.store_from|replace_underscore }}</td>
+                        <td>{{ rec.store_from|replace_underscore|upper }}</td>
                         <td>
                             {% if rec.action == "Withdraw Item" %}
                                 <span class="na-text">N/A</span>
@@ -405,7 +405,7 @@
                             {% if rec.action == "Withdraw Item" %}
                                 <span class="na-text">N/A</span>
                             {% else %}
-                                {{ rec.store_to|replace_underscore }}
+                                {{ rec.store_to|replace_underscore|upper }}
                             {% endif %}
                         </td>
                     </tr>
