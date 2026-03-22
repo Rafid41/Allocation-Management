@@ -7,8 +7,7 @@ from App_Entry.models import Item as MainItem
 def manage_zonal_home(request):
     """Home page for managing all zonal items and balance."""
     if not check_editor_permission(request.user):
-        messages.error(request, "Access Denied.")
-        return redirect("PBSWise_Balance:pbs_list_view")
+        return redirect("App_User_Group:access-denied")
     
     return render(request, "PBSWise_Templates/PBSWise_Balance/manage_zonals_home.html")
 
@@ -18,8 +17,7 @@ from App_Admin_Panel.models import PaginationManager
 def manage_zonal_items(request):
     """View to manage Zonal Items (Add/Edit/Delete)."""
     if not check_editor_permission(request.user):
-        messages.error(request, "Access Denied.")
-        return redirect("PBSWise_Balance:pbs_list_view")
+        return redirect("App_User_Group:access-denied")
     
     # Fetch all items in alphabetical order
     items_queryset = Zonal_Items.objects.all().order_by('item_name')
@@ -58,7 +56,7 @@ def manage_zonal_items(request):
 def zonal_item_add(request):
     """Handle adding a Zonal Item."""
     if not check_editor_permission(request.user):
-        return redirect("PBSWise_Balance:pbs_list_view")
+        return redirect("App_User_Group:access-denied")
     
     if request.method == "POST":
         item_name = request.POST.get('item_name', '').strip()
@@ -79,7 +77,7 @@ def zonal_item_add(request):
 def zonal_item_edit(request, item_id):
     """Handle editing a Zonal Item."""
     if not check_editor_permission(request.user):
-        return redirect("PBSWise_Balance:pbs_list_view")
+        return redirect("App_User_Group:access-denied")
     
     item = get_object_or_404(Zonal_Items, id=item_id)
     if request.method == "POST":
@@ -103,7 +101,7 @@ def zonal_item_edit(request, item_id):
 def zonal_item_delete(request, item_id):
     """Handle deleting a Zonal Item."""
     if not check_editor_permission(request.user):
-        return redirect("PBSWise_Balance:pbs_list_view")
+        return redirect("App_User_Group:access-denied")
     
     item = get_object_or_404(Zonal_Items, id=item_id)
     item_name = item.item_name

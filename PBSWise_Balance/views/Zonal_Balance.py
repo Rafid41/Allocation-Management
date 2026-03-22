@@ -11,8 +11,7 @@ from App_Entry.models import Item as MainItem
 def zonal_balance_view(request):
     """View to list and search Zonal Balances."""
     if not check_editor_permission(request.user):
-        messages.error(request, "Access Denied.")
-        return redirect("PBSWise_Balance:pbs_list_view")
+        return redirect("App_User_Group:access-denied")
 
     # Initial queryset
     queryset = Zonals_Balance.objects.all().select_related('pbs', 'zonal', 'item')
@@ -75,7 +74,7 @@ def zonal_balance_view(request):
 def zonal_balance_add(request):
     """Handle adding a Zonal Balance record."""
     if not check_editor_permission(request.user):
-        return redirect("PBSWise_Balance:pbs_list_view")
+        return redirect("App_User_Group:access-denied")
 
     if request.method == "POST":
         pbs_id = request.POST.get('pbs')
@@ -117,7 +116,7 @@ def zonal_balance_add(request):
 def zonal_balance_edit(request, record_id):
     """Handle editing a Zonal Balance record."""
     if not check_editor_permission(request.user):
-        return redirect("PBSWise_Balance:pbs_list_view")
+        return redirect("App_User_Group:access-denied")
 
     record = get_object_or_404(Zonals_Balance, id=record_id)
     if request.method == "POST":
@@ -158,7 +157,7 @@ def zonal_balance_edit(request, record_id):
 def zonal_balance_delete(request, record_id):
     """Handle deleting a Zonal Balance record."""
     if not check_editor_permission(request.user):
-        return redirect("PBSWise_Balance:pbs_list_view")
+        return redirect("App_User_Group:access-denied")
 
     record = get_object_or_404(Zonals_Balance, id=record_id)
     record.delete()

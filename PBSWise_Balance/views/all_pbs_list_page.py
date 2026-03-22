@@ -81,8 +81,7 @@ def pbs_list_view(request):
 def pbs_add(request):
     """Handle adding a new PBS (Editor/Superuser only) + Create Account."""
     if not check_editor_permission(request.user):
-        messages.error(request, "Access Denied: You don't have permission to add.")
-        return redirect("PBSWise_Balance:pbs_list_view")
+        return redirect("App_User_Group:access-denied")
     
     if request.method == "POST":
         pbs_name = request.POST.get('pbs_name', '').strip()
@@ -118,8 +117,7 @@ def pbs_add(request):
 def pbs_edit(request, pbs_id):
     """Handle editing an existing PBS (Editor/Superuser only) + Update Username."""
     if not check_editor_permission(request.user):
-        messages.error(request, "Access Denied: You don't have permission to edit.")
-        return redirect("PBSWise_Balance:pbs_list_view")
+        return redirect("App_User_Group:access-denied")
     
     pbs = get_object_or_404(PBS_List, id=pbs_id)
     old_username = get_pbs_username(pbs.pbs_name)
@@ -170,8 +168,7 @@ def pbs_edit(request, pbs_id):
 def pbs_delete(request, pbs_id):
     """Handle deleting a PBS (Editor/Superuser only) + Delete Account."""
     if not check_editor_permission(request.user):
-        messages.error(request, "Access Denied: You don't have permission to delete.")
-        return redirect("PBSWise_Balance:pbs_list_view")
+        return redirect("App_User_Group:access-denied")
     
     pbs = get_object_or_404(PBS_List, id=pbs_id)
     username = get_pbs_username(pbs.pbs_name)
