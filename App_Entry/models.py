@@ -34,6 +34,7 @@ class Item(models.Model):
         ("Ream", "Ream"),
         ("Bundle", "Bundle"),
         ("Carton", "Carton"),
+        ("Drum","Drum"),
     ]
 
 
