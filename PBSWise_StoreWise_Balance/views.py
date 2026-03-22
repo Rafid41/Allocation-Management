@@ -11,7 +11,9 @@ def storewise_balance_home_view(request):
     """
     Authorized home view for regional Storewise Balance analysis.
     """
-    if not request.user.is_superuser and getattr(request.user.user_group, 'user_group_type', '') != "Editor":
+    allowed_groups = ["Editor", "View History and Status only"]
+    current_group = getattr(request.user.user_group, 'user_group_type', '')
+    if not request.user.is_superuser and current_group not in allowed_groups:
         return redirect("App_User_Group:access-denied")
 
     return render(request, "PBSWise_Templates/PBSWise_StoreWise_Balance/storewise_balance_home.html")
@@ -22,7 +24,9 @@ def store_detail_summary_view(request, store_slug):
     Dynamic summary registry for specific regional store categories. 
     Aggregates absolute inventory levels across all 80+ PBS portals.
     """
-    if not request.user.is_superuser and getattr(request.user.user_group, 'user_group_type', '') != "Editor":
+    allowed_groups = ["Editor", "View History and Status only"]
+    current_group = getattr(request.user.user_group, 'user_group_type', '')
+    if not request.user.is_superuser and current_group not in allowed_groups:
         return redirect("App_User_Group:access-denied")
 
     # Store Mapping Suite

@@ -13,7 +13,8 @@ def pbswise_summary_view(request):
     Authorized view for a high-fidelity summary of PBS assets.
     Aggregates inventory data across all regional project portals.
     """
-    if not request.user.is_superuser and request.user.user_group.user_group_type != "Editor":
+    allowed_groups = ["Editor", "View History and Status only"]
+    if not request.user.is_superuser and request.user.user_group.user_group_type not in allowed_groups:
         return redirect("App_User_Group:access-denied")
 
     # Initial Data Acquisition

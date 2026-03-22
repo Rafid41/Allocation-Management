@@ -38,10 +38,23 @@ class UserGroupAccessMiddleware:
 
             path_for_View_History_and_Status_only = [
                 "/status/",
+                "/pbswise/home/",
+                "/pbswise/PBS_Summary/",
+                "/pbswise/storeWise_balance/",
+                "/pbswise/get_summary_suggestions_ajax/",
             ] + common_allowed_paths
 
             # Restriction logic per user group
             if group_type == "View History and Status only":
+                # Block specific PBSWise sectors (Inverse of allowed)
+                blocked_pbswise_paths = [
+                    "/pbswise/pbswise_balance/",
+                    "/pbswise/pbswise_inventory/",
+                    "/pbswise/pbswise_history/",
+                ]
+                if any(path.startswith(p) for p in blocked_pbswise_paths):
+                    return redirect("App_User_Group:access-denied")
+
                 restricted_subpaths = [               
                     "/project/project_allocation/",
                     "/project/project_modification/",
@@ -52,6 +65,7 @@ class UserGroupAccessMiddleware:
                 # If restricted path matches, block immediately
                 if any(path.startswith(p) for p in restricted_subpaths):
                     return redirect("App_User_Group:access-denied")
+                
                 if not any(path.startswith(p) for p in path_for_View_History_and_Status_only):
                     return redirect("App_User_Group:access-denied")
 
