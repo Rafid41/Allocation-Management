@@ -60,14 +60,15 @@ def zonal_item_add(request):
     
     if request.method == "POST":
         item_name = request.POST.get('item_name', '').strip()
-        unit = request.POST.get('unit', 'Mtr.')
+        unit = request.POST.get('unit', 'Nos.')
+        description = request.POST.get('description', '').strip()
         if item_name:
             # Duplicate check
             if Zonal_Items.objects.filter(item_name__iexact=item_name).exists():
                 messages.error(request, "This Zonal Item already exists")
                 return redirect("PBSWise_Balance:manage_zonal_items")
 
-            Zonal_Items.objects.create(item_name=item_name, unit=unit)
+            Zonal_Items.objects.create(item_name=item_name, unit=unit, description=description)
             messages.success(request, f"Item '{item_name}' added successfully.")
         else:
             messages.error(request, "Item name cannot be empty.")
@@ -82,7 +83,8 @@ def zonal_item_edit(request, item_id):
     item = get_object_or_404(Zonal_Items, id=item_id)
     if request.method == "POST":
         item_name = request.POST.get('item_name', '').strip()
-        unit = request.POST.get('unit', 'Mtr.')
+        unit = request.POST.get('unit', 'Nos.')
+        description = request.POST.get('description', '').strip()
         if item_name:
             # Duplicate check (excluding current item)
             if Zonal_Items.objects.filter(item_name__iexact=item_name).exclude(id=item_id).exists():
@@ -91,6 +93,7 @@ def zonal_item_edit(request, item_id):
 
             item.item_name = item_name
             item.unit = unit
+            item.description = description
             item.save()
             messages.success(request, "Item updated successfully.")
         else:

@@ -355,7 +355,7 @@
                 <tr>
                     <td>{{ record.zonal.zonal_name }}</td>
                     <td class="font-weight-bold text-dark">{{ record.item.item_name }}</td>
-                    <td class="text-left small">{{ record.description|default:"-" }}</td>
+                    <td class="text-left small">{{ record.item.description|default:"-" }}</td>
                     <td><span class="badge badge-dark rounded-pill px-3 py-2" style="font-size: 11px;">{{ record.item.unit }}</span></td>
                     <td>{{ record.deposit_work|floatformat:2 }}</td>
                     <td>{{ record.mcep_dmd|floatformat:2 }}</td>
@@ -367,8 +367,7 @@
                     <td class="total-cell font-weight-bold">{{ record.total|floatformat:2 }}</td>
                     {% if not is_print_view %}
                     <td>
-                        <button class="action-btn edit-btn" data-toggle="modal" data-target="#editModal{{ record.id }}" 
-                                onclick="checkUniqueness('edit-{{ record.id }}', '{{ pbs.id }}', $('#zonalEdit{{ record.id }}').val(), $('#itemEdit{{ record.id }}').val(), '{{ record.id }}')">
+                        <button class="action-btn edit-btn" data-toggle="modal" data-target="#editModal{{ record.id }}">
                             <i class="fas fa-edit"></i>
                         </button>
                         <button class="action-btn delete-btn" data-toggle="modal" data-target="#deleteModal{{ record.id }}">
@@ -385,94 +384,87 @@
                             <form id="editForm{{ record.id }}" onsubmit="event.preventDefault(); return handleFormSubmit('editForm{{ record.id }}', '{{ pbs.id }}', '{{ record.id }}');">
                                 {% csrf_token %}
                                 <div class="modal-header border-bottom-0 pb-0">
-                                    <h5 class="modal-title font-weight-bold"><i class="fas fa-edit text-info mr-2"></i> Update Balance Record</h5>
+                                    <h5 class="modal-title font-weight-bold text-dark"><i class="fas fa-edit text-info mr-2"></i> Update Regional Balance</h5>
                                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                                 </div>
                                 <div class="modal-body p-4">
-                                    <div id="warning-edit-{{ record.id }}" class="live-warning">
-                                        <i class="fas fa-exclamation-triangle mr-2"></i> Duplication Alert: This record already exists for this zonal and item.
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="small font-weight-bold text-muted text-uppercase">Zonal</label>
-                                                <select name="zonal" id="zonalEdit{{ record.id }}" class="form-control rounded-pill" 
-                                                        onchange="checkUniqueness('edit-{{ record.id }}', '{{ pbs.id }}', this.value, $('#itemEdit{{ record.id }}').val(), '{{ record.id }}')" required>
-                                                    {% for z in zonals_all %}
-                                                    <option value="{{ z.id }}" {% if z.id == record.zonal.id %}selected{% endif %}>{{ z.zonal_name }}</option>
-                                                    {% endfor %}
-                                                </select>
+                                    <!-- Locked Metadata Identity Section -->
+                                    <div class="p-3 mb-4 rounded-lg border" style="background: #f0fdf4; border-left: 5px solid #10b981 !important;">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-7">
+                                                <label class="font-weight-bold small text-muted text-uppercase mb-2"><i class="fas fa-id-card mr-1 text-success"></i> Regional Identity (Locked)</label>
+                                                <div class="p-2 px-3 rounded-pill bg-white border text-dark font-weight-bold small shadow-sm mb-2 mb-md-0">
+                                                    <i class="fas fa-building mr-1 text-success"></i> {{ pbs.pbs_name }} | <i class="fas fa-map-marker-alt mr-1 text-secondary"></i> {{ record.zonal.zonal_name }}
+                                                </div>
+                                                <input type="hidden" name="zonal" value="{{ record.zonal.id }}">
+                                                <input type="hidden" name="item" value="{{ record.item.id }}">
                                             </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="small font-weight-bold text-muted text-uppercase">Inventory Item</label>
-                                                <select name="item" id="itemEdit{{ record.id }}" class="form-control rounded-pill"
-                                                        onchange="checkUniqueness('edit-{{ record.id }}', '{{ pbs.id }}', $('#zonalEdit{{ record.id }}').val(), this.value, '{{ record.id }}')" required>
-                                                    {% for it in items_all %}
-                                                    <option value="{{ it.id }}" {% if it.id == record.item.id %}selected{% endif %}>{{ it.item_name }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <div class="form-group">
-                                                <label class="small font-weight-bold text-muted text-uppercase">Description</label>
-                                                <input type="text" name="description" value="{{ record.description }}" class="form-control rounded-pill">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="small font-weight-bold text-muted text-uppercase">Unit</label>
-                                                <div class="unit-display rounded-pill bg-light px-3 py-2 text-dark font-weight-bold" style="border: 1px solid #e2e8f0; text-align: center;">
-                                                    {{ record.item.unit }}
+                                            <div class="col-md-5">
+                                                <label class="font-weight-bold small text-muted text-uppercase mb-2"><i class="fas fa-cube mr-1 text-dark"></i> Locked Item Name</label>
+                                                <div class="p-2 px-3 rounded-pill text-white font-weight-bold text-center shadow-sm" style="background: #334155; font-size: 14px; border: 1px solid #1e293b;">
+                                                    {{ record.item.item_name }}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row g-3">
+
+                                    <!-- Locked Metadata Detail Row -->
+                                    <div class="row mb-4 g-3">
+                                        <div class="col-md-4 d-flex flex-column">
+                                            <label class="font-weight-bold small text-muted text-uppercase mb-2"><i class="fas fa-tag mr-1 text-info"></i> Unit</label>
+                                            <div class="p-3 rounded-lg border text-dark font-weight-bold text-center shadow-sm flex-grow-1 d-flex align-items-center justify-content-center" style="background: #f0f9ff; border-color: #0ea5e9 !important; font-size: 1.1rem;">
+                                                {{ record.item.unit }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 d-flex flex-column">
+                                            <label class="font-weight-bold small text-muted text-uppercase mb-2"><i class="fas fa-info-circle mr-1 text-pink"></i> Description</label>
+                                            <div class="p-3 rounded-lg border text-muted small font-weight-bold shadow-sm flex-grow-1" style="background: #fdf2f8; border-color: #ec4899 !important; min-height: 70px; line-height: 1.5;">
+                                                {{ record.item.description|default:"No technical specification provided for this regional inventory entry." }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <label class="font-weight-bold small text-muted text-uppercase mb-3"><i class="fas fa-calculator mr-2 text-success"></i> Update Asset Values</label>
+                                    <div class="row g-3 px-2">
                                         <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label class="small text-muted text-uppercase font-weight-bold">Deposit Work</label>
-                                                <input type="number" step="0.01" name="deposit_work" value="{{ record.deposit_work }}" class="form-control rounded-pill">
+                                            <div class="form-group mb-3">
+                                                <label class="small font-weight-bold text-muted text-uppercase"><i class="fas fa-wallet mr-1 text-secondary"></i> Deposit Work</label>
+                                                <input type="number" min="0" step="0.01" name="deposit_work" value="{{ record.deposit_work }}" class="form-control rounded-pill border-success shadow-sm">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label class="small text-muted text-uppercase font-weight-bold">MCEP-DMD</label>
-                                                <input type="number" step="0.01" name="mcep_dmd" value="{{ record.mcep_dmd }}" class="form-control rounded-pill">
+                                            <div class="form-group mb-3">
+                                                <label class="small font-weight-bold text-muted text-uppercase"><i class="fas fa-bolt mr-1 text-warning"></i> MCEP-DMD</label>
+                                                <input type="number" min="0" step="0.01" name="mcep_dmd" value="{{ record.mcep_dmd }}" class="form-control rounded-pill border-success shadow-sm">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label class="small text-muted text-uppercase font-weight-bold">MCEP-KD</label>
-                                                <input type="number" step="0.01" name="mcep_kd" value="{{ record.mcep_kd }}" class="form-control rounded-pill">
+                                            <div class="form-group mb-3">
+                                                <label class="small font-weight-bold text-muted text-uppercase"><i class="fas fa-lightbulb mr-1 text-warning"></i> MCEP-KD</label>
+                                                <input type="number" min="0" step="0.01" name="mcep_kd" value="{{ record.mcep_kd }}" class="form-control rounded-pill border-success shadow-sm">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label class="small text-muted text-uppercase font-weight-bold">MCEP-BD</label>
-                                                <input type="number" step="0.01" name="mcep_bd" value="{{ record.mcep_bd }}" class="form-control rounded-pill">
+                                            <div class="form-group mb-3">
+                                                <label class="small font-weight-bold text-muted text-uppercase"><i class="fas fa-plug mr-1 text-warning"></i> MCEP-BD</label>
+                                                <input type="number" min="0" step="0.01" name="mcep_bd" value="{{ record.mcep_bd }}" class="form-control rounded-pill border-success shadow-sm">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label class="small text-muted text-uppercase font-weight-bold">Other</label>
-                                                <input type="number" step="0.01" name="other" value="{{ record.other }}" class="form-control rounded-pill">
+                                            <div class="form-group mb-3">
+                                                <label class="small font-weight-bold text-muted text-uppercase"><i class="fas fa-plus-circle mr-1 text-secondary"></i> Other</label>
+                                                <input type="number" min="0" step="0.01" name="other" value="{{ record.other }}" class="form-control rounded-pill border-success shadow-sm">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label class="small text-muted text-uppercase font-weight-bold">O&M Store</label>
-                                                <input type="number" step="0.01" name="om_store" value="{{ record.om_store }}" class="form-control rounded-pill">
+                                            <div class="form-group mb-3">
+                                                <label class="small font-weight-bold text-muted text-uppercase"><i class="fas fa-warehouse mr-1 text-secondary"></i> O&M Store</label>
+                                                <input type="number" min="0" step="0.01" name="om_store" value="{{ record.om_store }}" class="form-control rounded-pill border-success shadow-sm">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label class="small text-muted text-uppercase font-weight-bold">Own Stock</label>
-                                                <input type="number" step="0.01" name="own_stock" value="{{ record.own_stock }}" class="form-control rounded-pill">
+                                            <div class="form-group mb-3">
+                                                <label class="small font-weight-bold text-muted text-uppercase"><i class="fas fa-boxes mr-1 text-secondary"></i> Own Stock</label>
+                                                <input type="number" min="0" step="0.01" name="own_stock" value="{{ record.own_stock }}" class="form-control rounded-pill border-success shadow-sm">
                                             </div>
                                         </div>
                                     </div>
@@ -586,64 +578,66 @@
                                 </select>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="form-group">
-                                <label class="small font-weight-bold text-muted text-uppercase">Description</label>
-                                <input type="text" name="description" placeholder="Optional details..." class="form-control rounded-pill">
-                            </div>
-                        </div>
+                    <!-- Dynamic Item Metadata Display (Unique Fields Design) -->
+                    <div class="row mb-4">
                         <div class="col-md-4">
-                            <div class="form-group">
-                                <label class="small font-weight-bold text-muted text-uppercase">Unit</label>
-                                <div id="add-unit-display" class="unit-display rounded-pill bg-light px-3 py-2 text-dark font-weight-bold" style="border: 1px solid #e2e8f0; text-align: center;">
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold small text-muted text-uppercase mb-2"><i class="fas fa-tag mr-1 text-info"></i> Measurement Unit</label>
+                                <div id="add-unit-display-box" class="p-3 rounded-pill border text-dark font-weight-bold text-center shadow-sm" style="background: #f0f9ff; border-color: #0ea5e9 !important; min-height: 52px;">
                                     -
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-8">
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold small text-muted text-uppercase mb-2"><i class="fas fa-info-circle mr-1 text-pink"></i> Technical Specification</label>
+                                <div id="add-desc-display-box" class="p-3 rounded-lg border text-muted small font-weight-bold shadow-sm" style="background: #fdf2f8; border-color: #ec4899 !important; min-height: 52px;">
+                                    No item selected.
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="row g-2">
+                    <div class="row g-3 px-2">
                         <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="small text-muted text-uppercase font-weight-bold">Deposit Work</label>
-                                <input type="number" step="0.01" name="deposit_work" class="form-control rounded-pill" placeholder="0.00">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted text-uppercase text-truncate d-block"><i class="fas fa-wallet mr-1 text-secondary"></i> Deposit Work</label>
+                                <input type="number" min="0" step="0.01" name="deposit_work" class="form-control rounded-pill border-success shadow-sm" placeholder="0.00">
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="small text-muted text-uppercase font-weight-bold">MCEP-DMD</label>
-                                <input type="number" step="0.01" name="mcep_dmd" class="form-control rounded-pill" placeholder="0.00">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted text-uppercase text-truncate d-block"><i class="fas fa-bolt mr-1 text-warning"></i> MCEP-DMD</label>
+                                <input type="number" min="0" step="0.01" name="mcep_dmd" class="form-control rounded-pill border-success shadow-sm" placeholder="0.00">
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="small text-muted text-uppercase font-weight-bold">MCEP-KD</label>
-                                <input type="number" step="0.01" name="mcep_kd" class="form-control rounded-pill" placeholder="0.00">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted text-uppercase text-truncate d-block"><i class="fas fa-lightbulb mr-1 text-warning"></i> MCEP-KD</label>
+                                <input type="number" min="0" step="0.01" name="mcep_kd" class="form-control rounded-pill border-success shadow-sm" placeholder="0.00">
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="small text-muted text-uppercase font-weight-bold">MCEP-BD</label>
-                                <input type="number" step="0.01" name="mcep_bd" class="form-control rounded-pill" placeholder="0.00">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted text-uppercase text-truncate d-block"><i class="fas fa-plug mr-1 text-warning"></i> MCEP-BD</label>
+                                <input type="number" min="0" step="0.01" name="mcep_bd" class="form-control rounded-pill border-success shadow-sm" placeholder="0.00">
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="small text-muted text-uppercase font-weight-bold">Other</label>
-                                <input type="number" step="0.01" name="other" class="form-control rounded-pill" placeholder="0.00">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted text-uppercase text-truncate d-block"><i class="fas fa-plus-circle mr-1 text-secondary"></i> Other</label>
+                                <input type="number" min="0" step="0.01" name="other" class="form-control rounded-pill border-success shadow-sm" placeholder="0.00">
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="small text-muted text-uppercase font-weight-bold">O&M Store</label>
-                                <input type="number" step="0.01" name="om_store" class="form-control rounded-pill" placeholder="0.00">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted text-uppercase text-truncate d-block"><i class="fas fa-warehouse mr-1 text-secondary"></i> O&M Store</label>
+                                <input type="number" min="0" step="0.01" name="om_store" class="form-control rounded-pill border-success shadow-sm" placeholder="0.00">
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="small text-muted text-uppercase font-weight-bold">Own Stock</label>
-                                <input type="number" step="0.01" name="own_stock" class="form-control rounded-pill" placeholder="0.00">
+                            <div class="form-group mb-3">
+                                <label class="small font-weight-bold text-muted text-uppercase text-truncate d-block"><i class="fas fa-boxes mr-1 text-secondary"></i> Own Stock</label>
+                                <input type="number" min="0" step="0.01" name="own_stock" class="form-control rounded-pill border-success shadow-sm" placeholder="0.00">
                             </div>
                         </div>
                     </div>
@@ -665,19 +659,30 @@
         {% endfor %}
     };
 
+    const itemDescriptions = {
+        {% for it in items_all %}
+        "{{ it.id }}": "{{ it.description|default_if_none:''|escapejs }}",
+        {% endfor %}
+    };
+
     $(document).ready(function() {
-        // Update unit display on item change (Add Modal)
+        // Update unit and description display on item change (Add Modal)
         $('#add_item').on('change', function() {
             const itemId = $(this).val();
             const unit = itemUnits[itemId] || '-';
-            $('#add-unit-display').text(unit);
+            const desc = itemDescriptions[itemId] || 'No item selected.';
+            $('#add-unit-display-box').text(unit);
+            $('#add-desc-display-box').text(desc || 'No description set.');
         });
 
-        // Update unit display on item change (Edit Modals)
+        // Update unit and description display on item change (Edit Modals)
         $('.modal-dialog select[name="item"]').on('change', function() {
             const itemId = $(this).val();
             const unit = itemUnits[itemId] || '-';
-            $(this).closest('.modal-content').find('.unit-display').text(unit);
+            const desc = itemDescriptions[itemId] || '-';
+            const modal = $(this).closest('.modal-content');
+            modal.find('.unit-display').text(unit);
+            modal.find('.item-desc-display').text(desc || 'No description set.');
         });
     });
 
@@ -710,17 +715,21 @@
 
     function handleFormSubmit(formId, pbsId, recordId = null) {
         const form = $('#' + formId);
-        if (form.data('duplicate') === true) return false;
+        const btn = form.find('button[type="submit"]');
+        
+        // 1. Prevent double submission (Double Click Prevention)
+        if (btn.prop('disabled')) return false;
+
+        // 2. Bypass duplicate check for edits (Locked fields)
+        if (!recordId && form.data('duplicate') === true) return false;
 
         const url = recordId ? `/pbswise/pbswise_balance/pbs_zonals/${pbsId}/manage_balance/edit/${recordId}/` : `/pbswise/pbswise_balance/pbs_zonals/${pbsId}/manage_balance/add/`;
-        const btn = form.find('button[type="submit"]');
         const originalText = recordId ? 'Apply Changes' : 'Register Entry';
         
-        // Hide any previous warnings
+        // 3. UI transformation for submission
         const warningId = recordId ? '#warning-edit-' + recordId : '#warning-add';
         $(warningId).fadeOut();
-
-        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Processing...');
 
         $.ajax({
             url: url,
@@ -732,18 +741,18 @@
                     window.location.reload();
                 } else if (response.error === 'duplicate') {
                     $(warningId).fadeIn();
-                    btn.prop('disabled', false).text(originalText);
-                    // Add shake effect to modal for better visibility
+                    btn.prop('disabled', false).html(originalText);
                     form.closest('.modal-content').addClass('shake-anim');
                     setTimeout(() => form.closest('.modal-content').removeClass('shake-anim'), 500);
                 } else {
-                    alert("Submission error: " + (response.error || "Unknown error"));
-                    btn.prop('disabled', false).text(originalText);
+                    alert("Administrative error: " + (response.error || "Unknown system exception"));
+                    btn.prop('disabled', false).html(originalText);
                 }
             },
             error: function(xhr) {
-                alert("Server error during submission. Please check your connection.");
-                btn.prop('disabled', false).text(originalText);
+                console.error("Protocol Execution Failure:", xhr);
+                alert("Technical link interrupted. Please verify your connection status.");
+                btn.prop('disabled', false).html(originalText);
             }
         });
         return false;

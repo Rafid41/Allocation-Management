@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from ..models import PBS_List, Zonal_Items
+from django.db.models import Q
 from .all_pbs_list_page import check_pbs_management_permission, get_pbs_username
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from App_Admin_Panel.models import PaginationManager
@@ -38,7 +39,10 @@ def manage_individual_pbs_zonal_items(request, pbs_id):
     # Fetch items for viewing
     search_query = request.GET.get('search', '').strip()
     if search_query:
-        items_queryset = Zonal_Items.objects.filter(item_name__icontains=search_query).order_by('item_name')
+        items_queryset = Zonal_Items.objects.filter(
+            Q(item_name__icontains=search_query) | 
+            Q(description__icontains=search_query)
+        ).order_by('item_name')
     else:
         items_queryset = Zonal_Items.objects.all().order_by('item_name')
 
@@ -66,11 +70,13 @@ def manage_individual_pbs_zonal_items(request, pbs_id):
     if request.method == "POST" and can_manage:
         item_name = request.POST.get('item_name', '').strip()
         unit = request.POST.get('unit', 'Mtr.')
+        description = request.POST.get('description', '').strip()
+        
         if item_name:
             if Zonal_Items.objects.filter(item_name__iexact=item_name).exists():
                 messages.error(request, f"Conflict: '{item_name}' already exists in the system.")
             else:
-                Zonal_Items.objects.create(item_name=item_name, unit=unit)
+                Zonal_Items.objects.create(item_name=item_name, unit=unit, description=description)
                 messages.success(request, f"Item '{item_name}' has been added to the master inventory list.")
         else:
             messages.error(request, "Item name cannot be blank.")

@@ -273,6 +273,7 @@
                 <tr>
                     <th>Item Name</th>
                     <th>Unit</th>
+                    <th>Description</th>
                     <th style="width: 150px; text-align: center;">Actions</th>
                 </tr>
             </thead>
@@ -281,6 +282,7 @@
                 <tr>
                     <td>{{ item.item_name }}</td>
                     <td><span class="badge badge-dark rounded-pill px-3" style="background:#334155; color:white;">{{ item.unit }}</span></td>
+                    <td class="small text-muted">{{ item.description|default_if_none:"" }}</td>
                     <td class="text-center">
                         {% if can_modify %}
                             <button class="action-icon edit-icon" data-toggle="modal" data-target="#editItem{{ forloop.counter }}">
@@ -320,6 +322,13 @@
                                             <option value="{{ u_val }}" {% if item.unit == u_val %}selected{% endif %}>{{ u_text }}</option>
                                             {% endfor %}
                                         </select>
+                                    </div>
+                                    <div class="form-group mb-0 mt-3">
+                                        <label class="font-weight-bold text-muted small text-uppercase">Description</label>
+                                        <textarea name="description" 
+                                                  data-original="{{ item.description|default_if_none:'' }}"
+                                                  oninput="validateEdit(document.querySelector('[name=item_name]'), document.querySelector('[name=unit]'), 'editBtn{{ forloop.counter }}')"
+                                                  class="form-control rounded-12 border-0 bg-light" rows="3">{{ item.description|default_if_none:"" }}</textarea>
                                     </div>
                                 </div>
                                 <div class="modal-footer border-top-0 px-4 pb-4">
@@ -425,9 +434,13 @@
                         <label class="font-weight-bold text-muted small text-uppercase">Measurement Unit</label>
                         <select name="unit" class="form-control form-control-lg rounded-pill border-0 bg-light" required>
                             {% for u_val, u_text in units %}
-                            <option value="{{ u_val }}" {% if u_val == "Mtr." %}selected{% endif %}>{{ u_text }}</option>
+                            <option value="{{ u_val }}" {% if u_val == "Nos." %}selected{% endif %}>{{ u_text }}</option>
                             {% endfor %}
                         </select>
+                    </div>
+                    <div class="form-group mb-0 mt-3">
+                        <label class="font-weight-bold text-muted small text-uppercase">Description</label>
+                        <textarea name="description" placeholder="Optional item description..." class="form-control rounded-12 border-0 bg-light" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer border-top-0 px-4 pb-4">
@@ -460,17 +473,22 @@
         const modal = btn.closest('.modal-content');
         const nameIn = modal.querySelector('input[name="item_name"]');
         const unitIn = modal.querySelector('select[name="unit"]');
+        const descIn = modal.querySelector('textarea[name="description"]');
 
-        const currentName = nameIn.value.trim().toLowerCase();
-        const originalName = nameIn.getAttribute('data-original').trim().toLowerCase();
+        const currentName = nameIn.value.trim();
+        const originalName = nameIn.getAttribute('data-original').trim();
         
         const currentUnit = unitIn.value;
         const originalUnit = unitIn.getAttribute('data-original');
+
+        const currentDesc = descIn.value.trim();
+        const originalDesc = descIn.getAttribute('data-original').trim();
         
         const nameChanged = (currentName !== "" && currentName !== originalName);
         const unitChanged = (currentUnit !== originalUnit);
+        const descChanged = (currentDesc !== originalDesc);
 
-        if (nameChanged || unitChanged) {
+        if (nameChanged || unitChanged || descChanged) {
             btn.classList.remove('disabled');
             btn.style.pointerEvents = 'auto';
             btn.style.opacity = '1';

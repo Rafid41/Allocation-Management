@@ -205,13 +205,13 @@
         color: white !important;
         font-weight: 700;
         text-transform: uppercase;
-        font-size: 11px;
+        font-size: 11.5px;
         letter-spacing: 0.5px;
         border: none;
         padding: 12px 15px;
         vertical-align: middle;
         word-wrap: break-word;
-        max-width: 150px;
+        max-width: 350px;
     }
 
     .table tbody td {
@@ -221,7 +221,8 @@
         font-weight: 500;
         border-bottom: 1px solid #f1f5f9;
         word-wrap: break-word;
-        max-width: 150px;
+        max-width: 350px;
+        white-space: normal;
     }
 
     .table tbody tr:hover {
@@ -303,7 +304,7 @@
         <!-- Search Bar -->
         <div class="search-group">
             <form action="{% url 'PBSWise_Balance:manage_individual_pbs_zonal_items' pbs.id %}" method="GET">
-                <input type="text" name="search" value="{{ search_query }}" class="search-input" placeholder="Search item name...">
+                <input type="text" name="search" value="{{ search_query }}" class="search-input" placeholder="Find items by name or keywords...">
                 <button type="submit" class="search-btn">Go</button>
             </form>
         </div>
@@ -320,15 +321,17 @@
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th style="width: 60%;">Master Item Name</th>
-                    <th>Unit</th>
-                    <th class="text-center">{% if can_modify %}Actions{% else %}Permissions{% endif %}</th>
+                    <th style="width: 25%;">Master Item Name</th>
+                    <th style="width: 45%;"><i class="fas fa-info-circle mr-1"></i> Detailed Description</th>
+                    <th style="width: 15%;">Unit</th>
+                    <th style="width: 15%;" class="text-center">Permissions / Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in items %}
                 <tr>
                     <td class="font-weight-bold text-dark">{{ item.item_name }}</td>
+                    <td><span class="small text-muted">{{ item.description|default:"-" }}</span></td>
                     <td><span class="badge badge-secondary rounded-pill px-3" style="background:#475569; color:white;">{{ item.unit }}</span></td>
                     <td class="text-center">
                         {% if can_modify %}
@@ -403,7 +406,7 @@
                 {% endif %}
                 {% empty %}
                 <tr>
-                    <td colspan="2" class="text-center text-muted py-5">
+                    <td colspan="4" class="text-center text-muted py-5">
                         <i class="fas fa-box-open fa-3x mb-3 opacity-25"></i><br>
                         No zonal items found in the database.
                     </td>
@@ -463,7 +466,11 @@
                         </div>
                         <div class="form-group mb-3">
                             <label class="font-weight-bold text-muted small text-uppercase">Item Name</label>
-                            <input type="text" name="item_name" placeholder="Enter full item description..." class="form-control form-control-lg rounded-pill border-0 bg-light px-3" required>
+                            <input type="text" name="item_name" placeholder="Enter name (e.g. 33kV Transformer)..." class="form-control form-control-lg rounded-pill border-0 bg-light px-3" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold text-muted small text-uppercase">Detailed Description</label>
+                            <textarea name="description" rows="3" placeholder="Enter technical specifications or category notes..." class="form-control border-0 bg-light px-3" style="border-radius: 15px;"></textarea>
                         </div>
                         <div class="form-group mb-0">
                             <label class="font-weight-bold text-muted small text-uppercase">Measurement Unit</label>

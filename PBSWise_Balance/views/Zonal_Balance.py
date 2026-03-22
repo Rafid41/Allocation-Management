@@ -89,18 +89,29 @@ def zonal_balance_add(request):
             return redirect("PBSWise_Balance:zonal_balance_view")
 
         try:
+            # Prevent negative numbers
+            deposit_work = float(request.POST.get('deposit_work', 0) or 0)
+            mcep_dmd = float(request.POST.get('mcep_dmd', 0) or 0)
+            mcep_kd = float(request.POST.get('mcep_kd', 0) or 0)
+            mcep_bd = float(request.POST.get('mcep_bd', 0) or 0)
+            other = float(request.POST.get('other', 0) or 0)
+            om_store = float(request.POST.get('om_store', 0) or 0)
+            own_stock = float(request.POST.get('own_stock', 0) or 0)
+
+            if any(val < 0 for val in [deposit_work, mcep_dmd, mcep_kd, mcep_bd, other, om_store, own_stock]):
+                raise ValueError("Negative values are not permitted for balance entries.")
+
             record = Zonals_Balance(
                 pbs_id=pbs_id,
                 zonal_id=zonal_id,
                 item_id=item_id,
-                description=request.POST.get('description', '').strip(),
-                deposit_work=float(request.POST.get('deposit_work', 0) or 0),
-                mcep_dmd=float(request.POST.get('mcep_dmd', 0) or 0),
-                mcep_kd=float(request.POST.get('mcep_kd', 0) or 0),
-                mcep_bd=float(request.POST.get('mcep_bd', 0) or 0),
-                other=float(request.POST.get('other', 0) or 0),
-                om_store=float(request.POST.get('om_store', 0) or 0),
-                own_stock=float(request.POST.get('own_stock', 0) or 0),
+                deposit_work=deposit_work,
+                mcep_dmd=mcep_dmd,
+                mcep_kd=mcep_kd,
+                mcep_bd=mcep_bd,
+                other=other,
+                om_store=om_store,
+                own_stock=own_stock,
             )
             record.save()
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -132,17 +143,28 @@ def zonal_balance_edit(request, record_id):
             return redirect("PBSWise_Balance:zonal_balance_view")
 
         try:
+            # Prevent negative numbers
+            deposit_work = float(request.POST.get('deposit_work', 0) or 0)
+            mcep_dmd = float(request.POST.get('mcep_dmd', 0) or 0)
+            mcep_kd = float(request.POST.get('mcep_kd', 0) or 0)
+            mcep_bd = float(request.POST.get('mcep_bd', 0) or 0)
+            other = float(request.POST.get('other', 0) or 0)
+            om_store = float(request.POST.get('om_store', 0) or 0)
+            own_stock = float(request.POST.get('own_stock', 0) or 0)
+
+            if any(val < 0 for val in [deposit_work, mcep_dmd, mcep_kd, mcep_bd, other, om_store, own_stock]):
+                raise ValueError("Negative values are not permitted for balance entries.")
+
             record.pbs_id = pbs_id
             record.zonal_id = zonal_id
             record.item_id = item_id
-            record.description = request.POST.get('description', '').strip()
-            record.deposit_work = float(request.POST.get('deposit_work', 0) or 0)
-            record.mcep_dmd = float(request.POST.get('mcep_dmd', 0) or 0)
-            record.mcep_kd = float(request.POST.get('mcep_kd', 0) or 0)
-            record.mcep_bd = float(request.POST.get('mcep_bd', 0) or 0)
-            record.other = float(request.POST.get('other', 0) or 0)
-            record.om_store = float(request.POST.get('om_store', 0) or 0)
-            record.own_stock = float(request.POST.get('own_stock', 0) or 0)
+            record.deposit_work = deposit_work
+            record.mcep_dmd = mcep_dmd
+            record.mcep_kd = mcep_kd
+            record.mcep_bd = mcep_bd
+            record.other = other
+            record.om_store = om_store
+            record.own_stock = own_stock
             record.save()
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'success': True})
