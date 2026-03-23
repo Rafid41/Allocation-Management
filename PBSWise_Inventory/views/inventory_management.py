@@ -175,6 +175,7 @@ def get_items_for_zonal_ajax(request):
         items_data.append({
             'id': rec.item.id,
             'name': rec.item.item_name,
+            'unit': rec.item.unit,
             # We can also pass the current stock values if needed for client-side validation
             'stocks': {
                 'deposit_work': float(rec.deposit_work or 0),

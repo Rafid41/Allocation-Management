@@ -377,7 +377,7 @@
                                         <i class="fas fa-exclamation-circle mr-1"></i> Quantity exceeds available stock (<span id="availStock">0</span>)
                                     </div>
                                     <div id="stockInfo" class="text-info small font-weight-bold mt-1" style="display:none;">
-                                        Available: <span id="infoStock">0</span>
+                                      Available: <span id="infoStock">0</span>
                                     </div>
                                 </div>
                              </div>
@@ -430,6 +430,7 @@
                 <tr>
                     <th style="min-width: 150px;">Zonal Name</th>
                     <th style="min-width: 250px;">Item Name</th>
+                    <th style="min-width: 100px;">Unit</th>
                     <th>Deposit Work</th>
                     <th>MCEP-DMD</th>
                     <th>MCEP-KD</th>
@@ -445,6 +446,7 @@
                 <tr>
                     <td><span class="zonal-pill">{{ record.zonal.zonal_name }}</span></td>
                     <td class="font-weight-bold text-dark text-left px-4">{{ record.item.item_name }}</td>
+                    <td><span class="badge badge-secondary px-3 py-1" style="font-size: 11px;">{{ record.item.unit }}</span></td>
                     <td>{{ record.deposit_work|floatformat:2 }}</td>
                     <td>{{ record.mcep_dmd|floatformat:2 }}</td>
                     <td>{{ record.mcep_kd|floatformat:2 }}</td>
@@ -458,7 +460,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="10" class="py-5 text-muted text-center">
+                    <td colspan="11" class="py-5 text-muted text-center">
                         <i class="fas fa-box-open fa-3x mb-3 opacity-25"></i><br>
                         No inventory data found for this PBS.
                     </td>
@@ -517,6 +519,13 @@
         const availStockLabel = $('#availStock');
         const infoStockLabel = $('#infoStock');
         const stockInfoDiv = $('#stockInfo');
+        const managementForm = $('#managementForm');
+
+        // Force reset form to default state on page load/refresh
+        managementForm[0].reset();
+        itemSelect.html('<option value="Select an option">Select an option</option>');
+        stockInfoDiv.hide();
+        transferSection.hide();
 
         // Toggle Transfer Section Visibility
         actionSelect.on('change', function() {
@@ -550,7 +559,10 @@
                     itemStocksMap = {};
                     data.items.forEach(it => {
                         html += `<option value="${it.id}">${it.name}</option>`;
-                        itemStocksMap[it.id] = it.stocks;
+                        itemStocksMap[it.id] = {
+                            stocks: it.stocks,
+                            unit: it.unit
+                        };
                     });
                     itemSelect.html(html);
                     resetStockValidation();
@@ -594,9 +606,12 @@
             const sFrom = storeFrom.val();
             
             if (itemId !== 'Select an option' && sFrom !== 'Select an option' && itemStocksMap[itemId]) {
-                const stock = itemStocksMap[itemId][sFrom];
-                availStockLabel.text(stock);
-                infoStockLabel.text(stock);
+                const stockData = itemStocksMap[itemId];
+                const stock = stockData.stocks[sFrom];
+                const unit = stockData.unit || "";
+                
+                availStockLabel.text(stock + " " + unit);
+                infoStockLabel.text(stock + " " + unit);
                 stockInfoDiv.show();
                 validateQuantity();
             } else {
@@ -611,7 +626,7 @@
             const qty = parseFloat(quantityInput.val());
 
             if (itemId !== 'Select an option' && sFrom !== 'Select an option' && itemStocksMap[itemId]) {
-                const maxStock = itemStocksMap[itemId][sFrom];
+                const maxStock = itemStocksMap[itemId].stocks[sFrom];
                 if (qty > maxStock) {
                     qWarning.show();
                 } else {
