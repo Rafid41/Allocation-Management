@@ -811,9 +811,10 @@ def run_seed():
     ]
 }
     
-    print(f"Provisioning {len(pbs_data)} PBS units and their corresponding zonal network...")
+    total_pbs = len(pbs_data)
+    print(f"Provisioning {total_pbs} PBS units and their corresponding zonal network...")
     
-    for pbs_name, zonals in pbs_data.items():
+    for i, (pbs_name, zonals) in enumerate(pbs_data.items(), 1):
         # 1. Create PBS
         pbs_obj = PBS_List.objects.create(pbs_name=pbs_name)
         
@@ -851,6 +852,9 @@ def run_seed():
                 zonal_name=trimmed,
                 zonal_type=ztype
             )
+        
+        if i % 5 == 0 or i == total_pbs:
+            print(f" -> Progress: {i}/{total_pbs} PBS units provisioned...")
             
     print("SUCCESS: Full regional infrastructure provisioning completed.")
 
