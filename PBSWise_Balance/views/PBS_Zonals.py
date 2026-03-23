@@ -49,6 +49,8 @@ def pbs_zonal_add(request, pbs_id):
     
     if request.method == "POST":
         zonal_name = request.POST.get('zonal_name', '').strip()
+        if zonal_name:
+            zonal_name = zonal_name[0].upper() + zonal_name[1:]
         zonal_type = request.POST.get('zonal_type', '').strip()
         
         if zonal_name and zonal_type:
@@ -85,6 +87,8 @@ def pbs_zonal_edit(request, pbs_id, zonal_id):
     
     if request.method == "POST":
         zonal_name = request.POST.get('zonal_name', '').strip()
+        if zonal_name:
+            zonal_name = zonal_name[0].upper() + zonal_name[1:]
         zonal_type = request.POST.get('zonal_type', '').strip()
         
         if zonal_name and zonal_type:

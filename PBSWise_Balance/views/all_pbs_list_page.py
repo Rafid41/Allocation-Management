@@ -96,6 +96,9 @@ def pbs_add(request):
     if request.method == "POST":
         pbs_name = request.POST.get('pbs_name', '').strip()
         if pbs_name:
+            # Auto-capitalize the first letter
+            pbs_name = pbs_name[0].upper() + pbs_name[1:]
+            
             # Check for duplicate: case-insensitive and trimmed (via .strip() and __iexact)
             if PBS_List.objects.filter(pbs_name__iexact=pbs_name).exists():
                 messages.error(request, "This PBS Already Exists")
@@ -135,6 +138,9 @@ def pbs_edit(request, pbs_id):
     if request.method == "POST":
         pbs_name = request.POST.get('pbs_name', '').strip()
         if pbs_name:
+            # Auto-capitalize the first letter
+            pbs_name = pbs_name[0].upper() + pbs_name[1:]
+            
             # Check for duplicate: case-insensitive and trimmed (excluding current pbs)
             if PBS_List.objects.filter(pbs_name__iexact=pbs_name).exclude(id=pbs.id).exists():
                 messages.error(request, "This PBS Already Exists")
