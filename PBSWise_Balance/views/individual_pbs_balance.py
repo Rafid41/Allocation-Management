@@ -69,6 +69,8 @@ def manage_individual_pbs_zonal_items(request, pbs_id):
     # Handle Global Items Addition (Regional users can only ADD)
     if request.method == "POST" and can_manage:
         item_name = request.POST.get('item_name', '').strip()
+        if item_name:
+            item_name = item_name[0].upper() + item_name[1:]
         unit = request.POST.get('unit', 'Mtr.')
         description = request.POST.get('description', '').strip()
         

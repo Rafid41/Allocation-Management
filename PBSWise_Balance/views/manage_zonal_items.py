@@ -60,6 +60,8 @@ def zonal_item_add(request):
     
     if request.method == "POST":
         item_name = request.POST.get('item_name', '').strip()
+        if item_name:
+            item_name = item_name[0].upper() + item_name[1:]
         unit = request.POST.get('unit', 'Nos.')
         description = request.POST.get('description', '').strip()
         if item_name:
@@ -83,6 +85,8 @@ def zonal_item_edit(request, item_id):
     item = get_object_or_404(Zonal_Items, id=item_id)
     if request.method == "POST":
         item_name = request.POST.get('item_name', '').strip()
+        if item_name:
+            item_name = item_name[0].upper() + item_name[1:]
         unit = request.POST.get('unit', 'Nos.')
         description = request.POST.get('description', '').strip()
         if item_name:
