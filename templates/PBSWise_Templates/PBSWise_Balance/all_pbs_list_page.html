@@ -383,7 +383,8 @@
                                 <button type="button" class="btn btn-secondary rounded-pill px-4" data-dismiss="modal">Cancel</button>
                                 <a href="{% url 'PBSWise_Balance:pbs_delete' pbs.id %}" id="deleteBtn{{ pbs.id }}" 
                                    class="btn btn-danger rounded-pill px-4 font-weight-bold disabled" 
-                                   style="pointer-events: none;">
+                                   style="pointer-events: none;"
+                                   onclick="this.classList.add('disabled'); this.style.pointerEvents='none'; this.innerHTML='<i class=\'fas fa-spinner fa-spin\'></i> Deleting...';">
                                     <i class="fas fa-trash-alt"></i> Execute Delete
                                 </a>
                             </div>

@@ -80,7 +80,10 @@
                        oninput="validateZonalDelete(this, 'deleteBtn{{ item.id }}')">
                 <a href="{% url 'PBSWise_Balance:pbs_zonal_delete' pbs.id item.id %}" id="deleteBtn{{ item.id }}" 
                    class="btn btn-danger btn-block font-weight-bold disabled" 
-                   style="pointer-events: none; opacity: 0.5;">Execute Delete</a>
+                   style="pointer-events: none; opacity: 0.5;"
+                   onclick="this.classList.add('disabled'); this.style.pointerEvents='none'; this.innerHTML='<i class=\'fas fa-spinner fa-spin\'></i> Deleting...';">
+                    <i class="fas fa-trash-alt"></i> Execute Delete
+                </a>
             </div>
         </div>
     </div>
