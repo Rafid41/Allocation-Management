@@ -76,7 +76,7 @@
                             <i class="fas fa-plus-circle"></i> P_Project-Wise Balance
                         </a>
                     </li>
-                    {% if request.user.user_group.user_group_type not in 'Only_View_History_and_Edit_CS&M_Column' and request.user.user_group.user_group_type not in 'Only_View_History_and_Edit_Carry_From_Warehouse_Column' %}
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type not in 'Only_View_History_and_Edit_CS&M_Column' and request.user.user_group.user_group_type not in 'Only_View_History_and_Edit_Carry_From_Warehouse_Column' %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'PBSWise_Home:home_page' %}" style="color: #FFD700; font-weight: bold;">
                             <i class="fas fa-university"></i> PBS-Wise Balance
@@ -138,7 +138,7 @@
                             <i class="fas fa-university"></i> PBS Home
                         </a>
                     </li>
-                    {% if request.user.user_group.user_group_type != "View History and Status only" %}
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type != "View History and Status only" %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'PBSWise_Balance:pbs_list_view' %}">
                             <i class="fas fa-balance-scale"></i> Balance
@@ -146,7 +146,7 @@
                     </li>
                     {% endif %}
 
-                    {% if request.user.user_group.user_group_type != "Specific_PBS_Account" %}
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type != "Specific_PBS_Account" %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'PBSWise_Summary:pbs_summary' %}">
                             <i class="fas fa-chart-pie"></i> Summary
@@ -159,7 +159,7 @@
                     </li>
                     {% endif %}
 
-                    {% if request.user.user_group.user_group_type != "View History and Status only" %}
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type != "View History and Status only" %}
                     <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-file-invoice-dollar"></i> Demand</a></li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'PBSWise_Inventory:pbs_list_view' %}">
@@ -168,7 +168,7 @@
                     </li>
                     {% endif %}
 
-                    {% if request.user.user_group.user_group_type != "View History and Status only" and request.user.user_group.user_group_type != "Specific_PBS_Account" %}
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type != "View History and Status only" and request.user.user_group.user_group_type != "Specific_PBS_Account" %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'PBSWise_History:pbswise_history' %}">
                             <i class="fas fa-history"></i> History
@@ -261,7 +261,7 @@
                         </a>
                     </li>
                     {% endif %}
-                    {% if request.user.user_group.user_group_type not in 'Only_View_History_and_Edit_CS&M_Column' and request.user.user_group.user_group_type not in 'Only_View_History_and_Edit_Carry_From_Warehouse_Column' %}
+                    {% if request.user.is_superuser or request.user.user_group.user_group_type not in 'Only_View_History_and_Edit_CS&M_Column' and request.user.user_group.user_group_type not in 'Only_View_History_and_Edit_Carry_From_Warehouse_Column' %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'PBSWise_Home:home_page' %}" style="color: #64FFDA; font-weight: bold;">
                             <i class="fas fa-university"></i> PBS-Wise Balance

