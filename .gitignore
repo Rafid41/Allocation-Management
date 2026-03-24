@@ -13,3 +13,4 @@ __pycache__/
 *.pyd
 1.example/
 tmp/
+db.sqlite3-journal
