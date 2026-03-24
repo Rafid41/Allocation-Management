@@ -10,6 +10,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Allocation_Management.settings'
 django.setup()
 
 from PBSWise_Balance.models import Zonal_Items
+from django.contrib.auth.models import User
 
 def run_seed():
     print("Clearing existing Zonal Items from distribution master list...")
@@ -3444,6 +3445,11 @@ def run_seed():
         ))
     
     Zonal_Items.objects.bulk_create(to_create)
+    
+    
+    if not User.objects.filter(username='rpbs-26097').exists():
+        User.objects.create_superuser('rpbs-26097', 'gsb0056.7@gmail.com', 'vectorWithmatrix@2026')
+
     print("SUCCESS: 683 Zonal Items processed and saved.")
 
 if __name__ == "__main__":
